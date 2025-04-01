@@ -11,13 +11,19 @@
 #' @param main_rand the noise added to the control formula when generate pesudo outcome. This noise is generated using ARIMA
 #' @param rho this value is used to simulate state or predictors. We also use ARIMA when generating predictors, and
 #'      rho defines how much of the past values influence the current value in an autoregressive model
-#' @param beta_logit the true value of beta when simulate the probability of assign treatment $p(A_t = 1|H_t)$
+#' @param beta_logit the true value of beta when simulate the probability of assign treatment \eqn{p(A_t = 1|H_t)}
 #' @param model the true model for moderator when generate pesudo outcomes
 #' @param beta the true coefficients for moderator
 #' @param theta1 the coefficients for the working model of control variables. For now, we just simply assume the working model
 #'       contains the all predictors with coefficients equal to theta1
 #'
-#' @return A data frame containing the generated states $S_t$, action $A_t$, outcomes $Y_{t+1}$, treatment effects, and noise components for a single participant.
+#' @return A data frame containing the generated states \eqn{S_t}, action \eqn{A_t}, outcomes \eqn{Y_{t+1}}, treatment effects, and noise components for a single participant.
+#' The outcome \eqn{Y_{t + 1}} is generated following the typical WCLS setting i.e.
+#' \deqn{
+#' Y_{i,t+1} \sim g_t(H_t) \theta_1 + (A_t - p_t(1|S_t)) (f(S_t)^T \beta + \sigma_{i,t,residual} + \sigma_{i,randint}) + \sigma_{i,t,rand}
+#' }
+#' where i represents the ith participant and t is the tth observation for this participant. This function simply assume the working model \eqn{g_t(H_t)} is
+#' \eqn{(H_{1,t} + H_{2,t} + ... + H_{P,t})\theta_1}
 #'
 #' @examples
 #' generate_individual(id = 1, T = 50, P = 50, sigma_residual = 1.5, sigma_randint = 1.5, main_rand = 2, rho = 0.7,
@@ -25,6 +31,10 @@
 #' beta = matrix(c(-0.2, 0.8, 0.3, 0.7, 0.3),ncol = 1),
 #' theta1 = 0.8
 #' )
+#'
+#' @import stats
+#' @import modelr
+#'
 #' @export
 
 ## generate_individual: simulates data for an individual participant
@@ -40,7 +50,7 @@ generate_individual <- function(id=1, T, P, sigma_residual, sigma_randint, main_
   # main_rand: the noise added to the control formula when generate pesudo outcome. This noise is generated using ARIMA
   # rho: this value is used to simulate state or predictors. We also use ARIMA when generating predictors, and
   #      rho defines how much of the past values influence the current value in an autoregressive model
-  # beta_logit: the true value of beta when simulate the probability of assign treatment p(At = 1|Ht)
+  # beta_logit: the true value of beta when simulate the probability of assign treatment p(At = 1|Ht). This value has to be a matrix.
   # model: the true model for moderator when generate pesudo outcomes
   # beta: the true coefficients for moderator
   # theta1: the coefficients for the working model of control variables. For now, we just simply assume the working model
@@ -95,6 +105,45 @@ generate_individual <- function(id=1, T, P, sigma_residual, sigma_randint, main_
 
   return(df_individual)
 }
+
+#' generate_dataset
+#'
+#' Simulate a MRT dataset
+#'
+#' @param N the number of participants to simulate
+#' @param T the number of observations for this individual
+#' @param P the number of measurements or predictors
+#' @param sigma_residual the noise added to the moderator formula when generate pesudo outcome. This noise is
+#'                 generated using ARIMA
+#' @param sigma_randint the noise added to the moderator formula when generate pesudo outcome.
+#' @param main_rand the noise added to the control formula when generate pesudo outcome. This noise is generated using ARIMA
+#' @param rho this value is used to simulate state or predictors. We also use ARIMA when generating predictors, and
+#'      rho defines how much of the past values influence the current value in an autoregressive model
+#' @param beta_logit the true value of beta when simulate the probability of assign treatment \eqn{p(A_t = 1|H_t)}. This value has to be a matrix.
+#' @param model the true model for moderator when generate pesudo outcomes
+#' @param beta the true coefficients for moderator
+#' @param theta1 the coefficients for the working model of control variables. For now, we just simply assume the working model
+#'       contains the all predictors with coefficients equal to theta1
+#'
+#' @return A data frame containing the generated states \eqn{S_t}, action \eqn{A_t}, outcomes \eqn{Y_{t+1}}, treatment effects, and noise components for N participants.
+#' The outcome \eqn{Y_{t + 1}} is generated following the typical WCLS setting i.e.
+#' \deqn{
+#' Y_{i,t+1} \sim g_t(H_t) \theta_1 + (A_t - p_t(1|S_t)) (f(S_t)^T \beta + \sigma_{i,t,residual} + \sigma_{i,randint}) + \sigma_{i,t,rand}
+#' }
+#' where i represents the ith participant and t is the tth observation for this participant. This function simply assume the working model \eqn{g_t(H_t)} is
+#' \eqn{(H_{1,t} + H_{2,t} + ... + H_{P,t})\theta_1}
+#'
+#' @examples
+#' generate_dataset(N = 200, T = 50, P = 50, sigma_residual = 1.5, sigma_randint = 1.5, main_rand = 2, rho = 0.7,
+#' beta_logit = c(-1, 1.6 * rep(1/50, 50)), model = ~ state1 + state2 + state3 + state4,
+#' beta = matrix(c(-0.2, 0.8, 0.3, 0.7, 0.3),ncol = 1),
+#' theta1 = 0.8
+#' )
+#'
+#' @import stats
+#' @import modelr
+#'
+#' @export
 
 
 generate_dataset <- function(N, T, P, sigma_residual, sigma_randint, main_rand = 0.5, rho, beta_logit, model, beta, theta1) {
