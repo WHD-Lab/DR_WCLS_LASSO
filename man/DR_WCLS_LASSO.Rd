@@ -38,15 +38,16 @@ DR_WCLS_LASSO(
 
 \item{outcome}{column names of outcome variable}
 
-\item{method_pesu}{the machines learning method used when generate estimates of the nuisance parameters, 
-and those values will be used to calculate the pseudo outcome}
+\item{method_pesu}{the machines learning method used when generate estimates of the nuisance parameters,
+and those values will be used to calculate the pseudo outcome. The available machine learning algorithms include
+cross validation LASSO ("CVLASSO"), Random Forest ("RandomForest"), and gradient boosting ("GradientBoosting").}
 
 \item{lam}{the value of penalty term of randomized LASSO. If it is not provided, the default value will be used}
 
-\item{noise_scale}{Scale of Gaussian noise added to objective. Default is sqrt((1 - splitrat)/splitrat*NT)*sd(y) 
-where omega is drawn from IID normals with standard deviation noise_scale}
+\item{noise_scale}{Scale of Gaussian noise added to objective. Default is \eqn{\sqrt{\frac{(1 - \rho)}{\rho}*number\ of\ rows}*sd(y)} where \eqn{\rho} is the split rate.
+The random noises, \eqn{\omega}, are iid drawn from normal distribution with standard deviation noise_scale}
 
-\item{splitrat}{the corresponding to the data splitting rate. Details can read "Exact Selective Inference with Randomization" page 15 equation (10). 
+\item{splitrat}{this value is corresponding to the data splitting rate. Details can read "Exact Selective Inference with Randomization" page 15 equation (10).
 This value will be used only when user doesn't provide the noise_scale.}
 
 \item{virtualenv_path}{Python virtual environment path}
@@ -58,9 +59,8 @@ This value will be used only when user doesn't provide the noise_scale.}
 \item{core_num}{the number of cores will be used for parallel calculation}
 }
 \value{
-A table with the selected variables for which CI is calculated, 
-the GEE estimate for this predictor,
-the post selection true value for this predictor if simulation is conducted. Otherwise, NA is provided.
+A table with the selected variables is returned. The returned table contains GEE estimate,
+the post selection true value (if simulation is conducted; Otherwise, NA is provided.)
 the p value,
 the confidence interval,
 the true corresponding pivot value for the lower bound and the upper bound.
@@ -69,9 +69,11 @@ the true corresponding pivot value for the lower bound and the upper bound.
 A function for basic LASSO DR-WCLS
 }
 \examples{
-UI_return = DR_WCLS_LASSO(data = data, fold = 5, ID = "id", time = "decision_point", 
-Ht = Ht, St = St, At = "action", outcome = "outcome", method_pesu = "CVLASSO", 
-lam = NULL, noise_scale = NULL, splitrat = 0.8, 
+
+UI_return = DR_WCLS_LASSO(data = data, fold = 5, ID = "id", time = "decision_point",
+Ht = Ht, St = St, At = "action", outcome = "outcome", method_pesu = "CVLASSO",
+lam = NULL, noise_scale = NULL, splitrat = 0.8,
 virtualenv_path = "path to selective-inference folder/env3",
 beta =  c(-0.2, 0.8, 0.3, 0.7, 0.3, rep(0, 21)), level = 0.9, core_num = 3)
+
 }

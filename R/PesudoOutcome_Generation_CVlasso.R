@@ -7,7 +7,7 @@
 #' This function uses CV LASSO to conduct model training on each fold then estimates \eqn{E[Y_{t+1}|H_t, A_t], E[A_t|H_t], E[A_t|S_t]} for reserved fold. Then
 #' the function returns a dataset with column named "yDR" for DR-WCLS pseudo outcome.
 #'
-#' @param fold number of folds to split
+#' @param fold number of folds to split when do corss-fitting
 #' @param ID the name of column where participants' ID are stored
 #' @param data dataset name
 #' @param Ht a vector that contains column names of control variables
@@ -16,7 +16,8 @@
 #' @param outcome column names of outcome variable
 #' @param core_num number of cores will be used for calculation
 #'
-#' @return This function returns a dataset with pseudo outcome. It generates pseudo outcome using the DR-WCLS.
+#' @return This function returns a dataset with pseudo outcome. It learns appropriate working models with CV LASSO and
+#' generates pseudo outcome using the DR-WCLS.
 #'
 #' @examples
 #' pseudo_outcome_generator_CVlasso(fold = 5,ID = "id", data, Ht, St, "action", "outcome",core_num = 5)
