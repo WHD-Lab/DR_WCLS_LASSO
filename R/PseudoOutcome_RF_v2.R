@@ -16,7 +16,7 @@
 #' generates pseudo outcome using the DR-WCLS.
 #'
 #' @examples
-#' pesudo_outcome_generator_rf_v2(fold = 5,ID = "id", data, Ht, St, "action", "outcome",core_num = 5)
+#' pseudo_outcome_generator_rf_v2(fold = 5,ID = "id", data, Ht, St, "action", "outcome",core_num = 5)
 #'
 #' @import ranger
 #' @import parallel
@@ -27,7 +27,7 @@
 
 
 # Run random forest to train working model
-pesudo_outcome_generator_rf_v2 = function(fold, ID, data, Ht, St, At, outcome, core_num = NULL) {
+pseudo_outcome_generator_rf_v2 = function(fold, ID, data, Ht, St, At, outcome, core_num = NULL) {
   # fold: # of folds hope to split
   # ID: the name of column where participants' ID are stored
   # data: simulated dataset

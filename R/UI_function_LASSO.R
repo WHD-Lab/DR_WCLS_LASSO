@@ -63,11 +63,11 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, outcome, method_pesu,
   # core_num: the number of cores will be used for parallel calculation
 
   if(method_pesu == "CVLASSO") {
-    ps = pesudo_outcome_generator_CVlasso(fold, ID, data, Ht, St, At, outcome, core_num)
+    ps = pseudo_outcome_generator_CVlasso(fold, ID, data, Ht, St, At, outcome, core_num)
   }
 
   if(method_pesu == "RandomForest") {
-    ps = pesudo_outcome_generator_rf_v2(fold, ID, data, Ht, St, At, outcome, core_num)
+    ps = pseudo_outcome_generator_rf_v2(fold, ID, data, Ht, St, At, outcome, core_num)
   }
 
   if(method_pesu == "GradientBoosting") {
