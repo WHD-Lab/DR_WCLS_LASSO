@@ -14,6 +14,81 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+
+## Introduction
+
+MRTpostInfLASSO is an R package for fitting the doubly robust version of weighted center least square. In this tutorial, we introduce the use of MRTpostInfLASSO through an example dataset.
+
+## Installation
+
+```{r warning = FALSE}
+### From GitHub
+# install.packages("devtools")
+# library(devtools)
+install_github("WHD-Lab/DR_WCLS_LASSO", build_vignettes = T)
+
 library(MRTpostInfLASSO)
+ls("package:MRTpostInfLASSO")
 ```
+
+```{r}
+
+# devtools::install(build_vignettes = T)
+# 
+# browseVignettes("MRTpostInfLASSO")
+
+```
+
+
+## Quick Start
+
+HeartSteps Data is a data frame with 7770 observations and 9 variables.
+Userid: individual id number
+
+time: decision point index
+
+day_in_study: day in the study
+
+logstep_30min: proximal outcome: the step count in the 30 minutes following the current decision point (log-transformed).
+
+logstep_30min_lag1: proximal outcome at the previous decision point (lag-1 outcome): the step count in the 30 minutes following the previous decision point (log-transformed).
+
+logstep_pre30min: the step count in the 30 minutes prior to the current decision point (log-transformed).
+
+is_at_home_or_work: whether the individual is at home or work (=1) or at other locations (=0) at the current decision point.
+
+intervention: whether the intervention is randomized to be delivered (=1) or not (=0) at the current decision point.
+
+rand_prob: the randomization probability P(A=1) for the current decision point.
+
+availability: whether the individual is available (=1) or not (=0) at the current decision point.
+
+```{r}
+library(MRTAnalysis) # Load HeartSteps Data
+data(data_mimicHeartSteps)
+head(data_mimicHeartSteps)
+
+```
+
+```{r}
+Ht = c('logstep_30min_lag1','logstep_pre30min','is_at_home_or_work','day_in_study')
+St = c('logstep_30min_lag1','logstep_pre30min','is_at_home_or_work','day_in_study')
+At = 'intervention'
+outcome = 'logstep_30min'
+UI_return = DR_WCLS_LASSO(data = data_mimicHeartSteps, fold = 2, ID = "userid", 
+                          time = "decision_point", Ht = Ht, St = St, At = At, 
+                          prob = 'rand_prob',outcome = outcome, 
+                          method_pesu = "CVLASSO", lam = NULL,
+                          noise_scale = NULL, splitrat = 0.8,
+                          level = 0.9, core_num = 3)
+
+UI_return_RF =  DR_WCLS_LASSO(data = data_mimicHeartSteps, fold = 2, ID = "userid", 
+                          time = "decision_point", Ht = Ht, St = St, At = At, 
+                          prob = 'rand_prob',outcome = outcome, 
+                          method_pesu = "RandomForest", lam = NULL,
+                          noise_scale = NULL, splitrat = 0.8,
+                          level = 0.9, core_num = 3)
+```
+
+
+

@@ -27,11 +27,11 @@
 
 
 
-pseudo_outcome_generator_gbm = function(fold, ID, data, Ht, St, At, outcome, core_num = NULL) {
+pseudo_outcome_generator_gbm = function(fold, ID, data, Ht, St, At, prob, outcome, core_num = NULL) {
   fold_ind = split_data(data[[ID]], fold = fold)
   MRT_gbm = ps_gradient_boosting(fold_indices = fold_ind, fold = fold, ID = ID,
                                  data = data, Ht = Ht, St = St, At = At, outcome = outcome, core_num)
-  pseudo = pseudo_outcome_cal_gbm(MRT_gbm)
+  pseudo = pseudo_outcome_cal_gbm(MRT_gbm, At, prob, outcome)
   return(pseudo)
 }
 
@@ -89,15 +89,15 @@ ps_gradient_boosting = function(fold_indices, fold, ID, data, Ht, St, At, outcom
   return(data_withpred)
 }
 
-pseudo_outcome_cal_gbm = function(data_withpred) {
-  At = data_withpred$action
+pseudo_outcome_cal_gbm = function(data_withpred, At, prob, outcome) {
+  At = data_withpred[,At]
   ptSt = data_withpred$ptSt
-  y = data_withpred$outcome
+  y = data_withpred[,outcome]
   gt = data_withpred$gt_pred_gbm
   gtAt1 = data_withpred$gtAt1_pred_gbm
   gtAt0 = data_withpred$gtAt0_pred_gbm
 
-  wt = data_withpred$ptStobs / (data_withpred$prob * At + (1 - data_withpred$prob) * (1 - At))
+  wt = data_withpred$ptStobs / (data_withpred[,prob] * At + (1 - data_withpred[,prob]) * (1 - At))
   data_withpred$yDR = wt * (At - ptSt) * (y - gt) / (ptSt * (1 - ptSt)) + (gtAt1 - gtAt0)
 
   return(data_withpred)

@@ -39,7 +39,7 @@
 #'
 #' @export
 
-DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, outcome, method_pesu,
+DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method_pesu,
                                  lam = NULL, noise_scale = NULL, splitrat = 0.8, virtualenv_path,
                                  beta = NULL, level = 0.9, core_num = NULL){
   # data: raw data without pesudo-outcome, ptSt.
@@ -63,15 +63,15 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, outcome, method_pesu,
   # core_num: the number of cores will be used for parallel calculation
 
   if(method_pesu == "CVLASSO") {
-    ps = pseudo_outcome_generator_CVlasso(fold, ID, data, Ht, St, At, outcome, core_num)
+    ps = pseudo_outcome_generator_CVlasso(fold, ID, data, Ht, St, At, prob=prob, outcome, core_num)
   }
 
   if(method_pesu == "RandomForest") {
-    ps = pseudo_outcome_generator_rf_v2(fold, ID, data, Ht, St, At, outcome, core_num)
+    ps = pseudo_outcome_generator_rf_v2(fold, ID, data, Ht, St, At, prob=prob, outcome, core_num)
   }
 
   if(method_pesu == "GradientBoosting") {
-    ps = pseudo_outcome_generator_gbm(fold, ID, data, Ht, St, At, outcome, core_num)
+    ps = pseudo_outcome_generator_gbm(fold, ID, data, Ht, St, At, prob=prob, outcome, core_num)
   }
 
   my_formula = as.formula(paste("yDR ~ ", paste(St, collapse = " + ")))
@@ -95,7 +95,8 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, outcome, method_pesu,
 
   AsyNormbeta_shared = joint_dist_Penal_Int_shared(E = select$E, NE = select$NE, pes_outcome = "yDR", data = ps, id = ID, time = time)
   PQR_shared = PQR_Pint_shared(AsyNormbeta_shared, select)
-
+  print(select)
+  print(AsyNormbeta_shared)
   CI_per_select_var = function(ej) {
     AsyNormbeta_ej = joint_dist_Penal_Int_ej(AsyNormbeta_shared, ej)
     PQR_ej = PQR_Pint_ej(PQR_shared, AsyNormbeta_ej, AsyNormbeta_shared)

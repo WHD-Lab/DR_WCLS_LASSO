@@ -27,7 +27,7 @@
 
 
 # Run random forest to train working model
-pseudo_outcome_generator_rf_v2 = function(fold, ID, data, Ht, St, At, outcome, core_num = NULL) {
+pseudo_outcome_generator_rf_v2 = function(fold, ID, data, Ht, St, At, prob, outcome, core_num = NULL) {
   # fold: # of folds hope to split
   # ID: the name of column where participants' ID are stored
   # data: simulated dataset
@@ -46,7 +46,7 @@ pseudo_outcome_generator_rf_v2 = function(fold, ID, data, Ht, St, At, outcome, c
   fold_ind = split_data(data[,ID], fold = fold)
   MRT_rf = ps_random_forest_v2(fold_indices = fold_ind, fold = fold, ID = ID,
                                data = data, Ht = Ht, St = St, At = At, outcome = outcome, core_num)
-  pesudo = pesudo_outcome_cal_rf_v2(MRT_rf)
+  pesudo = pesudo_outcome_cal_rf_v2(MRT_rf, At, prob, outcome)
   return(pesudo)
 }
 
@@ -137,23 +137,23 @@ ps_random_forest_v2 = function(fold_indices, fold, ID, data, Ht, St, At, outcome
   return(data_withpred)
 }
 
-pesudo_outcome_cal_rf_v2 = function(data_withpred) {
+pesudo_outcome_cal_rf_v2 = function(data_withpred, At, prob, outcome) {
   # Input:
   # the outcome of function ps_random_forest_v2
 
   # Output:
   # produce dataset that contains a new column "yDR". This is the pseudo outcome we hope to get
 
-  At = data_withpred$action
+  At = data_withpred[,At]
   ptSt = data_withpred$ptSt
-  y = data_withpred$outcome
+  y = data_withpred[,outcome]
   gt = data_withpred$gt_pred_rf
   gtAt1 = data_withpred$gtAt1_pred_rf
   gtAt0 = data_withpred$gtAt0_pred_rf
 
   # wt
   # wt = data_withpred$ptStobs/data_withpred$ptHtobs
-  wt = data_withpred$ptStobs/(data_withpred$prob*At + (1-data_withpred$prob)* (1-At))
+  wt = data_withpred$ptStobs/(data_withpred[,prob]*At + (1-data_withpred[,prob])* (1-At))
 
   data_withpred$yDR = wt*(At - ptSt)*(y - gt)/(ptSt * (1-ptSt)) + (gtAt1 - gtAt0)
   # print(data_withpred$yDR)

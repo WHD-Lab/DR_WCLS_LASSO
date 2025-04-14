@@ -30,7 +30,7 @@
 
 
 
-pseudo_outcome_generator_CVlasso = function(fold, ID, data, Ht, St, At, outcome, core_num = NULL) {
+pseudo_outcome_generator_CVlasso = function(fold, ID, data, Ht, St, At, prob, outcome, core_num = NULL) {
   # fold: # of folds hope to split
   # ID: the name of column where participants' ID are stored
   # data: dataset name
@@ -49,7 +49,7 @@ pseudo_outcome_generator_CVlasso = function(fold, ID, data, Ht, St, At, outcome,
   fold_ind = split_data(data[,ID], fold = fold)
   MRT_sim_lasso = simple_lasso(fold_indices = fold_ind, fold = fold, ID = ID, data = data,
                                Ht = Ht, St = St, At = At, outcome = outcome, core_num)[[1]]
-  pseudo = pseudo_outcomecal(MRT_sim_lasso)
+  pseudo = pseudo_outcomecal(MRT_sim_lasso, At, prob, outcome)
   return(pseudo)
 }
 
@@ -195,23 +195,23 @@ simple_lasso = function(fold_indices, fold, ID, data, Ht, St, At, outcome, core_
 
 }
 
-pseudo_outcomecal = function(data_withpred) {
+pseudo_outcomecal = function(data_withpred, At, prob, outcome) {
   # Input:
   # the outcome of function simple_lasso
 
   # Output:
   # produce dataset that contains a new column "yDR". This is the pseudo outcome we hope to get
 
-  At = data_withpred$action
+  At = data_withpred[,At]
   ptSt = data_withpred$ptSt
-  y = data_withpred$outcome
+  y = data_withpred[,outcome]
   gt = data_withpred$lasso.pred.gt
   gtAt1 = data_withpred$lasso.pred.gtAt1
   gtAt0 = data_withpred$lasso.pred.gtAt0
 
   # wt
   # wt = data_withpred$ptStobs/data_withpred$ptHtobs
-  wt = data_withpred$ptStobs/(data_withpred$prob*At + (1-data_withpred$prob)* (1-At))
+  wt = data_withpred$ptStobs/(data_withpred[,prob]*At + (1-data_withpred[,prob])* (1-At))
   data_withpred$yDR = wt*(At - ptSt)*(y - gt)/(ptSt * (1-ptSt)) + (gtAt1 - gtAt0)
 
   return(data_withpred)
