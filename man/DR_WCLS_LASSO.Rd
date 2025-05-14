@@ -12,6 +12,7 @@ DR_WCLS_LASSO(
   Ht,
   St,
   At,
+  prob,
   outcome,
   method_pesu,
   lam = NULL,

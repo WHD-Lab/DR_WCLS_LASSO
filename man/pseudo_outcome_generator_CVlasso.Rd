@@ -11,6 +11,7 @@ pseudo_outcome_generator_CVlasso(
   Ht,
   St,
   At,
+  prob,
   outcome,
   core_num = NULL
 )
@@ -27,6 +28,8 @@ pseudo_outcome_generator_CVlasso(
 \item{St}{a vector that contains column names of moderator variables; St should be a subset of Ht}
 
 \item{At}{column names of treatment (At)}
+
+\item{prob}{column names of \eqn{p_t(A_t = 1|H_t)}, the experiment design treatment probability}
 
 \item{outcome}{column names of outcome variable}
 
