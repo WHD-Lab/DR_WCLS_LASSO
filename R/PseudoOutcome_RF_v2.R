@@ -9,6 +9,7 @@
 #' @param Ht a vector that contains column names of control variables
 #' @param St a vector that contains column names of moderator variables; St should be a subset of Ht
 #' @param At column names of treatment (At)
+#' @param prob column names of \eqn{p_t(A_t = 1|H_t)}, the experiment design treatment probability
 #' @param outcome column names of outcome variable
 #' @param core_num number of cores will be used for calculation
 #'
@@ -34,6 +35,7 @@ pseudo_outcome_generator_rf_v2 = function(fold, ID, data, Ht, St, At, prob, outc
   # Ht: a vector that contains column names of Ht variables
   # St: a vector that contains column names of St variables; St should be a subset of Ht
   # At: column names of treatment (At)
+  # prob: the experiment design treatment probability, column names of pt(At=1|Ht)
   # outcome: column names of outcome variable
   # core_num: number of cores will be used for calculation
 
@@ -116,7 +118,7 @@ ps_random_forest_v2 = function(fold_indices, fold, ID, data, Ht, St, At, outcome
 
   folds_list = 1:fold
 
-  if(is.null(core_num)) {cl = makeCluster(core_num)} else {cl = makeCluster(detectCores())}
+  if(!is.null(core_num)) {cl = makeCluster(core_num)} else {cl = makeCluster(detectCores())}
 
   var_names = ls(envir= environment())
 

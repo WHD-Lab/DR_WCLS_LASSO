@@ -9,6 +9,7 @@
 #' @param Ht a vector that contains column names of control variables
 #' @param St a vector that contains column names of moderator variables; St should be a subset of Ht
 #' @param At column names of treatment (At)
+#' @param prob column names of \eqn{p_t(A_t = 1|H_t)}, the experiment design treatment probability
 #' @param outcome column names of outcome variable
 #' @param core_num number of cores will be used for calculation
 #'

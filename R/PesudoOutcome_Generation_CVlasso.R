@@ -13,6 +13,7 @@
 #' @param Ht a vector that contains column names of control variables
 #' @param St a vector that contains column names of moderator variables; St should be a subset of Ht
 #' @param At column names of treatment (At)
+#' @param prob column names of \eqn{p_t(A_t = 1|H_t)}, the experiment design treatment probability
 #' @param outcome column names of outcome variable
 #' @param core_num number of cores will be used for calculation
 #'
@@ -37,6 +38,7 @@ pseudo_outcome_generator_CVlasso = function(fold, ID, data, Ht, St, At, prob, ou
   # Ht: a vector that contains column names of control variables
   # St: a vector that contains column names of moderator variables; St should be a subset of Ht
   # At: column names of treatment (At)
+  # prob: column names of pt(At = 1|Ht), the design treatment probability
   # outcome: column names of outcome variable
   # core_num: number of cores will be used for calculation
 
@@ -168,7 +170,7 @@ simple_lasso = function(fold_indices, fold, ID, data, Ht, St, At, outcome, core_
 
   folds_list = 1:fold
 
-  if(is.null(core_num)) {cl = makeCluster(core_num)} else {cl = makeCluster(detectCores())}
+  if(!is.null(core_num)) {cl = makeCluster(core_num)} else {cl = makeCluster(detectCores())}
 
   var_names = ls(envir= environment())
 
