@@ -11,29 +11,29 @@ support_update = function(se, eta, LAMBDA, Aeta, Qn) {
   # LAMBDA: the updated variance of conditional distribution hat{beta}^{lambda}_E | (hat{beta}_Ej, hat{Gamma}EjPerp, Z_{-E}).
   # Aeta: the updated value of Aeta
   # Qn: the updated value of Qn
-  
+
   # Output:
   # the lower and upper bounds for inner integration
-  
-  diagSe = diag(se)
-  
+
+  if(length(se) > 1) {diagSe = diag(se)} else {diagSe = diag(se, nrow=1)}
+
   lowerbond = -Inf
   upperbond = Inf
-  
+
   for(i in 1:length(se)) {
-    
+
     frac = (t(diagSe[,i]) %*% Aeta)/(-t(diagSe[,i]) %*% Qn)
-    
+
     if(t(diagSe[,i]) %*% LAMBDA %*% eta > 0) {
       lowerbond = max(frac, lowerbond)
     }
-    
+
     if(t(diagSe[,i]) %*% LAMBDA %*% eta < 0) {
       upperbond = min(frac, upperbond)
     }
   }
   # what if exactly equal to 0
-  
+
   return(list(upperbond = upperbond,
               lowerbond = lowerbond))
 }
@@ -53,8 +53,8 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
   # data: the dataset with pseudo outcome
   # id: column names of participant id
   # time: column names of decidion time points
-  
-  
+
+
   E = select_E[["E"]]
   NE = select_E[["NE"]]
   ej = joint_distcal_ej[["ej"]]
@@ -76,29 +76,29 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
   hat_betaE_lambda = select_E[["soln"]]
   betaEjhat = joint_distcal_ej[["betaEj_cal"]][["betaEj"]]
   sigmasq1 = joint_distcal_ej[["betaEj_cal"]][["sigmasq1"]]
-  
-  
+
+
   lowp = (1-level)/2
   upp = 1 - (1-level)/2
-  
-  
+
+
   zeroEPNE = matrix(0, Enum, pnum-Enum)
   lamPNE = diag(rep(lam, pnum - Enum))
-  
-  
+
+
   # recreate self-define function to construct pivot
   my_function = function(b, mu_final,  sigmasq_final, eta,p1,p4,Pleft,Var_etabeta,HE,
                          lower, upper) {
-    
-    mu_etabeta = sapply(b, function(b) {t(eta) %*% solve(t(HE) %*% solve(omega) %*% HE) %*% (t(HE)%*% solve(omega)) %*% 
+
+    mu_etabeta = sapply(b, function(b) {t(eta) %*% solve(t(HE) %*% solve(omega) %*% HE) %*% (t(HE)%*% solve(omega)) %*%
         (b*rbind(p1,p4) + Pleft %*% GammaEjPerp + rbind(zeroEPNE, lamPNE) %*% ZNE + R)/c(sqrt(n))})
-    
-    out = dnorm(b, mean = mu_final, sqrt(sigmasq_final)) * 
-      (pnorm(upper,mu_etabeta, sqrt(Var_etabeta)) - pnorm(lower,mu_etabeta, sqrt(Var_etabeta))) 
-    
+
+    out = dnorm(b, mean = mu_final, sqrt(sigmasq_final)) *
+      (pnorm(upper,mu_etabeta, sqrt(Var_etabeta)) - pnorm(lower,mu_etabeta, sqrt(Var_etabeta)))
+
     return(out)
   }
-  
+
   pivot_prop_value = function(null_value) {
     # update joint beta distribution
     update_beta_dist = Asynorm_beta_under_hy(E, NE, pes_outcome, data, ej, id, time, null_value = null_value,
@@ -109,26 +109,26 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
     p4 = update_P[["p4"]]
     P = update_P[["P"]]
     Pleft = P[,-1]
-    
+
     # update mu_final and sigmasq_final
     update_mu_sigmasq_final = mu_sigmasq_final_modify(null_value = null_value, omega, P_modify = update_P,
                                                       PQR_org_shared = PQR_shared, PQR_org_ej = PQR_ej, theta22,
                                                       Asynorm_beta_under_hy = update_beta_dist, ZNE)
     mu_final = update_mu_sigmasq_final[["mu_final"]]
     sigmasq_final = update_mu_sigmasq_final[["sigmasq_final"]]
-    
+
     HE = rbind(HEE, HNEE)
     eta = c(sqrt(n)) * t(HE) %*% solve(omega) %*% rbind(p1, p4)
     Var_etabeta  = t(eta) %*% LAMBDA %*% eta
     Qn = LAMBDA %*% eta/ c(t(eta) %*% LAMBDA %*% eta)
     hat_betaE_lambda = hat_betaE_lambda[which(hat_betaE_lambda != 0)]
     Aeta = hat_betaE_lambda - LAMBDA %*% eta %*% t(eta) %*% hat_betaE_lambda/c(t(eta) %*% LAMBDA %*% eta)
-    
+
     # calculate upper and lower bound
     temp_support = support_update(se = se, eta = eta, LAMBDA = LAMBDA, Aeta = Aeta, Qn = Qn)
     lower = temp_support[["lowerbond"]]
     upper = temp_support[["upperbond"]]
-    
+
     denominator = integrate(my_function,
                             lower = min(mu_final, betaEjhat) - 15*sqrt(sigmasq_final),
                             upper = max(mu_final, betaEjhat) + 15*sqrt(sigmasq_final),
@@ -140,23 +140,23 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
                           mu_final = mu_final, sigmasq_final, eta,p1,p4,Pleft,Var_etabeta,HE,
                           lower, upper)
     prop_null_value = numerator$value/denominator$value
-    
+
     return(prop_null_value)
   }
-  
+
   # function that search betaE,j value using half split
   betaEj_search = function(range, max_tol, max_iterate) {
     # check the pivot value under the GEE point estimate
     prop_initial = pivot_prop_value(betaEjhat)
-    
+
     #######################
     # find the lower bound#
     #######################
-    
+
     if(prop_initial > upp & prop_initial < 1) {
       bottom = betaEjhat
       top = betaEjhat + range
-      
+
       # check the pivot value under top
       top_prop = pivot_prop_value(top)
       while(top_prop > upp & top_prop < 1){
@@ -167,7 +167,7 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
     } else {
       bottom = betaEjhat - range
       top = betaEjhat
-      
+
       # check the pivot value under bottom
       bottom_prop = pivot_prop_value(bottom)
       while(bottom_prop < upp & !is.na(bottom_prop)) {
@@ -175,14 +175,14 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
         bottom = betaEjhat - range
         bottom_prop = pivot_prop_value(bottom)
       }
-      
+
       while(bottom_prop > upp + 0.05 | is.na(bottom_prop)) {
         range = range/1.15
         bottom = betaEjhat - range
         bottom_prop = pivot_prop_value(bottom)
       }
     }
-    
+
     i = 0
     prop = 0
     while((abs(upp - prop) > max_tol) & (i < max_iterate)) {
@@ -197,15 +197,15 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
           cal = (bottom + top)/2
         }
       }
-      
+
       prop = pivot_prop_value(cal)
       i = i + 1
     }
-    
+
     # the lower bound value
     low_bound = cal
     prop_up = prop
-    
+
     #######################
     # find the upper bound#
     #######################
@@ -214,7 +214,7 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
     if(prop_initial < lowp) {
       bottom = betaEjhat - range
       top = betaEjhat
-      
+
       # check the pivot value under bottom
       bottom_prop = pivot_prop_value(bottom)
       while(bottom_prop < lowp) {
@@ -222,12 +222,12 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
         bottom = betaEjhat - range
         bottom_prop = pivot_prop_value(bottom)
       }
-      
-      
+
+
     } else {
       bottom = betaEjhat
       top = betaEjhat + range
-      
+
       # check the pivot value under top
       top_prop = pivot_prop_value(top)
       while(top_prop > lowp & top_prop < 1 & !is.na(top_prop)) {
@@ -240,9 +240,9 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
         top = betaEjhat + range
         top_prop = pivot_prop_value(top)
       }
-      
+
     }
-    
+
     i = 0
     while((abs(lowp - prop) > max_tol) & (i < max_iterate)) {
       if(i == 0) {
@@ -259,29 +259,29 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
       prop = pivot_prop_value(cal)
       i = i + 1
     }
-    
+
     # the upper bound value
     up_bound = cal
     prop_low = prop
-    
-    
+
+
     return(list(low_bound = low_bound,
                 up_bound = up_bound,
                 prop_up = prop_up,
                 prop_low = prop_low))
   }
-  
+
   CI = betaEj_search(sqrt(sigmasq1/n)*5, 10^{-5}, 10^{6})
   low = CI$low_bound
   up = CI$up_bound
-  
+
   ############################
   # now calculate the p value#
   ############################
-  
+
   prop0 = pivot_prop_value(0)
   if(prop0 > 1|is.na(prop0)) {pvalue = NA} else {pvalue = min(prop0, 1 - prop0)*2}
-  
+
   return(list(E = E[which(ej == 1)],
               GEE_est = betaEjhat,
               post_beta = select_E[["postbeta"]][which(ej == 1)],
@@ -291,7 +291,7 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
               prop_low = CI$prop_low,
               prop_up = CI$prop_up
   ))
-  
+
   # Output:
   # E: the selected variables for which CI is calculated
   # GEE_est: the GEE estimate for this predictor
@@ -299,9 +299,9 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
   # pvalue: the p value
   # lowCI: the lower bound of the confidence interval
   # upperCI: the upper bound of the confidence interval
-  # prop_low: the true corresponding pivot value for the lower bound. For example, if it's 90% CI, this 
+  # prop_low: the true corresponding pivot value for the lower bound. For example, if it's 90% CI, this
   #          value will close to 0.05
-  # prop_up: the true corresponding pivot value for the upper bound. For example, if it's 90% CI, this 
+  # prop_up: the true corresponding pivot value for the upper bound. For example, if it's 90% CI, this
   #          value will close to 0.95
 }
 
@@ -325,63 +325,81 @@ Asynorm_beta_under_hy = function(E, NE, pes_outcome, data, ej, id, time, null_va
   # HNEE: can recycle from previous calculation
   # HENE: can recycle from previous calculation
   # S: can recycle from previous calculation
-  
+
   require(dplyr)
-  
+
   id = data[,id]
   n = n_distinct(id)
-  
-  if("(Intercept)" %in% E) {ftStE = t(cbind(1,as.matrix(data[,E[E!="(Intercept)"]])))} else {ftStE = t(as.matrix(data[,E]))}
+
+  if(("(Intercept)" %in% E) & (length(E) > 1)) {
+    ftStE = t(cbind(1,as.matrix(data[,E[E!="(Intercept)"]])))
+  } else if (("(Intercept)" %in% E) & (length(E) == 1)) {
+    ftStE = matrix(1, nrow = 1, ncol = dim(data)[1])
+  } else {
+    ftStE = t(as.matrix(data[,E]))
+  }
   if("(Intercept)" %in% NE) {ftStNE = t(cbind(1,as.matrix(data[,NE[NE!="(Intercept)"]])))} else {ftStNE = t(as.matrix(data[,NE]))}
-  
+
   # modify the pesudo-outcome to remove the impact of betaEj
   data$yDR_modify = data[,pes_outcome] - t(ftStE) %*% matrix(ej, ncol = 1) * c(null_value)
+
+  wt = data$ptSt * (1-data$ptSt)
+  idf = as.factor(id)
+  time = data[,time]
+
+  if(length(E) > 1) {
   # modify E to remove betaE,j from selection
   E_modify = E[which(ej != 1)]
   if("(Intercept)" %in% E_modify) {
     formula = as.formula(paste("yDR_modify ~", paste(E_modify[which(E_modify != "(Intercept)")], collapse = "+")))
   } else {
-    formula = as.formula(paste("yDR_modify~-1+", paste(E_modify, collapse = "+")))  
+    formula = as.formula(paste("yDR_modify~-1+", paste(E_modify, collapse = "+")))
   }
-  
+
   # get modified betaE point estiamtes
-  wt = data$ptSt * (1-data$ptSt)
-  idf = as.factor(id)
-  time = data[,time]
   betaEM_modify = geepack::geeglm(formula, data = data, weights = wt/sqrt(n), corstr = "independence", id = idf,
                                   waves = time)
-  
+  } else {
+    betaEM_modify = list(residuals = data$yDR_modify,
+                         id = id)
+  }
+
   #sigmaTT
   KEE = K(ftStE, ftStNE, wt, "EE", betaEM_modify, n)
   sigmaTT = solve(HEE) %*% KEE %*% solve(HEE)
-  
+
   #sigmaST
   KNEE = K(ftStE, ftStNE, wt, "-EE", betaEM_modify, n)
   sigmaST = KNEE %*% solve(HEE) - HNEE %*% sigmaTT
-  
+
   #sigmaSS
   KNENE = K(ftStE, ftStNE, wt, "-E-E", betaEM_modify, n)
   sigmaSS = KNENE + HNEE %*% sigmaTT %*% HENE - KNEE %*% solve(HEE) %*% HENE - HNEE %*% solve(HEE) %*% t(KNEE)
-  
+
   # point estimate betaE
-  matrix_pre = diag(c(1-ej))
-  matrix_pre = matrix_pre[,-which(ej == 1)]
-  betaE_rest = matrix(betaEM_modify[["coefficients"]], ncol = 1)
+  if(length(E) > 1) {
+    matrix_pre = diag(c(1-ej))
+    matrix_pre = matrix_pre[,-which(ej == 1)]
+    betaE_rest = matrix(betaEM_modify[["coefficients"]], ncol = 1)
+  } else{
+    matrix_pre = matrix(0, ncol = 1)
+    betaE_rest = matrix(0, ncol = 1)
+  }
   ej = matrix(ej, ncol = 1)
   betaE = ej*c(null_value) + matrix_pre %*% betaE_rest
-  
+
   # betaEj
   betaEj = null_value
   sigmasq1 = t(ej) %*% sigmaTT %*% ej
-  
+
   # betaEperp
   betaEperp = S/(c(sqrt(n))) - sigmaST %*% solve(sigmaTT) %*% betaE
   sigma2 = sigmaSS - sigmaST %*% solve(sigmaTT) %*% t(sigmaST)
-  
+
   # betaEjperp
   betaEjperp = betaE - sigmaTT %*% ej %*% solve(t(ej) %*% sigmaTT %*% ej) * c(betaEj)
   sigma3 = sigmaTT - sigmaTT %*% ej %*% t(ej) %*% sigmaTT * c(solve(t(ej) %*% sigmaTT %*% ej))
-  
+
   # return those updated value
   return(list(betaEM_modify = betaEM_modify,
               H = list(HEE = HEE, HNEE = HNEE, HENE = HENE),
@@ -402,7 +420,7 @@ Asynorm_beta_under_hy = function(E, NE, pes_outcome, data, ej, id, time, null_va
 # due to SigmaTT and SigmaST is changed
 P_modify = function(Asynorm_beta_under_hy){
   # Asynorm_beta_under_hy: the result from function Asynorm_beta_under_hy
-  
+
   HEE = Asynorm_beta_under_hy[["H"]][["HEE"]]
   HNEE = Asynorm_beta_under_hy[["H"]][["HNEE"]]
   sigmaTT = Asynorm_beta_under_hy[["Sigma_modify"]][["sigmaTT"]]
@@ -411,7 +429,7 @@ P_modify = function(Asynorm_beta_under_hy){
   ej = Asynorm_beta_under_hy[["ej"]]
   Enum = Asynorm_beta_under_hy[["Enum"]]
   NEnum = Asynorm_beta_under_hy[["NEnum"]]
-  
+
   # matrix P
   p1 = HEE %*% sigmaTT %*% ej/c(t(ej) %*% sigmaTT %*% ej)
   p2 = HEE
@@ -419,12 +437,12 @@ P_modify = function(Asynorm_beta_under_hy){
   p4 = (sigmaST %*% ej + HNEE %*% sigmaTT %*% ej)/c(t(ej) %*% sigmaTT %*% ej)
   p5 = sigmaST %*% solve(sigmaTT) + HNEE
   p6 = diag(rep(1,NEnum))
-  
+
   Pup = cbind(p1, p2, p3)
   Pdown = cbind(p4, p5, p6)
-  
+
   P = rbind(Pup, Pdown) * sqrt(n)
-  
+
   return(list(P = P,
               p1 = p1 * sqrt(n),
               p4 = p4*sqrt(n), n = n))
@@ -442,7 +460,7 @@ mu_sigmasq_final_modify = function(null_value, omega, P_modify,
   # theta22: recycle from the previous calculation
   # Asynorm_beta_under_hy: the results from function Asynorm_beta_under_hy
   # ZNE: recycle from the previous calculation
-  
+
   Q = PQR_org_shared[["Q"]]
   R = PQR_org_shared[["R"]]
   P = P_modify[["P"]]
@@ -452,7 +470,7 @@ mu_sigmasq_final_modify = function(null_value, omega, P_modify,
   Enum = Asynorm_beta_under_hy[["Enum"]]
   NEnum = Asynorm_beta_under_hy[["NEnum"]]
   pnum = Enum + NEnum
-  
+
   # update matrix A and C
   zeros = matrix(0, nrow = NEnum, ncol = Enum)
   I = diag(rep(1, NEnum))
@@ -461,10 +479,10 @@ mu_sigmasq_final_modify = function(null_value, omega, P_modify,
   Ip = diag(rep(1, pnum))
   A = -shared %*% solve(t(Q) %*% solve(omega) %*% Q) %*% t(Q) %*% solve(omega) %*% P %*% matrix(c(1,rep(0,pnum)), ncol = 1)
   C = -shared %*% solve(t(Q) %*% solve(omega) %*% Q) %*% t(Q) %*% solve(omega) %*% (R + P %*% rbind(zero1p, Ip) %*% GammaEjPerp)
-  
+
   mu_final = (n*null_value + c(sigma1sq) * (t(ZNE - C) %*% solve(theta22) %*% A))/(n + c(sigma1sq) * (t(A) %*% solve(theta22) %*% A))
   sigmasq_final = sigma1sq / (n + c(sigma1sq) * (t(A) %*% solve(theta22) %*% A))
-  
+
   return(list(mu_final = mu_final,
               sigmasq_final = sigmasq_final))
 }
