@@ -36,6 +36,7 @@
 #' beta =  c(-0.2, 0.8, 0.3, 0.7, 0.3, rep(0, 21)), level = 0.9, core_num = 3)
 #'
 #' @import parallel
+#' @import devtools
 #'
 #' @export
 
@@ -61,7 +62,8 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
   # beta: the true coefficient value (if simulation is conducted)
   # level: the CI significant level
   # core_num: the number of cores will be used for parallel calculation
-
+  
+  require(devtools)
   if(method_pesu == "CVLASSO") {
     ps = pseudo_outcome_generator_CVlasso(fold, ID, data, Ht, St, At, prob=prob, outcome, core_num)
   }
@@ -95,8 +97,7 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
 
   AsyNormbeta_shared = joint_dist_Penal_Int_shared(E = select$E, NE = select$NE, pes_outcome = "yDR", data = ps, id = ID, time = time)
   PQR_shared = PQR_Pint_shared(AsyNormbeta_shared, select)
-  print(select)
-  print(AsyNormbeta_shared)
+
   CI_per_select_var = function(ej) {
     AsyNormbeta_ej = joint_dist_Penal_Int_ej(AsyNormbeta_shared, ej)
     PQR_ej = PQR_Pint_ej(PQR_shared, AsyNormbeta_ej, AsyNormbeta_shared)
@@ -119,18 +120,24 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
 
     ejs[[i]] = vec_ej
   }
-
-  # List all objects in the global environment
-  all_functions <- ls(envir = globalenv())
-
-  # Filter the list to keep only the function names (not variables)
-  function_names <- all_functions[sapply(all_functions, function(x) is.function(get(x)))]
-
-  clusterExport(cl, varlist = function_names, envir = environment())
-  # do parallel calculation
-  results = parLapply(cl, ejs, CI_per_select_var)
-
-  stopCluster(cl)
+  # # List all objects in the global environment
+  # all_functions <- ls(envir = globalenv())
+  # 
+  # # Filter the list to keep only the function names (not variables)
+  # function_names <- all_functions[sapply(all_functions, function(x) is.function(get(x)))]
+  # 
+  # clusterExport(cl, varlist = function_names, envir = environment())
+  # # do parallel calculation
+  # results = parLapply(cl, ejs, CI_per_select_var)
+  # 
+  # stopCluster(cl)
+  results <- lapply(ejs, CI_per_select_var)
+  final_results <- do.call(rbind, lapply(results, function(x) {
+    as.data.frame(as.list(x), stringsAsFactors = FALSE)
+  }))
+  
+  num_cols <- setdiff(names(final_results), "E")
+  final_results[num_cols] <- lapply(final_results[num_cols], as.numeric)
 
   # now makes the returned outcomes look like a table
   final_results = data.frame(
