@@ -83,7 +83,11 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
 
 
   zeroEPNE = matrix(0, Enum, pnum-Enum)
-  lamPNE = diag(rep(lam, pnum - Enum))
+  if(pnum - Enum > 1) {
+    lamPNE = diag(rep(lam, pnum - Enum))
+  } else {
+    lamPNE = lam
+  }
 
 
   # recreate self-define function to construct pivot
@@ -118,7 +122,7 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
     sigmasq_final = update_mu_sigmasq_final[["sigmasq_final"]]
 
     HE = rbind(HEE, HNEE)
-    eta = c(sqrt(n)) * t(HE) %*% solve(omega) %*% rbind(p1, p4)
+    eta =  t(HE) %*% solve(omega) %*% rbind(p1, p4)
     Var_etabeta  = t(eta) %*% LAMBDA %*% eta
     Qn = LAMBDA %*% eta/ c(t(eta) %*% LAMBDA %*% eta)
     hat_betaE_lambda = hat_betaE_lambda[which(hat_betaE_lambda != 0)]
@@ -187,7 +191,7 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
     prop = 0
     while((abs(upp - prop) > max_tol) & (i < max_iterate)) {
       if (abs(top - bottom) < 1e-4) break
-      
+
       if(i == 0) {
         cal = (top + bottom)/2
       } else {
@@ -248,7 +252,7 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
     i = 0
     while((abs(lowp - prop) > max_tol) & (i < max_iterate)) {
       if (abs(top - bottom) < 1e-4) break
-      
+
       if(i == 0) {
         cal = (top + bottom)/2
       } else {
@@ -356,7 +360,7 @@ Asynorm_beta_under_hy = function(E, NE, pes_outcome, data, ej, id, time, null_va
   # modify E to remove betaE,j from selection
   E_modify = E[which(ej != 1)]
   other_terms = setdiff(E_modify, "(Intercept)")
-  
+
   if (length(other_terms) == 0) {
     formula = as.formula("yDR_modify ~ 1")
   } else if("(Intercept)" %in% E_modify) {

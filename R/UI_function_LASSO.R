@@ -62,7 +62,7 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
   # beta: the true coefficient value (if simulation is conducted)
   # level: the CI significant level
   # core_num: the number of cores will be used for parallel calculation
-  
+
   require(devtools)
   if(method_pesu == "CVLASSO") {
     ps = pseudo_outcome_generator_CVlasso(fold, ID, data, Ht, St, At, prob=prob, outcome, core_num)
@@ -95,6 +95,9 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
                                              splitrat = splitrat, virtualenv_path= virtualenv_path, beta = beta)
   }
 
+  # print selection
+  print(paste("select predictors:", select$E))
+
   AsyNormbeta_shared = joint_dist_Penal_Int_shared(E = select$E, NE = select$NE, pes_outcome = "yDR", data = ps, id = ID, time = time)
   PQR_shared = PQR_Pint_shared(AsyNormbeta_shared, select)
 
@@ -110,7 +113,7 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
 
   require(parallel)
 
-  if(is.null(core_num)) {cl = makeCluster(core_num)} else {cl = makeCluster(detectCores())}
+  if(!is.null(core_num)) {cl = makeCluster(core_num)} else {cl = makeCluster(detectCores())}
 
   # the list that stores the ej vectors for selected variables
   ejs = list()
@@ -120,22 +123,22 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
 
     ejs[[i]] = vec_ej
   }
-  # # List all objects in the global environment
-  # all_functions <- ls(envir = globalenv())
-  # 
-  # # Filter the list to keep only the function names (not variables)
-  # function_names <- all_functions[sapply(all_functions, function(x) is.function(get(x)))]
-  # 
-  # clusterExport(cl, varlist = function_names, envir = environment())
-  # # do parallel calculation
-  # results = parLapply(cl, ejs, CI_per_select_var)
-  # 
-  # stopCluster(cl)
-  results <- lapply(ejs, CI_per_select_var)
+   # List all objects in the global environment
+   all_functions <- ls(envir = globalenv())
+
+   # Filter the list to keep only the function names (not variables)
+   function_names <- all_functions[sapply(all_functions, function(x) is.function(get(x)))]
+
+   clusterExport(cl, varlist = function_names, envir = environment())
+   # do parallel calculation
+   results = parLapply(cl, ejs, CI_per_select_var)
+
+   stopCluster(cl)
+  #results <- lapply(ejs, CI_per_select_var)
   final_results <- do.call(rbind, lapply(results, function(x) {
     as.data.frame(as.list(x), stringsAsFactors = FALSE)
   }))
-  
+
   num_cols <- setdiff(names(final_results), "E")
   final_results[num_cols] <- lapply(final_results[num_cols], as.numeric)
 

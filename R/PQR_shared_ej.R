@@ -33,7 +33,7 @@ PQR_Pint_shared = function(joint_distcal_shared, select_E) {
   Q1 = HEE * c(-sqrt(n))
   Q2 = matrix(0, nrow = Enum, ncol = NEnum)
   Q3 = HNEE * c(-sqrt(n))
-  Q4 = diag(rep(lam, NEnum))
+  if (NEnum > 1) {Q4 = diag(rep(lam, NEnum))} else {Q4 = lam}
 
   Qup = cbind(Q1,Q2)
   Qdown = cbind(Q3,Q4)
