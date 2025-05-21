@@ -36,13 +36,15 @@
 #' beta =  c(-0.2, 0.8, 0.3, 0.7, 0.3, rep(0, 21)), level = 0.9, core_num = 3)
 #'
 #' @import parallel
+#' @import doParallel
+#' @import foreach
 #' @import devtools
 #'
 #' @export
 
 DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method_pesu,
                                  lam = NULL, noise_scale = NULL, splitrat = 0.8, virtualenv_path,
-                                 beta = NULL, level = 0.9, core_num = NULL){
+                                 beta = NULL, level = 0.9, core_num = NULL, CI_algorithm = "lapply"){
   # data: raw data without pesudo-outcome, ptSt.
   # fold: # of folds hope to split when generating pesudo outcome
   # ID: the name of column where participants' ID are stored
@@ -62,6 +64,7 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
   # beta: the true coefficient value (if simulation is conducted)
   # level: the CI significant level
   # core_num: the number of cores will be used for parallel calculation
+  # CI_algorithm: when calculate CI can choice using for loop, built-in parallel function, and doParallel function; "lapply", "parallel", "doParallel"
 
   require(devtools)
   if(method_pesu == "CVLASSO") {
@@ -111,11 +114,7 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
     return(CI)
   }
 
-  require(parallel)
-
-  if(!is.null(core_num)) {cl = makeCluster(core_num)} else {cl = makeCluster(detectCores())}
-
-  # the list that stores the ej vectors for selected variables
+  #the list that stores the ej vectors for selected variables
   ejs = list()
   for(i in 1:length(select$E)) {
     vec_ej = rep(0,length(select$E))
@@ -123,18 +122,44 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
 
     ejs[[i]] = vec_ej
   }
-   # List all objects in the global environment
-   all_functions <- ls(envir = globalenv())
 
-   # Filter the list to keep only the function names (not variables)
-   function_names <- all_functions[sapply(all_functions, function(x) is.function(get(x)))]
+  if(CI_algorithm == "parallel") {
+    require(parallel)
 
-   clusterExport(cl, varlist = function_names, envir = environment())
-   # do parallel calculation
-   results = parLapply(cl, ejs, CI_per_select_var)
+    if(!is.null(core_num)) {cl = makeCluster(core_num)} else {cl = makeCluster(detectCores())}
 
-   stopCluster(cl)
-  #results <- lapply(ejs, CI_per_select_var)
+    # List all objects in the global environment
+    all_functions <- ls(envir = globalenv())
+
+    # Filter the list to keep only the function names (not variables)
+    function_names <- all_functions[sapply(all_functions, function(x) is.function(get(x)))]
+
+    clusterExport(cl, varlist = function_names, envir = environment())
+    # do parallel calculation
+    results = parLapply(cl, ejs, CI_per_select_var)
+
+    stopCluster(cl)
+  }
+
+  if(CI_algorithm == "lapply") {results <- lapply(ejs, CI_per_select_var)}
+
+  if(CI_algorithm == "doParallel") {
+    require(doParallel)
+    require(foreach)
+
+    if(!is.null(core_num)) {cl = makeCluster(core_num)} else {cl = makeCluster(detectCores())}
+    registerDoParallel(cl)
+
+    results = foreach(i = 1:length(select$E)) %dopar% {
+      ej = ejs[[i]]
+      CI_per_select_var(ej)
+    }
+
+    stopCluster(cl)
+
+  }
+
+
   final_results <- do.call(rbind, lapply(results, function(x) {
     as.data.frame(as.list(x), stringsAsFactors = FALSE)
   }))

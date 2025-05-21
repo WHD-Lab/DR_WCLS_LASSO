@@ -21,7 +21,8 @@ DR_WCLS_LASSO(
   virtualenv_path,
   beta = NULL,
   level = 0.9,
-  core_num = NULL
+  core_num = NULL,
+  CI_algorithm = "lapply"
 )
 }
 \arguments{
