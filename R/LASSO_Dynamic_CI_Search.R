@@ -41,7 +41,7 @@ support_update = function(se, eta, LAMBDA, Aeta, Qn) {
 #####################################################################################
 # when intercept is penalized
 pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_shared, joint_distcal_ej, select_E, level = 0.9, pes_outcome, data,
-                              id, time) {
+                              id, time, max_iterate = 10^{6}, max_tol = 10^{-3}) {
   # PQR_shared: result of function PQR_Pint_shared
   # PQR_ej: result of function PQR_Pint_ej
   # cond_dist: result of function conditional_dist
@@ -53,6 +53,8 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
   # data: the dataset with pseudo outcome
   # id: column names of participant id
   # time: column names of decidion time points
+  # max_iterate: the max iteration number when searching CI
+  # max_tol: the max error tolerance when calculate pivot value
 
 
   E = select_E[["E"]]
@@ -133,17 +135,31 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
     lower = temp_support[["lowerbond"]]
     upper = temp_support[["upperbond"]]
 
-    denominator = integrate(my_function,
-                            lower = min(mu_final, betaEjhat) - 15*sqrt(sigmasq_final),
-                            upper = max(mu_final, betaEjhat) + 15*sqrt(sigmasq_final),
-                            mu_final = mu_final, sigmasq_final, eta,p1,p4,Pleft,Var_etabeta,HE,
-                            lower, upper)
-    numerator = integrate(my_function,
-                          lower = min(mu_final, betaEjhat) - 15*sqrt(sigmasq_final),
-                          upper = betaEjhat,
-                          mu_final = mu_final, sigmasq_final, eta,p1,p4,Pleft,Var_etabeta,HE,
-                          lower, upper)
-    prop_null_value = numerator$value/denominator$value
+    #numerator = integrate(my_function,
+    #                      lower = min(mu_final, betaEjhat) - 15*sqrt(sigmasq_final),
+    #                      upper = betaEjhat,
+    #                      mu_final = mu_final, sigmasq_final, eta,p1,p4,Pleft,Var_etabeta,HE,
+    #                      lower, upper)
+    require(calculus)
+    numerator = integral(my_function, bounds = list(b = c(min(mu_final,betaEjhat) - 15*sqrt(sigmasq_final), betaEjhat)),
+                         params = list(mu_final = mu_final,  sigmasq_final = sigmasq_final, eta = eta,
+                                       p1 = p1, p4 = p4, Pleft = Pleft, Var_etabeta = Var_etabeta, HE = HE,
+                                       lower = lower, upper = upper))
+
+    #denominator = integrate(my_function,
+    #                        lower = min(mu_final, betaEjhat) - 15*sqrt(sigmasq_final),
+    #                        upper = max(mu_final, betaEjhat) + 15*sqrt(sigmasq_final),
+    #                        mu_final = mu_final, sigmasq_final, eta,p1,p4,Pleft,Var_etabeta,HE,
+    #                        lower, upper)
+
+    denominator_p2 = integral(my_function, bounds = list(b = c(betaEjhat, min(mu_final,betaEjhat) + 15*sqrt(sigmasq_final))),
+                           params = list(mu_final = mu_final,  sigmasq_final = sigmasq_final, eta = eta,
+                                         p1 = p1, p4 = p4, Pleft = Pleft, Var_etabeta = Var_etabeta, HE = HE,
+                                         lower = lower, upper = upper))
+
+    #prop_null_value = numerator$value/denominator$value
+
+    prop_null_value = numerator$value/(numerator$value + denominator_p2$value)
 
     return(prop_null_value)
   }
@@ -152,6 +168,16 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
   betaEj_search = function(range, max_tol, max_iterate) {
     # check the pivot value under the GEE point estimate
     prop_initial = pivot_prop_value(betaEjhat)
+
+    if(is.na(prop_initial)) {
+      print("the pivot is undefined even when the null value equals to the point estimate, the denominator of pivot is 0." )
+      return(list(low_bound = NA,
+                  up_bound = NA,
+                  prop_up = NA,
+                  prop_low = NA,
+                  message_low = NA,
+                  message_up = NA))
+    }
 
     #######################
     # find the lower bound#
@@ -190,7 +216,10 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
     i = 0
     prop = 0
     while((abs(upp - prop) > max_tol) & (i < max_iterate)) {
-      if (abs(top - bottom) < 1e-4) break
+      if (abs(top - bottom) < 1e-4) {
+        message_lower = "stops lower bound calculation due to the little change for each loop"
+        break
+      }
 
       if(i == 0) {
         cal = (top + bottom)/2
@@ -211,6 +240,7 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
     # the lower bound value
     low_bound = cal
     prop_up = prop
+    if(i == max_iterate) {message_low = "stops due to iteration limitation"} else {message_low = "Normal"}
 
     #######################
     # find the upper bound#
@@ -251,7 +281,10 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
 
     i = 0
     while((abs(lowp - prop) > max_tol) & (i < max_iterate)) {
-      if (abs(top - bottom) < 1e-4) break
+      if (abs(top - bottom) < 1e-4) {
+        message_up = "stops upper bound calculation due to the little change for each loop"
+        break
+        }
 
       if(i == 0) {
         cal = (top + bottom)/2
@@ -271,15 +304,18 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
     # the upper bound value
     up_bound = cal
     prop_low = prop
+    if(i == max_iterate) {message_up = "stops due to iteration limitation"} else {message_up = "Normal"}
 
 
     return(list(low_bound = low_bound,
                 up_bound = up_bound,
                 prop_up = prop_up,
-                prop_low = prop_low))
+                prop_low = prop_low,
+                message_low = message_low,
+                message_up = message_up))
   }
 
-  CI = betaEj_search(sqrt(sigmasq1/n)*5, 10^{-5}, 10^{6})
+  CI = betaEj_search(sqrt(sigmasq1/n)*5, max_tol, max_iterate)
   # CI = betaEj_search(sqrt(sigmasq1/n)*5, 10^{-2}, 10^{2})
   low = CI$low_bound
   up = CI$up_bound
@@ -298,7 +334,9 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
               lowCI = low,
               upperCI = up,
               prop_low = CI$prop_low,
-              prop_up = CI$prop_up
+              prop_up = CI$prop_up,
+              message_low = CI$message_low,
+              message_up = CI$message_up
   ))
 
   # Output:
