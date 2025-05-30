@@ -78,21 +78,45 @@ ps_random_forest_v2 = function(fold_indices, fold, ID, data, Ht, St, At, outcome
     reserve = data[(data[,ID] %in% fold_indices[[i]]), ]
     train_fold = data[!(data[,ID] %in% fold_indices[[i]]), ]
 
+    fomula = as.formula(paste("~-1+", paste(paste0(Ht,":",At), collapse = "+")))
+
+    X_test_gt =  data.matrix(modelr::model_matrix(reserve, fomula))
+    colnames(X_test_gt) <- gsub(":", ".", colnames(X_test_gt))
+    X_test_gt = cbind(reserve, X_test_gt)
+
+    X_train_gt =  data.matrix(modelr::model_matrix(train_fold, fomula))
+    colnames(X_train_gt) <- gsub(":", ".", colnames(X_train_gt))
+    names_val = colnames(X_train_gt)
+    X_train_gt = cbind(train_fold, X_train_gt)
+
+    X_testfixAt1 = reserve
+    X_testfixAt1[,At] = 1
+    X_test_gtfixAt1 =  data.matrix(modelr::model_matrix(X_testfixAt1, fomula))
+    colnames(X_test_gtfixAt1) <- gsub(":", ".", colnames(X_test_gtfixAt1))
+    X_testfixAt1 = cbind(X_testfixAt1, X_test_gtfixAt1)
+
+
+    X_testfixAt0 = reserve
+    X_testfixAt0[,At] = 0
+    X_test_gtfixAt0 =  data.matrix(modelr::model_matrix(X_testfixAt0, fomula))
+    colnames(X_test_gtfixAt0) <- gsub(":", ".", colnames(X_test_gtfixAt0))
+    X_testfixAt0 = cbind(X_testfixAt0, X_test_gtfixAt0)
+
+
     ## gt(Ht,At)
-    X_test = reserve[, c(Ht, At)]
-    gt_rf = ranger(formula = as.formula(paste(outcome, "~", paste(c(Ht, At), collapse = " + "))),
-                   data = train_fold,
+    gt_rf = ranger(formula = as.formula(paste(outcome ,"~", paste(c(Ht, At, names_val), collapse = " + "))),
+                   data = X_train_gt,
                    num.trees = 500)
-    reserve$gt_pred_rf = predict(gt_rf, data = reserve)$predictions
+    reserve$gt_pred_rf = predict(gt_rf, data = X_test_gt)$predictions
 
     ## gt(Ht, At = 1)
-    X_testfixAt1 = X_test
-    X_testfixAt1[,At] = 1
+    #X_testfixAt1 = X_test
+    #X_testfixAt1[,At] = 1
     reserve$gtAt1_pred_rf = predict(gt_rf, data = X_testfixAt1)$predictions
 
     ## gt(Ht, At = 0)
-    X_testfixAt0 = X_test
-    X_testfixAt0[,At] = 0
+    #X_testfixAt0 = X_test
+    #X_testfixAt0[,At] = 0
     reserve$gtAt0_pred_rf = predict(gt_rf, data = X_testfixAt0)$predictions
 
     ## E[At|Ht]
@@ -129,6 +153,7 @@ ps_random_forest_v2 = function(fold_indices, fold, ID, data, Ht, St, At, outcome
   stopCluster(cl)
 
   for(i in folds_list) {
+    #data_withpred = expectation_cal(i)
     data_withpred = rbind(data_withpred, results[[i]])
   }
   ###########################

@@ -115,27 +115,36 @@ simple_lasso = function(fold_indices, fold, ID, data, Ht, St, At, outcome, core_
     X_train <- train_fold[, c(Ht, At)] # Add intercept
     y_train <- train_fold[, outcome]
 
+    fomula = as.formula(paste("~", paste(c(Ht, At, paste0(Ht,":",At)), collapse = "+")))
+    X_test_gt =  data.matrix(modelr::model_matrix(X_test, fomula))
+    X_train_gt =  data.matrix(modelr::model_matrix(X_train, fomula))
+
+    X_testfixAt1 = X_test
+    X_testfixAt1[,At] = 1
+    X_test_gtfixAt1 =  data.matrix(modelr::model_matrix(X_testfixAt1, fomula))
+
+    X_testfixAt0 = X_test
+    X_testfixAt0[,At] = 0
+    X_test_gtfixAt0 =  data.matrix(modelr::model_matrix(X_testfixAt0, fomula))
+
+
     ### standardize data and store mean and var for y_train to convert prediction back to normal scale
     X_test = scale(as.matrix(X_test))
     X_train = scale(as.matrix(X_train))
     ymean = mean(y_train)
     ysd = sd(y_train)
-    y_train = scale(y_train)
+    #y_train = scale(y_train)
 
     # set.seed(1)
-    cv.lasso.gt = cv.glmnet(as.matrix(X_train), y_train, alpha = 1)
+    cv.lasso.gt = cv.glmnet(as.matrix(X_train_gt), y_train, alpha = 1)
     bestlambda.gt = cv.lasso.gt$lambda.min
-    lasso.gt.mod = glmnet(as.matrix(X_train), y_train, alpha = 1, lambda = bestlambda.gt)
+    lasso.gt.mod = glmnet(as.matrix(X_train_gt), y_train, alpha = 1, lambda = bestlambda.gt)
     varselect_gt[[i]] = lapply(coef(lasso.gt.mod), is.numeric) %>% unlist()
-    reserve$lasso.pred.gt = predict(lasso.gt.mod, newx = as.matrix(X_test))*ysd + ymean
+    reserve$lasso.pred.gt = predict(lasso.gt.mod, newx = as.matrix(X_test_gt))
     # Add predicted gt(Ht, At = 1)
-    X_testfixAt1 = X_test
-    X_testfixAt1[,At] = 1
-    reserve$lasso.pred_gtAt1 = predict(lasso.gt.mod, newx = as.matrix(X_testfixAt1))*ysd + ymean
+    reserve$lasso.pred_gtAt1 = predict(lasso.gt.mod, newx = as.matrix(X_test_gtfixAt1))
     # Add predicted gt(Ht, At = 0)
-    X_testfixAt0 = X_test
-    X_testfixAt0[,At] = 0
-    reserve$lasso.pred_gtAt0 = predict(lasso.gt.mod, newx = as.matrix(X_testfixAt0))*ysd + ymean
+    reserve$lasso.pred_gtAt0 = predict(lasso.gt.mod, newx = as.matrix(X_test_gtfixAt0))
 
 
     ## E[At|Ht]

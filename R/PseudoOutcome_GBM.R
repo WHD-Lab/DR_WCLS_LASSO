@@ -48,8 +48,19 @@ ps_gradient_boosting = function(fold_indices, fold, ID, data, Ht, St, At, outcom
     reserve = data[data[[ID]] %in% fold_indices[[i]], ]
     train_fold = data[!(data[[ID]] %in% fold_indices[[i]]), ]
 
-    train_matrix = xgb.DMatrix(data = as.matrix(train_fold[, c(Ht, At)]), label = train_fold[[outcome]])
-    test_matrix = xgb.DMatrix(data = as.matrix(reserve[, c(Ht, At)]))
+    fomula = as.formula(paste("~-1+", paste(paste0(Ht,":",At), collapse = "+")))
+    X_test_gt =  data.matrix(modelr::model_matrix(reserve, fomula))
+    colnames(X_test_gt) <- gsub(":", ".", colnames(X_test_gt))
+    X_test_gt = cbind(reserve, X_test_gt)
+
+    X_train_gt =  data.matrix(modelr::model_matrix(train_fold, fomula))
+    colnames(X_train_gt) <- gsub(":", ".", colnames(X_train_gt))
+    names_val = colnames(X_train_gt)
+    X_train_gt = cbind(train_fold, X_train_gt)
+
+
+    train_matrix = xgb.DMatrix(data = as.matrix(X_train_gt[, c(Ht, At, names_val)]), label = X_train_gt[[outcome]])
+    test_matrix = xgb.DMatrix(data = as.matrix(X_test_gt[, c(Ht, At, names_val)]))
 
     params_reg = list(objective = "reg:squarederror", booster = "gbtree", eta = 0.1, max_depth = 6, nrounds = 500)
     params_class = list(objective = "binary:logistic", booster = "gbtree", eta = 0.1, max_depth = 6, nrounds = 500)
@@ -60,7 +71,16 @@ ps_gradient_boosting = function(fold_indices, fold, ID, data, Ht, St, At, outcom
 
     ## gt(Ht, At = 1) and gt(Ht, At = 0)
     X_testfixAt1 = reserve[, c(Ht, At)]; X_testfixAt1[[At]] = 1
+    X_test_gtfixAt1 =  data.matrix(modelr::model_matrix(X_testfixAt1, fomula))
+    colnames(X_test_gtfixAt1) <- gsub(":", ".", colnames(X_test_gtfixAt1))
+    X_testfixAt1 = cbind(X_testfixAt1, X_test_gtfixAt1)
+
+
     X_testfixAt0 = reserve[, c(Ht, At)]; X_testfixAt0[[At]] = 0
+    X_test_gtfixAt0 =  data.matrix(modelr::model_matrix(X_testfixAt0, fomula))
+    colnames(X_test_gtfixAt0) <- gsub(":", ".", colnames(X_test_gtfixAt0))
+    X_testfixAt0 = cbind(X_testfixAt0, X_test_gtfixAt0)
+
 
     reserve$gtAt1_pred_gbm = predict(gt_gbm, xgb.DMatrix(as.matrix(X_testfixAt1)))
     reserve$gtAt0_pred_gbm = predict(gt_gbm, xgb.DMatrix(as.matrix(X_testfixAt0)))
