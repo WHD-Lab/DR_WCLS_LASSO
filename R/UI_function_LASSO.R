@@ -8,6 +8,8 @@
 #' @param time the name of column where time in study are stored
 #' @param Ht a vector that contains column names of control variables
 #' @param St a vector that contains column names of moderator variables; St should be a subset of Ht
+#' @param At column names of treatment (At)
+#' @param prob column names of \eqn{p_t(A_t = 1|H_t)}, the experiment design treatment probability
 #' @param outcome column names of outcome variable
 #' @param method_pesu the machines learning method used when generate estimates of the nuisance parameters,
 #' and those values will be used to calculate the pseudo outcome. The available machine learning algorithms include
@@ -21,6 +23,12 @@
 #' @param beta the true coefficient value (if simulation is conducted)
 #' @param level the CI significant level
 #' @param core_num the number of cores will be used for parallel calculation
+#' @param CI_algorithm when calculate CI can choice using for loop, built-in parallel function, and doParallel function; "lapply", "parallel", "doParallel"
+#' @param max_iterate: the max iteration number when searching CI
+#' @param max_tol the max error tolerance when calculate pivot value. The default value is \eqn{10^{-3}} i.e. the target pivot value is 5% for lower bound when calculating
+#' 90% confidence interval, and the provided results is within 4.999% to 5.001%.
+#' @param varSelect_program the user can decide using which program to do variable selection. If it is "Python", a valid virtual environment path must be provided, i.e.
+#' virtualenv_path can't be NULL. If it is "R", no virtual environment path is required.
 #'
 #' @return A table with the selected variables is returned. The returned table contains GEE estimate,
 #' the post selection true value (if simulation is conducted; Otherwise, NA is provided.)
@@ -30,10 +38,11 @@
 #' @examples
 #'
 #' UI_return = DR_WCLS_LASSO(data = data, fold = 5, ID = "id", time = "decision_point",
-#' Ht = Ht, St = St, At = "action", outcome = "outcome", method_pesu = "CVLASSO",
+#' Ht = Ht, St = St, At = "action", prob = "prob", outcome = "outcome", method_pesu = "CVLASSO",
 #' lam = NULL, noise_scale = NULL, splitrat = 0.8,
 #' virtualenv_path = "path to selective-inference folder/env3",
-#' beta =  c(-0.2, 0.8, 0.3, 0.7, 0.3, rep(0, 21)), level = 0.9, core_num = 3)
+#' beta =  c(-0.2, 0.8, 0.3, 0.7, 0.3, rep(0, 21)), level = 0.9, core_num = 3,
+#' CI_algorithm = "parallel", varSelect_program = "R")
 #'
 #' @import parallel
 #' @import doParallel
@@ -44,7 +53,8 @@
 
 DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method_pesu,
                                  lam = NULL, noise_scale = NULL, splitrat = 0.8, virtualenv_path,
-                                 beta = NULL, level = 0.9, core_num = NULL, CI_algorithm = "lapply"){
+                                 beta = NULL, level = 0.9, core_num = NULL, CI_algorithm = "lapply",
+                         max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "Python"){
   # data: raw data without pesudo-outcome, ptSt.
   # fold: # of folds hope to split when generating pesudo outcome
   # ID: the name of column where participants' ID are stored
@@ -65,6 +75,10 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
   # level: the CI significant level
   # core_num: the number of cores will be used for parallel calculation
   # CI_algorithm: when calculate CI can choice using for loop, built-in parallel function, and doParallel function; "lapply", "parallel", "doParallel"
+  # max_iterate: the max iteration number when searching CI
+  # max_tol: the max error tolerance when calculate pivot value
+  # varSelect_program: the user can decide using which program to do variable selection. If it is "Python", a valid virtual environment path must be provided, i.e.
+  # virtualenv_path can't be NULL. If it is "R", no virtual environment path is required.
 
   require(devtools)
   if(method_pesu == "CVLASSO") {
@@ -82,20 +96,35 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
   my_formula = as.formula(paste("yDR ~ ", paste(St, collapse = " + ")))
 
   if(is.null(lam) & is.null(noise_scale)) {
-    select = variable_selection_PY_penal_int(ps, ID, my_formula, splitrat=splitrat, virtualenv_path= virtualenv_path, beta = beta)
+    if(varSelect_program == "Python") {select = variable_selection_PY_penal_int(ps, ID, my_formula, splitrat=splitrat, virtualenv_path= virtualenv_path, beta = beta)}
+
+    if(varSelect_program == "R") {select = FISTA_backtracking(ps, ID, my_formula, splitrat=splitrat, beta = beta)}
   }
 
   if(!is.null(lam) & is.null(noise_scale)) {
-    select = variable_selection_PY_penal_int(ps, ID, my_formula, lam = lam, splitrat = splitrat, virtualenv_path= virtualenv_path, beta = beta)
+    if(varSelect_program == "Python") {select = variable_selection_PY_penal_int(ps, ID, my_formula, lam = lam, splitrat = splitrat,
+                                                                                virtualenv_path= virtualenv_path, beta = beta)}
+
+    if(varSelect_program == "R") {select = FISTA_backtracking(ps, ID, my_formula, lam = lam, splitrat = splitrat, beta = beta)}
+
   }
 
   if(is.null(lam) & !is.null(noise_scale)) {
-    select = variable_selection_PY_penal_int(ps, ID, my_formula, noise_scale = noise_scale, splitrat = splitrat, virtualenv_path= virtualenv_path, beta = beta)
+    if(varSelect_program == "Python") {select = variable_selection_PY_penal_int(ps, ID, my_formula, noise_scale = noise_scale, splitrat = splitrat,
+                                                                                virtualenv_path= virtualenv_path, beta = beta)}
+    if(varSelect_program == "R") {
+      select = FISTA_backtracking(ps, ID, my_formula, noise_scale = noise_scale, splitrat = splitrat, beta = beta)
+    }
+
   }
 
   if(!is.null(lam) & !is.null(noise_scale)) {
-    select = variable_selection_PY_penal_int(ps, ID, my_formula, lam = lam, noise_scale = noise_scale,
-                                             splitrat = splitrat, virtualenv_path= virtualenv_path, beta = beta)
+    if(varSelect_program == "Python") {select = variable_selection_PY_penal_int(ps, ID, my_formula, lam = lam, noise_scale = noise_scale,
+                                             splitrat = splitrat, virtualenv_path= virtualenv_path, beta = beta)}
+
+    if(varSelect_program == "R") {select = FISTA_backtracking(ps, ID, my_formula, lam = lam, noise_scale = noise_scale,
+                                                              splitrat = splitrat, beta = beta)}
+
   }
 
   # print selection
@@ -164,7 +193,7 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
     as.data.frame(as.list(x), stringsAsFactors = FALSE)
   }))
 
-  num_cols <- setdiff(names(final_results), "E")
+  num_cols <- setdiff(names(final_results), c("E", "message_low", "message_up"))
   final_results[num_cols] <- lapply(final_results[num_cols], as.numeric)
 
   # now makes the returned outcomes look like a table
@@ -176,7 +205,9 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
     lowCI = numeric(),
     upperCI = numeric(),
     prop_low = numeric(),
-    prop_up = numeric()
+    prop_up = numeric(),
+    message_low = character(),
+    message_up = character()
   )
 
   for(i in 1:length(results)) {final_results[i,] = unlist(results[[i]])}

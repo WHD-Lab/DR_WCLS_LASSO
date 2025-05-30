@@ -22,7 +22,14 @@ DR_WCLS_LASSO(
   beta = NULL,
   level = 0.9,
   core_num = NULL,
-  CI_algorithm = "lapply"
+  CI_algorithm = "lapply",
+  max_iterate = 10^{
+     6
+ },
+  max_tol = 10^{
+     -3
+ },
+  varSelect_program = "Python"
 )
 }
 \arguments{
@@ -37,6 +44,10 @@ DR_WCLS_LASSO(
 \item{Ht}{a vector that contains column names of control variables}
 
 \item{St}{a vector that contains column names of moderator variables; St should be a subset of Ht}
+
+\item{At}{column names of treatment (At)}
+
+\item{prob}{column names of \eqn{p_t(A_t = 1|H_t)}, the experiment design treatment probability}
 
 \item{outcome}{column names of outcome variable}
 
@@ -59,6 +70,16 @@ This value will be used only when user doesn't provide the noise_scale.}
 \item{level}{the CI significant level}
 
 \item{core_num}{the number of cores will be used for parallel calculation}
+
+\item{CI_algorithm}{when calculate CI can choice using for loop, built-in parallel function, and doParallel function; "lapply", "parallel", "doParallel"}
+
+\item{max_tol}{the max error tolerance when calculate pivot value. The default value is \eqn{10^{-3}} i.e. the target pivot value is 5% for lower bound when calculating
+90% confidence interval, and the provided results is within 4.999% to 5.001%.}
+
+\item{varSelect_program}{the user can decide using which program to do variable selection. If it is "Python", a valid virtual environment path must be provided, i.e.
+virtualenv_path can't be NULL. If it is "R", no virtual environment path is required.}
+
+\item{max_iterate:}{the max iteration number when searching CI}
 }
 \value{
 A table with the selected variables is returned. The returned table contains GEE estimate,
@@ -73,9 +94,10 @@ A function for basic LASSO DR-WCLS
 \examples{
 
 UI_return = DR_WCLS_LASSO(data = data, fold = 5, ID = "id", time = "decision_point",
-Ht = Ht, St = St, At = "action", outcome = "outcome", method_pesu = "CVLASSO",
+Ht = Ht, St = St, At = "action", prob = "prob", outcome = "outcome", method_pesu = "CVLASSO",
 lam = NULL, noise_scale = NULL, splitrat = 0.8,
 virtualenv_path = "path to selective-inference folder/env3",
-beta =  c(-0.2, 0.8, 0.3, 0.7, 0.3, rep(0, 21)), level = 0.9, core_num = 3)
+beta =  c(-0.2, 0.8, 0.3, 0.7, 0.3, rep(0, 21)), level = 0.9, core_num = 3,
+CI_algorithm = "parallel", varSelect_program = "R")
 
 }
