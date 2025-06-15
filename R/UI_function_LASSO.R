@@ -48,6 +48,7 @@
 #' @import doParallel
 #' @import foreach
 #' @import devtools
+#' @import zoo
 #'
 #' @export
 
@@ -206,8 +207,8 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
     upperCI = numeric(),
     prop_low = numeric(),
     prop_up = numeric(),
-    message_low = character(),
-    message_up = character()
+    message_low_CI = character(),
+    message_up_CI = character()
   )
 
   for(i in 1:length(results)) {final_results[i,] = unlist(results[[i]])}

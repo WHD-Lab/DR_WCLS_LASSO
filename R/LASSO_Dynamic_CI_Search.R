@@ -165,7 +165,7 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
   }
 
   # function that search betaE,j value using half split
-  betaEj_search = function(range, max_tol, max_iterate) {
+  betaEj_search = function(range0, max_tol, max_iterate) {
     # check the pivot value under the GEE point estimate
     prop_initial = pivot_prop_value(betaEjhat)
 
@@ -175,13 +175,72 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
                   up_bound = NA,
                   prop_up = NA,
                   prop_low = NA,
-                  message_low = NA,
-                  message_up = NA))
+                  message_low_CI = NA,
+                  message_up_CI = NA))
     }
+
+    require(zoo)
+
+    # check whether the trend is increasing first then decreasing
+    # or monotone decreasing
+    check_trend_downward <- function(x, k = 1) {
+      if (length(x) < k + 2) return(FALSE)
+
+      # Smooth with moving average
+      smoothed <- rollmean(x, k = k, fill = NA)
+      smoothed <- na.omit(smoothed)
+
+      if (length(smoothed) < 3) return(FALSE)
+
+      # Check monotone decreasing
+      if (all(diff(smoothed) <= 0)) return(TRUE)
+
+      # Check increasing then decreasing
+      peak_idx <- which.max(smoothed)
+      if (peak_idx == 1 || peak_idx == length(smoothed)) return(FALSE)
+
+      left <- smoothed[1:peak_idx]
+      right <- smoothed[peak_idx:length(smoothed)]
+
+      increasing_before <- mean(diff(left)) > 0
+      decreasing_after <- mean(diff(right)) < 0
+
+      return(increasing_before && decreasing_after)
+    }
+
+    # check whether the trend is decreasing then increasing or monotone increasing
+    check_trend_upward <- function(x, k = 1) {
+      if (length(x) < k + 2) return(FALSE)
+
+      # Smooth with moving average
+      smoothed <- rollmean(x, k = k, fill = NA)
+      smoothed <- na.omit(smoothed)
+
+      if (length(smoothed) < 3) return(FALSE)
+
+      # Check monotone increasing
+      if (all(diff(smoothed) >= 0)) return(TRUE)
+
+      # Check decreasing then increasing
+      valley_idx <- which.min(smoothed)
+      if (valley_idx == 1 || valley_idx == length(smoothed)) return(FALSE)
+
+      left <- smoothed[1:valley_idx]
+      right <- smoothed[valley_idx:length(smoothed)]
+
+      decreasing_before <- mean(diff(left)) < 0
+      increasing_after <- mean(diff(right)) > 0
+
+      return(decreasing_before && increasing_after)
+    }
+
+    var = E[which(ej != 0)]
+
 
     #######################
     # find the lower bound#
     #######################
+    range = range0
 
     if(prop_initial > upp & prop_initial < 1) {
       bottom = betaEjhat
@@ -194,30 +253,93 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
         top = betaEjhat + range
         top_prop = pivot_prop_value(top)
       }
+
+      #print(list(var = var, top = top, top_prop = top_prop, "the upper range is updating; Lower CI"))
+
     } else {
       bottom = betaEjhat - range
       top = betaEjhat
-
-      # check the pivot value under bottom
       bottom_prop = pivot_prop_value(bottom)
-      while(bottom_prop < upp & !is.na(bottom_prop)) {
-        range = range*1.25
-        bottom = betaEjhat - range
-        bottom_prop = pivot_prop_value(bottom)
+
+      # store bottom and its prop value for tend analysis
+      bottom_value = c()
+      bottom_prop_value = c()
+
+      while(bottom_prop < upp & !is.na(bottom_prop) & bottom_prop != 0) {
+          range = range*1.25
+          bottom = betaEjhat - range
+          bottom_prop = pivot_prop_value(bottom)
+
+          bottom_value = c(bottom_value, bottom)
+          bottom_prop_value = c(bottom_prop_value, bottom_prop)
+
+          #print(list(var = var, bottom = bottom, bottom_prop = bottom_prop, "the lower range is updating; Lower CI"))
+        }
+
+      trends = check_trend_downward(bottom_prop_value)
+
+      if(trends == T) {
+        bottom = bottom_value[which.max(bottom_prop_value)]
+        bottom_prop = bottom_prop_value[which.max((bottom_prop_value))]
+        range = betaEjhat - bottom
       }
 
-      while(bottom_prop > upp + 0.05 | is.na(bottom_prop)) {
-        range = range/1.15
-        bottom = betaEjhat - range
-        bottom_prop = pivot_prop_value(bottom)
+      #print(list(var = var, betaEjhat = betaEjhat, bottom = bottom, bottom_prop = bottom_prop, top = top, "first adjustment for bottom; Lower CI"))
+
+      if(trends == T & bottom_prop < (upp - (1 - upp)/2)) {
+        # store bottom and its prop value for tend analysis
+        bottom_value = c()
+        bottom_prop_value = c()
+        j = 0
+
+        while(bottom_prop < (2*upp - 1) & j < 20) {
+          range = range/1.15
+          bottom = betaEjhat - range
+          bottom_prop = pivot_prop_value(bottom)
+
+          bottom_value = c(bottom_value, bottom)
+          bottom_prop_value = c(bottom_prop_value, bottom_prop)
+
+          #print(list(var = var, bottom = bottom, bottom_prop = bottom_prop, "the lower range is updating; Lower CI"))
+
+          j = j+ 1
+        }
+
+        # might see increasing then decreasing trend or monotone decreasing trend
+        # because we come back to reasonable range
+        # when get close to betaEj_hat the pivot value will decrease
+        trends = check_trend_downward(bottom_prop_value)
+
+        if(trends == T) {
+          bottom = bottom_value[which.max(bottom_prop_value)]
+          bottom_prop = bottom_prop_value[which.max((bottom_prop_value))]
+        }
+
+      } else {
+        while(bottom_prop > (upp + (1 - upp)/2) | is.na(bottom_prop) | bottom_prop == 0) {
+          range = range/1.15
+          bottom = betaEjhat - range
+          bottom_prop = pivot_prop_value(bottom)
+
+
+          #print(list(var = var, bottom = bottom, bottom_prop = bottom_prop, "the lower range is updating; Lower CI"))
+        }
       }
+
+
+
+
+      #print(list(var = var, betaEjhat = betaEjhat, bottom = bottom, bottom_prop = bottom_prop, top = top, "second adjustment for bottom; Lower CI"))
+
     }
+
 
     i = 0
     prop = 0
+    message_low_CI = NULL
     while((abs(upp - prop) > max_tol) & (i < max_iterate)) {
       if (abs(top - bottom) < 1e-4) {
-        message_lower = "stops lower bound calculation due to the little change for each loop"
+        message_low_CI = "stops lower bound calculation due to the little change for each loop"
         break
       }
 
@@ -240,13 +362,18 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
     # the lower bound value
     low_bound = cal
     prop_up = prop
-    if(i == max_iterate) {message_low = "stops due to iteration limitation"} else {message_low = "Normal"}
+    if(i == max_iterate) {message_low_CI = "stops due to iteration limitation"
+    } else if(!is.null(message_low_CI)) {message_low_CI = message_low_CI
+    } else {message_low_CI = "Normal"}
+
+
 
     #######################
     # find the upper bound#
     #######################
     ## reset top and bottom
     prop = 0
+    range = range0
     if(prop_initial < lowp) {
       bottom = betaEjhat - range
       top = betaEjhat
@@ -257,6 +384,9 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
         range = range*1.25
         bottom = betaEjhat - range
         bottom_prop = pivot_prop_value(bottom)
+
+        print(list(var = var, bottom = bottom, bottom_prop = bottom_prop, "the lower range is updating; Upper CI"))
+
       }
 
 
@@ -266,23 +396,85 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
 
       # check the pivot value under top
       top_prop = pivot_prop_value(top)
+
+      # store bottom and its prop value for tend analysis
+      top_value = c()
+      top_prop_value = c()
+
       while(top_prop > lowp & top_prop < 1 & !is.na(top_prop)) {
         range = range * 1.25
         top = betaEjhat + range
         top_prop = pivot_prop_value(top)
+
+        top_value = c(top_value, top)
+        top_prop_value = c(top_prop_value, top_prop)
+
+        print(list(var = var, top = top, top_prop = top_prop, "the top range is updating; Upper CI"))
+
       }
-      while(is.na(top_prop) | top_prop < lowp - 0.05) {
-        range = range/1.15
-        top = betaEjhat + range
-        top_prop = pivot_prop_value(top)
+
+
+      trends = check_trend_upward(top_prop_value)
+      #print(list(top_prop_value = top_prop_value, trends = trends))
+
+      if(trends == T) {
+        top = top_value[which.min(top_prop_value)]
+        top_prop = top_prop_value[which.min(top_prop_value)]
+        range = top - betaEjhat
       }
+
+      print(list(var = var, betaEjhat = betaEjhat, bottom = bottom, top = top, top_prop = top_prop, "first adjustment for top; Upper CI"))
+
+      if(trends == T & top_prop > 1.5*lowp) {
+        # store bottom and its prop value for tend analysis
+        top_value = c()
+        top_prop_value = c()
+        j = 0
+
+        while(top_prop > 1.5*lowp & j < 20) {
+          range = range/1.15
+          top = betaEjhat + range
+          top_prop = pivot_prop_value(top)
+
+          top_value = c(top_value, top)
+          top_prop_value = c(top_prop_value, top_prop)
+
+          print(list(var = var, top = top, top_prop = top_prop, "the top range is updating; Upper CI"))
+
+          j = j+ 1
+        }
+        # might see decreasing then increasing trend or monotone increasing trend
+        # because we come back to reasonable range
+        # when get close to betaEj_hat the pivot value will increase
+        trends = check_trend_upward(top_prop_value)
+
+        if(trends == T) {
+          top = top_value[which.min(top_prop_value)]
+          top_prop = top_prop_value[which.min(top_prop_value)]
+        }
+
+      } else {
+        while(is.na(top_prop) | top_prop < lowp/2 | top_prop == 1) {
+          range = range/1.15
+          top = betaEjhat + range
+          top_prop = pivot_prop_value(top)
+
+          print(list(var = var, top = top, top_prop = top_prop, "the top range is updating; Upper CI"))
+        }
+      }
+
+
+
+      print(list(var = var, betaEjhat = betaEjhat, bottom = bottom, top = top, top_prop = top_prop, "second adjustment for top; Upper CI"))
+
 
     }
 
     i = 0
+    message_up_CI = NULL
     while((abs(lowp - prop) > max_tol) & (i < max_iterate)) {
       if (abs(top - bottom) < 1e-4) {
-        message_up = "stops upper bound calculation due to the little change for each loop"
+        message_up_CI = "stops upper bound calculation due to the little change for each loop"
         break
         }
 
@@ -304,18 +496,20 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
     # the upper bound value
     up_bound = cal
     prop_low = prop
-    if(i == max_iterate) {message_up = "stops due to iteration limitation"} else {message_up = "Normal"}
+    if(i == max_iterate) {message_up_CI = "stops due to iteration limitation"
+    } else if (!is.null(message_up_CI)) {message_up_CI = message_up_CI
+    } else {message_up_CI = "Normal"}
 
 
     return(list(low_bound = low_bound,
                 up_bound = up_bound,
                 prop_up = prop_up,
                 prop_low = prop_low,
-                message_low = message_low,
-                message_up = message_up))
+                message_low_CI = message_low_CI,
+                message_up_CI = message_up_CI))
   }
 
-  CI = betaEj_search(sqrt(sigmasq1/n)*5, max_tol, max_iterate)
+  CI = betaEj_search(sqrt(sigmasq1/n), max_tol, max_iterate)
   # CI = betaEj_search(sqrt(sigmasq1/n)*5, 10^{-2}, 10^{2})
   low = CI$low_bound
   up = CI$up_bound
@@ -335,8 +529,8 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
               upperCI = up,
               prop_low = CI$prop_low,
               prop_up = CI$prop_up,
-              message_low = CI$message_low,
-              message_up = CI$message_up
+              message_low_CI = CI$message_low_CI,
+              message_up_CI = CI$message_up_CI
   ))
 
   # Output:
