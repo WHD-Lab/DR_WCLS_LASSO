@@ -72,7 +72,6 @@ joint_dist_Penal_Int_shared = function(E, NE, pes_outcome, data, id, time) {
   # wt: ptSt * (1 - ptSt).
   # betaEM: fitted model for selected predictors.
   # S: ftStNE %*% residuals * wt / sqrt(n).
-  # ej: The j-th standard basis vector, used to extract a specific coefficient estimate from betaE.
   # H: HEE, HNEE, HENE.
   # K: KEE, KNEE, KNENE.
   # Sigma: sigmaTT, sigmaST, sigmaSS.

@@ -152,7 +152,7 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
     #                        mu_final = mu_final, sigmasq_final, eta,p1,p4,Pleft,Var_etabeta,HE,
     #                        lower, upper)
 
-    denominator_p2 = integral(my_function, bounds = list(b = c(betaEjhat, min(mu_final,betaEjhat) + 15*sqrt(sigmasq_final))),
+    denominator_p2 = integral(my_function, bounds = list(b = c(betaEjhat, max(mu_final,betaEjhat) + 15*sqrt(sigmasq_final))),
                            params = list(mu_final = mu_final,  sigmasq_final = sigmasq_final, eta = eta,
                                          p1 = p1, p4 = p4, Pleft = Pleft, Var_etabeta = Var_etabeta, HE = HE,
                                          lower = lower, upper = upper))
@@ -554,7 +554,7 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
 
 Asynorm_beta_under_hy = function(E, NE, pes_outcome, data, ej, id, time, null_value,
                                  HEE, HNEE, HENE, S) {
-  # E: vector of selected predictors (don't include intercept)
+  # E: vector of selected predictors
   # NE: vector of unselected predictors
   # pes_outcome: column name for pesudo-outcome
   # data: the output of pesudo_outcomecal function

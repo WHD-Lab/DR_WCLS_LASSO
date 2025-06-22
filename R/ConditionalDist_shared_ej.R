@@ -90,6 +90,8 @@ conditional_dist = function(PQR_shared, PQR_ej, joint_distcal_shared, joint_dist
   # mu: the mean of conditional distribution hat{beta}^{lambda}_E | (hat{beta}_Ej, hat{Gamma}EjPerp, Z_{-E}).
   # LAMBDA: the variance of conditional distribution hat{beta}^{lambda}_E | (hat{beta}_Ej, hat{Gamma}EjPerp, Z_{-E}).
   # eta: the specifically designed vector that will be used to reduce integration dimension when calculate pivot
+  # Aeta: perpendicular to betaEj_lambda
+  # Qn: value used to obtain support
   # se: Signs of the estimated coefficients for selected variables.
   # n: # of unique subjects in the dataset.
 }
