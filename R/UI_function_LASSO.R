@@ -130,19 +130,37 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
 
   # print selection
   print(paste("select predictors:", select$E))
+  print(length(setdiff(select$E[select$E != "(Intercept)"], St)) == 0)
+  print(setdiff(select$E[select$E != "(Intercept)"], St))
 
-  AsyNormbeta_shared = joint_dist_Penal_Int_shared(E = select$E, NE = select$NE, pes_outcome = "yDR", data = ps, id = ID, time = time)
-  PQR_shared = PQR_Pint_shared(AsyNormbeta_shared, select)
+  if(length(setdiff(select$E[select$E != "(Intercept)"], St)) == 0) {
+    AsyNormbeta_shared = joint_dist_selectAll(E = select$E, pes_outcome = "yDR", data = ps, id = ID, time = time)
+    PQR_shared = PQR_shared_selectALL(AsyNormbeta_shared, select)
 
-  CI_per_select_var = function(ej) {
-    AsyNormbeta_ej = joint_dist_Penal_Int_ej(AsyNormbeta_shared, ej)
-    PQR_ej = PQR_Pint_ej(PQR_shared, AsyNormbeta_ej, AsyNormbeta_shared)
-    condition = conditional_dist(PQR_shared, PQR_ej, AsyNormbeta_shared, AsyNormbeta_ej, select)
-    CI = pivot_split_update(PQR_shared, PQR_ej, condition, AsyNormbeta_shared, AsyNormbeta_ej, select, level = level, pes_outcome = "yDR", data = ps,
-                       id = ID, time = time)
+    CI_per_select_var = function(ej) {
+      AsyNormbeta_ej = joint_dist_Penal_Int_ej(AsyNormbeta_shared, ej)
+      PQR_ej = PQR_ej_selectALL(PQR_shared, AsyNormbeta_ej, AsyNormbeta_shared)
+      condition = conditional_dist_selectALL(PQR_shared, PQR_ej, AsyNormbeta_shared, AsyNormbeta_ej, select)
+      CI = pivot_split_update_sellectALL(PQR_shared, PQR_ej, condition, AsyNormbeta_shared, AsyNormbeta_ej, select, level = level, pes_outcome = "yDR", data = ps,
+                              id = ID, time = time)
 
-    return(CI)
+      return(CI)
+    }
+  } else {
+    AsyNormbeta_shared = joint_dist_Penal_Int_shared(E = select$E, NE = select$NE, pes_outcome = "yDR", data = ps, id = ID, time = time)
+    PQR_shared = PQR_Pint_shared(AsyNormbeta_shared, select)
+
+    CI_per_select_var = function(ej) {
+      AsyNormbeta_ej = joint_dist_Penal_Int_ej(AsyNormbeta_shared, ej)
+      PQR_ej = PQR_Pint_ej(PQR_shared, AsyNormbeta_ej, AsyNormbeta_shared)
+      condition = conditional_dist(PQR_shared, PQR_ej, AsyNormbeta_shared, AsyNormbeta_ej, select)
+      CI = pivot_split_update(PQR_shared, PQR_ej, condition, AsyNormbeta_shared, AsyNormbeta_ej, select, level = level, pes_outcome = "yDR", data = ps,
+                              id = ID, time = time)
+
+      return(CI)
+    }
   }
+
 
   #the list that stores the ej vectors for selected variables
   ejs = list()
