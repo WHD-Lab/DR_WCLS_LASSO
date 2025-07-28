@@ -130,10 +130,10 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
 
   # print selection
   print(paste("select predictors:", select$E))
-  print(length(setdiff(select$E[select$E != "(Intercept)"], St)) == 0)
-  print(setdiff(select$E[select$E != "(Intercept)"], St))
+  print(length(setdiff(St, select$E[select$E != "(Intercept)"])) == 0)
+  print(setdiff(St, select$E[select$E != "(Intercept)"]))
 
-  if(length(setdiff(select$E[select$E != "(Intercept)"], St)) == 0) {
+  if(length(setdiff(St, select$E[select$E != "(Intercept)"])) == 0) {
     AsyNormbeta_shared = joint_dist_selectAll(E = select$E, pes_outcome = "yDR", data = ps, id = ID, time = time)
     PQR_shared = PQR_shared_selectALL(AsyNormbeta_shared, select)
 
