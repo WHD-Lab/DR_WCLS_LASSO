@@ -252,9 +252,11 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
         range = range*1.25
         top = betaEjhat + range
         top_prop = pivot_prop_value(top)
+
+        #print(list(var = var, top = top, top_prop = top_prop, "the upper range is updating; Lower CI"))
+
       }
 
-      #print(list(var = var, top = top, top_prop = top_prop, "the upper range is updating; Lower CI"))
 
     } else {
       bottom = betaEjhat - range
@@ -288,8 +290,8 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
 
       if(trends == T & bottom_prop < (upp - (1 - upp)/2)) {
         # store bottom and its prop value for tend analysis
-        bottom_value = c()
-        bottom_prop_value = c()
+        bottom_value = c(bottom)
+        bottom_prop_value = c(bottom_prop)
         j = 0
 
         while(bottom_prop < (2*upp - 1) & j < 20) {
@@ -427,8 +429,8 @@ pivot_split_update = function(PQR_shared, PQR_ej, cond_dist, joint_distcal_share
 
       if(trends == T & top_prop > 1.5*lowp) {
         # store bottom and its prop value for tend analysis
-        top_value = c()
-        top_prop_value = c()
+        top_value = c(top)
+        top_prop_value = c(top_prop)
         j = 0
 
         while(top_prop > 1.5*lowp & j < 20) {
