@@ -16,6 +16,7 @@ conditional_dist = function(PQR_shared, PQR_ej, joint_distcal_shared, joint_dist
   R = PQR_shared[["R"]]
   GammaEjPerp = PQR_ej[["GammaEjPerp"]]
   betaEj = joint_distcal_ej[["betaEj_cal"]][["betaEj"]]
+  sigmasq1 = joint_distcal_ej[["betaEj_cal"]][["sigmasq1"]]
   HEE = joint_distcal_shared[["H"]][["HEE"]]
   HNEE = joint_distcal_shared[["H"]][["HNEE"]]
   lam = select_E[["lam"]] # need to change it when get randomized lasso down
@@ -24,6 +25,9 @@ conditional_dist = function(PQR_shared, PQR_ej, joint_distcal_shared, joint_dist
   p4 = PQR_ej[["p4"]]
   ZNE = matrix(select_E[["Z"]], ncol = 1)
   hat_betaE_lambda = select_E[["soln"]]
+  se = select_E[["sign_soln"]]
+
+  NEnum = pnum - Enum
 
   # create omega
   if(length(OMEGA) == 1) {
@@ -57,13 +61,24 @@ conditional_dist = function(PQR_shared, PQR_ej, joint_distcal_shared, joint_dist
   Qn = LAMBDA %*% eta/ c(t(eta) %*% LAMBDA %*% eta)
 
   hat_betaE_lambda = hat_betaE_lambda[which(hat_betaE_lambda != 0)]
-  # if(length(hat_betaE_lambda) < Enum) {hat_betaE_lambda = matrix(c(0.001,hat_betaE_lambda), ncol = 1)}
-  # WARNING: hat{beta}^lambda_E doesn't provide estimate for intercept. Here I use 0.001 for default
-  # try to use fitted intercept from gee
-  # if(length(hat_betaE_lambda) < Enum) {hat_betaE_lambda = matrix(c(joint_distcal[["betaEM"]][["coefficients"]][["(Intercept)"]]
-  #                                                                 ,hat_betaE_lambda), ncol = 1)}
 
   Aeta = hat_betaE_lambda - LAMBDA %*% eta %*% t(eta) %*% hat_betaE_lambda/c(t(eta) %*% LAMBDA %*% eta)
+
+  zeros = matrix(0, nrow = NEnum, ncol = Enum)
+  I = diag(rep(1, NEnum))
+  shared = cbind(zeros, I)
+  zero1p = matrix(0, nrow = 1, ncol = pnum)
+  Ip = diag(rep(1, pnum))
+  A = -shared %*% solve(t(Q) %*% solve(omega) %*% Q) %*% t(Q) %*% solve(omega) %*% P %*% matrix(c(1,rep(0,pnum)), ncol = 1)
+  C = -shared %*% solve(t(Q) %*% solve(omega) %*% Q) %*% t(Q) %*% solve(omega) %*% (R + P %*% rbind(zero1p, Ip) %*% GammaEjPerp)
+
+  mu_final = (n*betaEj + c(sigmasq1) * (t(ZNE - C) %*% solve(theta22) %*% A))/(n + c(sigmasq1) * (t(A) %*% solve(theta22) %*% A))
+  sigmasq_final = sigmasq1 / (n + c(sigmasq1) * (t(A) %*% solve(theta22) %*% A))
+
+  # calculate bounds for truncated normal distribution
+  bounds = support(se, eta, LAMBDA, Aeta, Qn)
+  etamu = t(eta) %*% mu
+  etaLAMBDA = t(eta) %*% LAMBDA %*% eta
 
   return(list(omega = omega,
               delta = delta,
@@ -78,7 +93,15 @@ conditional_dist = function(PQR_shared, PQR_ej, joint_distcal_shared, joint_dist
               Aeta = Aeta,
               Qn = Qn,
               se = PQR_shared[["se"]],
-              n = n,hat_betaE_lambda = hat_betaE_lambda))
+              n = n,hat_betaE_lambda = hat_betaE_lambda,
+              pivot_related = list(mu_final = mu_final,
+                                   sigmasq_final = sigmasq_final,
+                                   bounds = bounds,
+                                   etamu = etamu,
+                                   etaLAMBDA = etaLAMBDA,
+                                   zetaj = sigmasq_final*(t(ZNE - C) %*% solve(theta22) %*% A),
+                                   lambdaj = n * sigmasq_final/sigmasq1)
+              ))
   # Output:
   # omega: Matrix version of OMEGA. It the variance of added random noised.
   # delta: the mean of conditional distribution (hat{beta}^{lambda}_E, Z_{-E}) | (hat{beta}_Ej, hat{Gamma}EjPerp).
@@ -94,4 +117,34 @@ conditional_dist = function(PQR_shared, PQR_ej, joint_distcal_shared, joint_dist
   # Qn: value used to obtain support
   # se: Signs of the estimated coefficients for selected variables.
   # n: # of unique subjects in the dataset.
+}
+
+
+# below function calculate support for truncated normal distribution
+support = function(se, eta, LAMBDA, Aeta, Qn) {
+
+  diagSe = diag(se)
+
+  lowerbond = -Inf
+  upperbond = Inf
+
+  for(i in 1:length(se)) {
+    # warning: I manually set i starts from 2 to skip intercept
+    # Because we lack se and point estimate for intercept from randomized lasso
+    # to avoid manipulated value impact later result I skip it
+
+    frac = (t(diagSe[,i]) %*% Aeta)/(-t(diagSe[,i]) %*% Qn)
+
+    if(t(diagSe[,i]) %*% LAMBDA %*% eta > 0) {
+      lowerbond = max(frac, lowerbond)
+    }
+
+    if(t(diagSe[,i]) %*% LAMBDA %*% eta < 0) {
+      upperbond = min(frac, upperbond)
+    }
+  }
+  # what if exactly equal to 0
+
+  return(list(upperbond = upperbond,
+              lowerbond = lowerbond))
 }

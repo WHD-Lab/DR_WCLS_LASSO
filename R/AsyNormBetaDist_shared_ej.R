@@ -1,4 +1,4 @@
-joint_dist_Penal_Int_shared = function(E, NE, pes_outcome, data, id, time) {
+joint_dist_Penal_Int_shared = function(E, NE, pes_outcome, data, id, time, moderator_formula) {
   # E: vector of selected predictors (don't include intercept)
   # NE: vector of unselected predictors
   # pes_outcome: column name for pesudo-outcome
@@ -7,8 +7,12 @@ joint_dist_Penal_Int_shared = function(E, NE, pes_outcome, data, id, time) {
   # time: column name, a vector that records the decision points for each individual
 
   require(dplyr)
-  if("(Intercept)" %in% E) {ftStE = t(cbind(1,as.matrix(data[,E[E!="(Intercept)"]])))} else {ftStE = t(as.matrix(data[,E]))}
-  if("(Intercept)" %in% NE) {ftStNE = t(cbind(1,as.matrix(data[,NE[NE!="(Intercept)"]])))} else {ftStNE = t(as.matrix(data[,NE]))}
+  X = data.matrix(modelr::model_matrix(data, moderator_formula))
+  if("(Intercept)" %in% E) {ftStE = t(cbind(1,as.matrix(X[,E[E!="(Intercept)"]])))} else {ftStE = t(as.matrix(X[,E]))}
+  if("(Intercept)" %in% NE) {ftStNE = t(cbind(1,as.matrix(X[,NE[NE!="(Intercept)"]])))} else {ftStNE = t(as.matrix(X[,NE]))}
+  ystring <- toString(moderator_formula[[2]])
+  val_names <- all.vars(moderator_formula)
+  y <- data.matrix(dplyr::select(stats::na.omit(data[,val_names]),tidyselect::all_of(ystring)))
 
   id = data[,id]
   n = n_distinct(id)
@@ -26,7 +30,7 @@ joint_dist_Penal_Int_shared = function(E, NE, pes_outcome, data, id, time) {
     formula = as.formula(paste(pes_outcome, "~-1+", paste(E, collapse = "+")))
   }
 
-  betaEM = geepack::geeglm(formula, data = data, weights = wt/sqrt(n), corstr = "independence", id = idf,
+  betaEM = geepack::geeglm(formula, data = as.data.frame(cbind(y,X)), weights = wt/sqrt(n), corstr = "independence", id = idf,
                            waves = time)
 
   # S
