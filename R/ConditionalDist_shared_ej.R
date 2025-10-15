@@ -47,11 +47,13 @@ conditional_dist = function(PQR_shared, PQR_ej, joint_distcal_shared, joint_dist
   # conditional distribution of hat{beta}^{lambda}_E
   HE = rbind(HEE, HNEE)
   Zero = matrix(0,nrow = Enum, ncol = pnum - Enum)
+
   if(pnum - Enum > 1) {
     lammatrix = diag(rep(lam, pnum - Enum))
   } else {
     lammatrix = lam
   }
+
   mu = solve(t(HE) %*% solve(omega) %*% HE) %*% (t(HE) %*% solve(omega)) %*%
     (P %*% rbind(betaEj, GammaEjPerp) + rbind(Zero, lammatrix) %*% ZNE + R) /c(sqrt(n))
   LAMBDA = solve(c(n)*t(HE) %*% solve(omega) %*% HE)

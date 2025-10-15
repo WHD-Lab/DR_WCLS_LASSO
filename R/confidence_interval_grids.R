@@ -26,7 +26,13 @@ truncate_normal_weights = function(PQR_shared, PQR_ej, joint_distcal_shared, joi
 
   # calculate weights
   Zero = matrix(0,nrow = Enum, ncol = pnum - Enum)
-  lammatrix = diag(rep(lam, pnum - Enum))
+
+  if(pnum - Enum > 1) {
+    lammatrix = diag(rep(lam, pnum - Enum))
+  } else {
+    lammatrix = lam
+  }
+
 
   # log transformed truncated cdf value
   log_trunc_cdf = sapply(grid_values, FUN = function(betaEj) {
