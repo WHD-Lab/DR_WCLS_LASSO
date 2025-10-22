@@ -5,6 +5,9 @@ library(MRTAnalysis)
 data(data_mimicHeartSteps)
 head(data_mimicHeartSteps)
 
+library(devtools)
+load_all()
+
 ID = 'userid'
 Ht = c('logstep_30min_lag1','logstep_pre30min','is_at_home_or_work', 'day_in_study')
 St = c('logstep_30min_lag1','logstep_pre30min','is_at_home_or_work', 'day_in_study')
@@ -55,13 +58,15 @@ condition = conditional_dist(PQR_shared, PQR_ej, AsyNormbeta_shared, AsyNormbeta
 
 library(devtools)
 load_all()
+
+# this seed selection gives error when use Python to find CI
 set.seed(100)
 py_run_string("
 import random
 import numpy as np
 
-random.seed(50)
-np.random.seed(50)
+random.seed(1)
+np.random.seed(1)
 ")
 UI_return = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           fold = 5, ID = ID,
@@ -70,7 +75,8 @@ UI_return = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           prob = prob, outcome = outcome,
                           method_pesu = "CVLASSO",
                           virtualenv_path = "C:/Users/23300/selective-inference/env3",
-                          varSelect_program = "Python")
+                          varSelect_program = "Python",
+                          standardize_x = T, standardize_y = T)
 
 ########################################################
 # try other data
@@ -106,8 +112,8 @@ py_run_string("
 import random
 import numpy as np
 
-random.seed(50)
-np.random.seed(50)
+random.seed(1)
+np.random.seed(1)
 ")
 UI_return_IHS = DR_WCLS_LASSO(data = df_IHS2,
                           fold = 5, ID = ID,
@@ -135,3 +141,78 @@ AsyNormbeta_ej_IHS = joint_dist_Penal_Int_ej(AsyNormbeta_shared_IHS, ej_IHS)
 PQR_ej_IHS = PQR_Pint_ej(PQR_shared_IHS, AsyNormbeta_ej_IHS, AsyNormbeta_shared_IHS)
 condition_IHS = conditional_dist(PQR_shared_IHS, PQR_ej_IHS, AsyNormbeta_shared_IHS, AsyNormbeta_ej_IHS,
                                  select_IHS)
+####################################################
+# check standardization
+sim_data = generate_dataset(N = 1000, T = 40, P = 50, sigma_residual = 1.5, sigma_randint = 1.5, main_rand = 3, rho = 0.7,
+                                             beta_logit = c(-1, 1.6 * rep(1/50, 50)), model = ~ state1 + state2 + state3 + state4,
+                                             beta = matrix(c(-1, 1.7, 1.5, -1.3, -1),ncol = 1),
+                                             theta1 = 0.8)
+Ht = unlist(lapply(1:50, FUN = function(X) paste0("state",X)))
+St = unlist(lapply(1:25, FUN = function(X) paste0("state",X)))
+set.seed(100)
+py_run_string("
+import random
+import numpy as np
+
+random.seed(1)
+np.random.seed(1)
+")
+
+UI_return_sim_notSand = DR_WCLS_LASSO(data = sim_data,
+                          fold = 5, ID = "id",
+                          time = "decision_point",
+                          Ht = Ht, St = St, At = "action",
+                          prob = "prob", outcome = "outcome",
+                          method_pesu = "CVLASSO",
+                          virtualenv_path = "C:/Users/23300/selective-inference/env3",
+                          varSelect_program = "Python",
+                          standardize_x = F, standardize_y = F)
+
+set.seed(100)
+py_run_string("
+import random
+import numpy as np
+
+random.seed(1)
+np.random.seed(1)
+")
+UI_return_sim_Sand = DR_WCLS_LASSO(data = sim_data,
+                                      fold = 5, ID = "id",
+                                      time = "decision_point",
+                                      Ht = Ht, St = St, At = "action",
+                                      prob = "prob", outcome = "outcome",
+                                      method_pesu = "CVLASSO",
+                                      virtualenv_path = "C:/Users/23300/selective-inference/env3",
+                                      varSelect_program = "Python",
+                                      standardize_x = T, standardize_y = T,
+                                   beta = matrix(c(-1, 1.7, 1.5, -1.3, -1, rep(0, 21)),ncol = 1))
+
+
+# try IHS
+ID = 'PARTICIPANTIDENTIFIER'
+Ht = c('StepsPastDay', 'is_weekend', 'maxHRPast24Hours', 'HoursSinceLastMood')
+St = c('StepsPastDay', 'is_weekend', 'maxHRPast24Hours',  'HoursSinceLastMood')
+At = 'sent'
+outcome = 'LogStepsReward'
+prob = 'prob'
+
+
+set.seed(200)
+py_run_string("
+import random
+import numpy as np
+
+random.seed(1)
+np.random.seed(1)
+")
+UI_return_IHS = DR_WCLS_LASSO(data = df_IHS,
+                              fold = 5, ID = ID,
+                              time = "time", Ht = Ht, St = St, At = At,
+                              prob = prob, outcome = outcome,
+                              virtualenv_path = "C:/Users/23300/selective-inference/env3",
+                              method_pesu = "CVLASSO", lam = NULL,
+                              noise_scale = NULL, splitrat = 0.8,
+                              level = 0.9, core_num=3, CI_algorithm = 'lapply',
+                              max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "Python") # default is standardize
+# no error returned
+

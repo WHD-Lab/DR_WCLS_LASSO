@@ -55,7 +55,8 @@
 DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method_pesu,
                                  lam = NULL, noise_scale = NULL, splitrat = 0.8, virtualenv_path,
                                  beta = NULL, level = 0.9, core_num = NULL, CI_algorithm = "lapply",
-                         max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "Python"){
+                         max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "Python",
+                         standardize_x = TRUE, standardize_y = TRUE){
   # data: raw data without pesudo-outcome, ptSt.
   # fold: # of folds hope to split when generating pesudo outcome
   # ID: the name of column where participants' ID are stored
@@ -80,6 +81,19 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
   # max_tol: the max error tolerance when calculate pivot value
   # varSelect_program: the user can decide using which program to do variable selection. If it is "Python", a valid virtual environment path must be provided, i.e.
   # virtualenv_path can't be NULL. If it is "R", no virtual environment path is required.
+  # standardize_x: Logical flag for x variable standardization, prior to the model selection.
+  #               Don't expect intercept is provided. The final CI will convert back to original scale
+  # standardize_y: Logical flag for x variable standardization, prior to the model selection
+
+  if(standardize_x == TRUE) {
+    x_scale = apply(data[,Ht], 2, sd)
+    data[,Ht] = scale(data[,Ht], center = FALSE, scale = x_scale)
+  }
+
+  if(standardize_y == TRUE) {
+    y_scale = sd(data[,outcome])
+    data[,outcome] = scale(data[,outcome], center = FALSE, scale = y_scale)
+  }
 
   require(devtools)
   if(method_pesu == "CVLASSO") {
@@ -178,7 +192,28 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
     vec_ej = rep(0,length(select$E))
     vec_ej[i] = 1
 
-    final_results = rbind(final_results, CI_per_select_var(vec_ej))
+    ci = CI_per_select_var(vec_ej)
+
+    final_results[i,] = ci
+  }
+
+  # converage back to original scale
+  if(standardize_x == TRUE) {
+    # intercept is not penalized, so we add 1 as scale for it
+    select_scales = c(1, x_scale[which(Ht %in% final_results$E)])
+    final_results$GEE_est = final_results$GEE_est/select_scales
+    final_results$lowCI = final_results$lowCI/select_scales
+    final_results$upperCI = final_results$upperCI/select_scales
+  }
+
+  if(standardize_y == TRUE) {
+    final_results$GEE_est = final_results$GEE_est * y_scale
+    final_results$lowCI = final_results$lowCI * y_scale
+    final_results$upperCI = final_results$upperCI * y_scale
+  }
+
+  if(!is.null(beta)) {
+    final_results$post_true = select$postbeta
   }
 
   return(final_results)
