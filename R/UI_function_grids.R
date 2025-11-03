@@ -112,7 +112,7 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
 
   ############## test purpose ###############
   # remove row with na yDR
-  print(paste("remove", sum(!is.na(ps$yDR)), "lines of data due to NA produced for yDR"))
+  print(paste("remove", sum(is.na(ps$yDR)), "lines of data due to NA produced for yDR"))
   ps = ps[!is.na(ps$yDR),]
 
   if(is.null(lam) & is.null(noise_scale)) {
