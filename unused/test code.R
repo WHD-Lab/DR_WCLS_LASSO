@@ -115,7 +115,7 @@ import numpy as np
 random.seed(1)
 np.random.seed(1)
 ")
-UI_return_IHS = DR_WCLS_LASSO(data = df_IHS2,
+IHS_dataprocessed = DR_WCLS_LASSO(data = df_IHS2,
                           fold = 5, ID = ID,
                           time = "time",
                           Ht = Ht, St = St, At = At,
@@ -123,6 +123,27 @@ UI_return_IHS = DR_WCLS_LASSO(data = df_IHS2,
                           method_pesu = "CVLASSO",
                           virtualenv_path = "C:/Users/23300/selective-inference/env3",
                           varSelect_program = "Python")
+
+set.seed(100)
+py_run_string("
+import random
+import numpy as np
+
+random.seed(1)
+np.random.seed(1)
+")
+IHS_dataprocessed_WOstand = DR_WCLS_LASSO(data = df_IHS2,
+                                  fold = 5, ID = ID,
+                                  time = "time",
+                                  Ht = Ht, St = St, At = At,
+                                  prob = prob, outcome = outcome,
+                                  method_pesu = "CVLASSO",
+                                  virtualenv_path = "C:/Users/23300/selective-inference/env3",
+                                  varSelect_program = "Python",
+                                  standardize_x = F, standardize_y = F)
+
+#######################
+# standardization will give differnet confidence interval
 
 set.seed(100)
 ps_IHS = pseudo_outcome_generator_CVlasso(fold = 5, ID, data = df_IHS2,
@@ -210,9 +231,102 @@ UI_return_IHS = DR_WCLS_LASSO(data = df_IHS,
                               time = "time", Ht = Ht, St = St, At = At,
                               prob = prob, outcome = outcome,
                               virtualenv_path = "C:/Users/23300/selective-inference/env3",
+                              #virtualenv_path = "/Users/yuxuanchen/Library/CloudStorage/OneDrive-Personal/Desktop/Research/MRTAnalysis/selective-inference/env3",
                               method_pesu = "CVLASSO", lam = NULL,
                               noise_scale = NULL, splitrat = 0.8,
                               level = 0.9, core_num=3, CI_algorithm = 'lapply',
                               max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "Python") # default is standardize
 # no error returned
+set.seed(200)
+py_run_string("
+import random
+import numpy as np
 
+random.seed(1)
+np.random.seed(1)
+")
+notStand_IHS = DR_WCLS_LASSO(data = df_IHS,
+                              fold = 5, ID = ID,
+                              time = "time", Ht = Ht, St = St, At = At,
+                              prob = prob, outcome = outcome,
+                              virtualenv_path = "C:/Users/23300/selective-inference/env3",
+                              #virtualenv_path = "/Users/yuxuanchen/Library/CloudStorage/OneDrive-Personal/Desktop/Research/MRTAnalysis/selective-inference/env3",
+                              method_pesu = "CVLASSO", lam = NULL,
+                              noise_scale = NULL, splitrat = 0.8,
+                              level = 0.9, core_num=3, CI_algorithm = 'lapply',
+                              max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "Python",
+                              standardize_x = F, standardize_y = F) # given error
+
+#######################################################
+set.seed(50)
+sim_data = generate_dataset_test(N = 100, T = 40, P = 50, sigma_residual = 1.5, sigma_randint = 1.5, main_rand = 3, rho = 0.7,
+                            beta_logit = c(-1, 1.6 * rep(1/500, 50)), model = ~ state1 + state2 + state13 + state14 + state22 + state31 +
+                              state41 + state42 + state43,
+                            beta = matrix(c(-0.5, 0.017, 0.015, 0.05, -0.04, 1.7,
+                                            1.2, 1, 1, -3),ncol = 1),
+                            theta1 = 0.8)
+Ht = unlist(lapply(1:50, FUN = function(X) paste0("state",X)))
+St = unlist(lapply(1:50, FUN = function(X) paste0("state",X)))
+
+beta_truth = matrix(c(-0.5, 0.017, 0.015, rep(0, 8),
+                rep(0, 2), 0.05, -0.04, rep(0, 6),
+                rep(0, 1),1.7, rep(0, 8),
+                1.2, rep(0, 9),
+                1, 1, -3, rep(0, 7)),ncol = 1)
+ps = pseudo_outcome_generator_CVlasso(fold = 5, ID = "id",
+                                      data = sim_data, Ht = Ht, St = St, At = "action",
+                                      prob="prob", outcome = "outcome", core_num = 5)
+hist(ps$prob)
+hist(ps$outcome)
+
+sum(is.na(ps$yDR))
+
+set.seed(10)
+py_run_string("
+import random
+import numpy as np
+
+random.seed(1)
+np.random.seed(1)
+")
+
+notSand_test = DR_WCLS_LASSO(data = sim_data,
+                                      fold = 5, ID = "id",
+                                      time = "decision_point", core_num = 5,
+                                      Ht = Ht, St = St, At = "action",
+                                      prob = "prob", outcome = "outcome",
+                                      method_pesu = "CVLASSO",
+                                      virtualenv_path = "C:/Users/23300/selective-inference/env3",
+                                      #virtualenv_path = "/Users/yuxuanchen/Library/CloudStorage/OneDrive-Personal/Desktop/Research/MRTAnalysis/selective-inference/env3",
+                                      varSelect_program = "Python",
+                                      standardize_x = F, standardize_y = F,
+                             beta = beta_truth)
+
+mean(notSand_test$post_true <= notSand_test$upperCI & notSand_test$post_true >= notSand_test$lowCI)
+
+set.seed(10)
+py_run_string("
+import random
+import numpy as np
+
+random.seed(1)
+np.random.seed(1)
+")
+
+Sand_test = DR_WCLS_LASSO(data = sim_data,
+                          fold = 5, ID = "id",
+                          time = "decision_point", core_num = 5, #lam = 0.5,
+                          Ht = Ht, St = St, At = "action",
+                          prob = "prob", outcome = "outcome",
+                          method_pesu = "CVLASSO",
+                          virtualenv_path = "C:/Users/23300/selective-inference/env3",
+                          #virtualenv_path = "/Users/yuxuanchen/Library/CloudStorage/OneDrive-Personal/Desktop/Research/MRTAnalysis/selective-inference/env3",
+                          varSelect_program = "Python",
+                          standardize_x = T, standardize_y = T,
+                          beta = beta_truth)
+# the standardization makes the upper and lower bound very large
+# also I have to give very small lam to make sure the algorithm select some variables
+
+
+# you can also use glment to check the performance of standardization
+# use they as benchmark

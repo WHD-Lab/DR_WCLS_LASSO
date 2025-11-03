@@ -110,6 +110,11 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
 
   my_formula = as.formula(paste("yDR ~ ", paste(St, collapse = " + ")))
 
+  ############## test purpose ###############
+  # remove row with na yDR
+  print(paste("remove", sum(!is.na(ps$yDR)), "lines of data due to NA produced for yDR"))
+  ps = ps[!is.na(ps$yDR),]
+
   if(is.null(lam) & is.null(noise_scale)) {
     if(varSelect_program == "Python") {select = variable_selection_PY_penal_int(ps, ID, my_formula, splitrat=splitrat, virtualenv_path= virtualenv_path, beta = beta)}
 
@@ -214,6 +219,7 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
 
   if(!is.null(beta)) {
     final_results$post_true = select$postbeta
+    final_results$true_signal = final_results$E %in% (c("(Intercept)",St)[which(beta != 0)])
   }
 
   return(final_results)

@@ -82,16 +82,16 @@ variable_selection_PY_penal_int = function(data,ID, moderator_formula, lam = NUL
   #postbeta2 = solve(t(X[,nonzero] * c(wt / sqrt(n))) %*% X[,nonzero]) %*% t(X[,nonzero] * c(wt / sqrt(n))) %*% X %*% beta
 
   # get all Python code return
-  disperson = np$linalg$norm(Y1 - np$dot(X1[,nonzero], np$dot(np$linalg$pinv(X1[,nonzero]), Y1)))^2 / (n - sum(nonzero))
-  conv$setup_inference(dispersion=dispersion)
-  target_spec = selected_targets(conv$loglike,
-                                 conv$observed_soln,
-                                 dispersion=dispersion)
+  #disperson = np$linalg$norm(Y1 - np$dot(X1[,nonzero], np$dot(np$linalg$pinv(X1[,nonzero]), Y1)))^2 / (n - sum(nonzero))
+  #conv$setup_inference(dispersion=dispersion)
+  #target_spec = selected_targets(conv$loglike,
+  #                               conv$observed_soln,
+  #                               dispersion=dispersion)
   #result = conv$inference(target_spec,
   #                        method='exact',
   #                        level=0.9)
-  G = exact_grid_inference(query_spec = conv$specification, target_spec = target_spec)
-  grids = as.matrix(G$stat_grid)
+  #G = exact_grid_inference(query_spec = conv$specification, target_spec = target_spec)
+  #grids = as.matrix(G$stat_grid)
 
   return(list(formula = moderator_formula, E = E, NE = NE, n = n,
               perturb = perturb/(-2), lam = lam/(-2), Z = Z, OMEGA = (noise_scale)^2/4,
