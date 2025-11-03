@@ -94,7 +94,7 @@ variable_selection_PY_penal_int = function(data,ID, moderator_formula, lam = NUL
   #grids = as.matrix(G$stat_grid)
 
   return(list(formula = moderator_formula, E = E, NE = NE, n = n,
-              perturb = perturb/(-2), lam = lam/(-2), Z = Z, OMEGA = (noise_scale)^2/4,
+              perturb = perturb/(-2), ori_lam = lam, lam = lam/(-2), Z = Z, OMEGA = (noise_scale)^2/4,
               sign_soln = signs[nonzero], soln = soln, postbeta = postbeta, nonzero = nonzero
               #Python_Output = list(conv = conv,
               #                     target_spec = target_spec,

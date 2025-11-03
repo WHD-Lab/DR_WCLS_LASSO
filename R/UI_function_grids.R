@@ -146,7 +146,8 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
                                                               splitrat = splitrat, beta = beta)}
 
   }
-
+  # print lambda
+  print(paste("The current lambda value is:", select$ori_lam))
   # print selection
   print(paste("select predictors:", select$E))
   print(length(setdiff(St, select$E[select$E != "(Intercept)"])) == 0)
