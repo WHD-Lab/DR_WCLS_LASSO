@@ -93,7 +93,7 @@ FISTA_backtracking = function(data,ID, moderator_formula, lam = NULL, noise_scal
               n = n, soln = c(x_k),
               Z = p_L_returns[["Z"]][!nonzero],
               OMEGA = (noise_scale^2)/4,
-              lam = lam/(-2),
+              lam = lam/(-2), ori_lam = lam,
               perturb = c(perturb/(-2)),
               nonzero = c(nonzero), postbeta = c(postbeta),
               sign_soln = sign_soln[nonzero]))
