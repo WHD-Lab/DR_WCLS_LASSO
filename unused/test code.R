@@ -336,6 +336,23 @@ Sand_test = DR_WCLS_LASSO(data = sim_data,
 
 mean(Sand_test$post_true <= Sand_test$upperCI & Sand_test$post_true >= Sand_test$lowCI)
 
+
+Sand_test_R = DR_WCLS_LASSO(data = sim_data,
+                          fold = 5, ID = "id",
+                          time = "decision_point", core_num = 5, lam = 0.5,
+                          Ht = Ht, St = St, At = "action",
+                          prob = "prob", outcome = "outcome",
+                          method_pesu = "CVLASSO",
+                          virtualenv_path = "C:/Users/23300/selective-inference/env3",
+                          #virtualenv_path = "/Users/yuxuanchen/Library/CloudStorage/OneDrive-Personal/Desktop/Research/MRTAnalysis/selective-inference/env3",
+                          varSelect_program = "R",
+                          standardize_x = T, standardize_y = T,
+                          beta = beta_truth)
+
+
+
+
+
 # the standardization makes the upper and lower bound very large
 # also I have to give very small lam to make sure the algorithm select some variables
 
