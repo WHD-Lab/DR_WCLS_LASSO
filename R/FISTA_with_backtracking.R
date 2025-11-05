@@ -44,6 +44,8 @@ FISTA_backtracking = function(data,ID, moderator_formula, lam = NULL, noise_scal
     lam = sqrt(2*log(dim(Xw)[2]))*sd(yw)*splitrat* sqrt(dim(Xw)[1])
   }
 
+  lam_vec = c(0, rep(lam, dim(Xw)[2] - 1))
+
   # simulate random variables
   perturb = matrix(rnorm(n = dim(Xw)[2], mean = 0, sd = noise_scale), ncol = 1)
 
@@ -57,9 +59,9 @@ FISTA_backtracking = function(data,ID, moderator_formula, lam = NULL, noise_scal
   resSumSqDiff = Inf
 
   while(k < max_ite & resSumSqDiff > tol) {
-    L_k = i_finder(L_kmins1, y_k, design_matrix = X, outcome = y, wt, n, perturb, lam, eta)
+    L_k = i_finder(L_kmins1, y_k, design_matrix = X, outcome = y, wt, n, perturb, lam_vec, eta)
 
-    p_L_returns = p_L(y_k, L_k, design_matrix = X, outcome = y, wt, n, perturb, lam)
+    p_L_returns = p_L(y_k, L_k, design_matrix = X, outcome = y, wt, n, perturb, lam_vec)
     x_k = p_L_returns[["x_k"]]
     t_kplus1 = (1 + sqrt(1 + 4 * t_k^2))/2
     y_kplus1 = x_k + (t_k - 1)/(t_kplus1) * (x_k - x_kmins1)
@@ -97,7 +99,7 @@ FISTA_backtracking = function(data,ID, moderator_formula, lam = NULL, noise_scal
               sign_soln = sign_soln[nonzero]))
 }
 
-p_L = function(y_k, L, design_matrix, outcome, wt, n, perturb, lam){
+p_L = function(y_k, L, design_matrix, outcome, wt, n, perturb, lam_vec){
   # y_k: the value will be used to obtain x_k
   # L: estimater for the Lipschitz constant
   # design_matrix: in matrix form
@@ -110,10 +112,11 @@ p_L = function(y_k, L, design_matrix, outcome, wt, n, perturb, lam){
   der_designmatrix = c(-2/sqrt(n)) *  t(design_matrix) %*%
     matrix((outcome - design_matrix %*% y_k)* wt, ncol = 1) - perturb
 
-  x_k = pmax(abs(y_k - 1/L * der_designmatrix) - lam/L, 0) * sign(y_k - der_designmatrix/L)
+  x_k = pmax(abs(y_k - 1/L * der_designmatrix) - lam_vec/L, 0) * sign(y_k - der_designmatrix/L)
 
   # subgradients
-  Z = L/lam * (y_k - der_designmatrix/L - x_k)
+  Z = L/lam_vec * (y_k - der_designmatrix/L - x_k)
+  Z[1] = sign(x_k)[1]
 
 
   return(list(x_k = x_k,
@@ -122,7 +125,7 @@ p_L = function(y_k, L, design_matrix, outcome, wt, n, perturb, lam){
               wt = wt,
               design_matrix = design_matrix,
               outcome = outcome,
-              lam = lam,
+              lam = lam_vec,
               L = L, perturb = perturb, Z = Z))
 }
 
@@ -137,7 +140,7 @@ F_loss_function = function(p_L_results) {
   lam = p_L_results[["lam"]]
   perturb = p_L_results[["perturb"]]
 
-  loss_F = sum((outcome - design_matrix %*% x_k)^2 * wt)/sqrt(n) + lam * sum(abs(x_k)) - c(t(perturb) %*% x_k)
+  loss_F = sum((outcome - design_matrix %*% x_k)^2 * wt)/sqrt(n) + sum(lam * abs(x_k)) - c(t(perturb) %*% x_k)
 
   return(loss_F = loss_F)
 }
@@ -160,12 +163,12 @@ Q_loss_function = function(p_L_results) {
   der_designmatrix_y_k = c(-2/sqrt(n)) *  t(design_matrix) %*%
     matrix((outcome - design_matrix %*% y_k)* wt, ncol = 1) - perturb
 
-  QL_x_y = f_y_k + t(x_k - y_k) %*% der_designmatrix_y_k + L/2 * t(x_k - y_k) %*% (x_k - y_k) + lam * sum(abs(x_k))
+  QL_x_y = f_y_k + t(x_k - y_k) %*% der_designmatrix_y_k + L/2 * t(x_k - y_k) %*% (x_k - y_k) +  sum(lam * abs(x_k))
 
   return(QL_x_y = QL_x_y)
 }
 
-i_finder = function(L_kmins1, y_k, design_matrix, outcome, wt, n, perturb, lam, eta){
+i_finder = function(L_kmins1, y_k, design_matrix, outcome, wt, n, perturb, lam_vec, eta){
   # y_k: the value will be used to obtain x_k
   # L_kmins1: previous estimater for the Lipschitz constant
   # design_matrix: in matrix form
@@ -176,14 +179,14 @@ i_finder = function(L_kmins1, y_k, design_matrix, outcome, wt, n, perturb, lam, 
 
   i_k = 0
   L_bar = eta^(i_k) * L_kmins1
-  p_L_return = p_L(y_k, L_bar, design_matrix, outcome, wt, n, perturb, lam)
+  p_L_return = p_L(y_k, L_bar, design_matrix, outcome, wt, n, perturb, lam_vec)
   loss_F = F_loss_function(p_L_return)
   QL_x_y = Q_loss_function(p_L_return)
 
   while(loss_F > QL_x_y){
     i_k = i_k + 1
     L_bar = eta^(i_k) * L_kmins1
-    p_L_return = p_L(y_k, L_bar, design_matrix, outcome, wt, n, perturb, lam)
+    p_L_return = p_L(y_k, L_bar, design_matrix, outcome, wt, n, perturb, lam_vec)
     loss_F = F_loss_function(p_L_return)
     QL_x_y = Q_loss_function(p_L_return)
   }

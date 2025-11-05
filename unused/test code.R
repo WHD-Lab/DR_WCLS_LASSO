@@ -189,6 +189,17 @@ UI_return_sim_notSand = DR_WCLS_LASSO(data = sim_data,
                           varSelect_program = "Python",
                           standardize_x = F, standardize_y = F)
 
+UI_return_sim_notSand_R = DR_WCLS_LASSO(data = sim_data,
+                                      fold = 5, ID = "id",
+                                      time = "decision_point",
+                                      Ht = Ht, St = St, At = "action",
+                                      prob = "prob", outcome = "outcome",
+                                      method_pesu = "CVLASSO",
+                                      virtualenv_path = "C:/Users/23300/selective-inference/env3",
+                                      varSelect_program = "R",
+                                      standardize_x = F, standardize_y = F,
+                                      beta = matrix(c(-1, 1.7, 1.5, -1.3, -1, rep(0, 21))))
+
 set.seed(100)
 py_run_string("
 import random
@@ -259,20 +270,15 @@ notStand_IHS = DR_WCLS_LASSO(data = df_IHS,
 
 #######################################################
 set.seed(50)
-sim_data = generate_dataset_test(N = 100, T = 40, P = 50, sigma_residual = 1.5, sigma_randint = 1.5, main_rand = 3, rho = 0.7,
-                            beta_logit = c(-1, 1.6 * rep(1/500, 50)), model = ~ state1 + state2 + state13 + state14 + state22 + state31 +
-                              state41 + state42 + state43,
-                            beta = matrix(c(-0.5, 0.017, 0.015, 0.05, -0.04, 1.7,
-                                            1.2, 1, 1, -3),ncol = 1),
+sim_data = generate_dataset_test(N = 100, T = 40, P = 10, sigma_residual = 1.5, sigma_randint = 1.5, main_rand = 3, rho = 0.7,
+                            beta_logit = c(-1, 1.6 * rep(1/2000, 5), 1.6 * rep(1/20, 5)), model = ~ state1 + state6,
+                            beta = matrix(c(-0.5, 0.01, 1),ncol = 1),
                             theta1 = 0.8)
-Ht = unlist(lapply(1:50, FUN = function(X) paste0("state",X)))
-St = unlist(lapply(1:50, FUN = function(X) paste0("state",X)))
+Ht = unlist(lapply(1:10, FUN = function(X) paste0("state",X)))
+St = unlist(lapply(1:10, FUN = function(X) paste0("state",X)))
 
-beta_truth = matrix(c(-0.5, 0.017, 0.015, rep(0, 8),
-                rep(0, 2), 0.05, -0.04, rep(0, 6),
-                rep(0, 1),1.7, rep(0, 8),
-                1.2, rep(0, 9),
-                1, 1, -3, rep(0, 7)),ncol = 1)
+beta_truth = matrix(c(-0.5, 0.01, rep(0, 4),
+                      1, rep(0,4)),ncol = 1)
 ps = pseudo_outcome_generator_CVlasso(fold = 5, ID = "id",
                                       data = sim_data, Ht = Ht, St = St, At = "action",
                                       prob="prob", outcome = "outcome", core_num = 5)
@@ -280,6 +286,9 @@ hist(ps$prob)
 hist(ps$outcome)
 
 sum(is.na(ps$yDR))
+
+library(reticulate)
+use_virtualenv("C:/Users/23300/selective-inference/env3")
 
 set.seed(10)
 py_run_string("
@@ -315,7 +324,7 @@ np.random.seed(1)
 
 Sand_test = DR_WCLS_LASSO(data = sim_data,
                           fold = 5, ID = "id",
-                          time = "decision_point", core_num = 5, #lam = 0.5,
+                          time = "decision_point", core_num = 5, lam = 0.5,
                           Ht = Ht, St = St, At = "action",
                           prob = "prob", outcome = "outcome",
                           method_pesu = "CVLASSO",
@@ -324,6 +333,9 @@ Sand_test = DR_WCLS_LASSO(data = sim_data,
                           varSelect_program = "Python",
                           standardize_x = T, standardize_y = T,
                           beta = beta_truth)
+
+mean(Sand_test$post_true <= Sand_test$upperCI & Sand_test$post_true >= Sand_test$lowCI)
+
 # the standardization makes the upper and lower bound very large
 # also I have to give very small lam to make sure the algorithm select some variables
 
