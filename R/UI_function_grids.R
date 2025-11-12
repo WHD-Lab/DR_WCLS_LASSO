@@ -53,7 +53,7 @@
 #' @export
 
 DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method_pesu,
-                                 lam = NULL, noise_scale = NULL, splitrat = 0.8, virtualenv_path,
+                                 lam = NULL, noise_scale = NULL, splitrat = 0.8, virtualenv_path = '',
                                  beta = NULL, level = 0.9, core_num = NULL, CI_algorithm = "lapply",
                          max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "Python",
                          standardize_x = TRUE, standardize_y = TRUE){

@@ -29,7 +29,7 @@
 #' @export
 #' 
 variable_selection_PY_penal_int = function(data,ID, moderator_formula, lam = NULL, noise_scale = NULL,
-                                           splitrat = 0.8, virtualenv_path, ridge_term = 0, beta = NULL) {
+                                           splitrat = 0.8, virtualenv_path = '', ridge_term = 0, beta = NULL) {
   # data: the output of pesudo_outcomecal function
   # ID: the name of column where participants' ID are stored
   # moderator_formula: determines the formula for the f(St)T*beta function
@@ -64,8 +64,11 @@ variable_selection_PY_penal_int = function(data,ID, moderator_formula, lam = NUL
   
   # load python virtualenv
   require(reticulate)
-  use_virtualenv(virtualenv_path)
-  # use_condaenv(condaenv = 'env3', conda = "/opt/anaconda3/bin/conda", required = TRUE)
+  if (isTRUE(nzchar(trimws(virtualenv_path)))) {
+    use_virtualenv(virtualenv_path)
+  } else {
+    use_condaenv(condaenv = 'env3', conda = "/opt/anaconda3/bin/conda", required = TRUE)
+  }
   # load required modules and functions
   np = import("numpy")
   selectinf = import("selectinf")
