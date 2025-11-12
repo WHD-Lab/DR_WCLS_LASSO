@@ -19,3 +19,4 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+URL: https://whd-lab.github.io/DR_WCLS_LASSO/
