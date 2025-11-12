@@ -98,8 +98,7 @@ The package can be installed from our GitHub repository.
 
 ```{r warning = FALSE}
 # Install From GitHub
-# install.packages("devtools")
-# (devtools::install_github("WHD-Lab/DR_WCLS_LASSO"))
+# remotes::install_github("WHD-Lab/DR_WCLS_LASSO")
 ```
 
 ## Loading the Package
