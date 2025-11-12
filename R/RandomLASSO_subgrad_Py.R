@@ -64,8 +64,8 @@ variable_selection_PY_penal_int = function(data,ID, moderator_formula, lam = NUL
   
   # load python virtualenv
   require(reticulate)
-  # use_virtualenv(virtualenv_path)
-  use_condaenv(condaenv = 'env3', conda = "/opt/anaconda3/bin/conda", required = TRUE)
+  use_virtualenv(virtualenv_path)
+  # use_condaenv(condaenv = 'env3', conda = "/opt/anaconda3/bin/conda", required = TRUE)
   # load required modules and functions
   np = import("numpy")
   selectinf = import("selectinf")
