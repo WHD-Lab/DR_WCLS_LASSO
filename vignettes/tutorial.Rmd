@@ -1,6 +1,13 @@
 ---
-title: "tutorial"
-output: rmarkdown::html_vignette
+title: "MRTpostInfLASSO"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: true
+    theme: bootstrap     
+    code_folding: show
 vignette: >
   %\VignetteIndexEntry{tutorial}
   %\VignetteEngine{knitr::rmarkdown}
@@ -14,14 +21,13 @@ knitr::opts_chunk$set(
 )
 ```
 
+# Introduction
 
-## Introduction
+Micro-randomized trials (MRTs) are designed to evaluate the effectiveness of mobile health (mHealth) interventions delivered via smartphones. In practice, the assumptions required for MRTs are often difficult to satisfy: randomization probabilities can be uncertain, observations are frequently incomplete, and prespecifying features from high-dimensional contexts for linear working models is also challenging. To address these issues, the **doubly robust weighted centered least squares (DR-WCLS)** framework provides a flexible procedure for variable selection and inference. The methods incorporates supervised learning algorithms and enables valid inference on time-varying causal effects in longitudinal settings.
 
-Micro-randomized trials (MRTs) are designed to evaluate the effectiveness of mobile health (mHealth) interventions delivered via smartphones. In practice, the assumptions required for MRTs are often difficult to satisfy: randomization probabilities can be uncertain, observations are frequently incomplete, and prespecifying features from high-dimensional contexts for linear working models is also challenging. To address these issues, the **doubly robust weighted centered least squares (DR-WCLS)** framework provides a flexible procedure for variable selection and inference. The methods incorporates supervised learning algorithms and enables valid inference on time-varying causal effects in longitudinal settings. \\
+This vignette introduces the **MRTpostInfLASSO** package. Its core function, **DR_WCLS_LASSO**, allows users to perform variable selection, estimate time-varying causal effects and make valid inferences conditional on the selected variables.
 
-This vignette introduces the **MRTpostInfLASSO** package. Its core function, **DR_WCLS_LASSO**, allows users to perform variable selection, estimate time-varying causal effects and make valid inferences conditional on the selected variables. \\
-
-Individual-level data of an MRT can be summarized as $\left\{O_1, A_1, O_2, A_2, \cdots, O_T, A_T, O_{T+1} \right\}$ where $T$ is the total decision times, $O_t$ is the information collected between $t-1$ and $t$, and $A_t$ is the treatment provided at time $t$. Here we consider treatment $A_t \in \left\{0,1\right\}$. Treatment options are intended to influence a proximal outcome $Y_{t+1} \in O_{t+1}$. \\
+Individual-level data of an MRT can be summarized as $\left\{O_1, A_1, O_2, A_2, \cdots, O_T, A_T, O_{T+1} \right\}$ where $T$ is the total decision times, $O_t$ is the information collected between $t-1$ and $t$, and $A_t$ is the treatment provided at time $t$. Here we consider treatment $A_t \in \left\{0,1\right\}$. Treatment options are intended to influence a proximal outcome $Y_{t+1} \in O_{t+1}$.
 
 Denote history $H_t = \left\{ O_1, A_1, O_2, A_2, \cdots, A_{t-1}, O_t \right\}$ and randomized probabilities $\boldsymbol{p} = \left\{p_t(A_t \mid H_t) \right\}_{t=1}^T$. The DR-WCLS criterion is given by
 
@@ -36,18 +42,17 @@ $$
   f_t(S_t)
 \Bigr]
 = 0
-$$
-where $\beta(t;H_t) := g_t(H_t,1) - g_t(H_t,0)$ is the causal excursion effect under the fully observed history $H_t$, and $\tilde{\sigma}^2_t(S_t) := \tilde{p}_t(1 \mid S_t)(1-\tilde{p}_t(1 \mid S_t))$. \\
+$$ where $\beta(t;H_t) := g_t(H_t,1) - g_t(H_t,0)$ is the causal excursion effect under the fully observed history $H_t$, and $\tilde{\sigma}^2_t(S_t) := \tilde{p}_t(1 \mid S_t)(1-\tilde{p}_t(1 \mid S_t))$.
 
-The $\hat{\beta}_n^{(DR)}$ is a consistent estimator of the true $\beta$ if either  the randomization probability $p_t(A_t \mid H_t)$ or the conditional expectation $g_t(H_t, A_t)$ is correctly specified. \\
+The $\hat{\beta}_n^{(DR)}$ is a consistent estimator of the true $\beta$ if either the randomization probability $p_t(A_t \mid H_t)$ or the conditional expectation $g_t(H_t, A_t)$ is correctly specified.
 
 The **DR_WCLS** algorithm is as follows:
 
-Step I. : Randomly split the $n$ individuals into $K$ equal folds $\left\{I_k\right\}^K_{k=1}$ assuming $n$ is a multiple of $K$. Let $I^∁_k$ denote the complement of fold k. \\
+Step I: Randomly split the $n$ individuals into $K$ equal folds $\left\{I_k\right\}^K_{k=1}$ assuming $n$ is a multiple of $K$. Let $I^∁_k$ denote the complement of fold k.
 
-Step II. : For each fold $k$, use data from $I^∁_k$ to estimate the nuisance functions $\hat{g}^{(k)}_t(H_t,A_t)$,$\hat{p}^{(k)}_t(1 \mid H_t)$, $\hat{\tilde{p}}^{(k)}_t(1 \mid S_t)$, and compute the weight $\hat{W}_t^{(k)} = \hat{\tilde{p}}^{(k)}_t(1 \mid S_t) / \hat{p}^{(k)}_t(1 \mid H_t)$. \\
+Step II: For each fold $k$, use data from $I^∁_k$ to estimate the nuisance functions $\hat{g}^{(k)}_t(H_t,A_t)$,$\hat{p}^{(k)}_t(1 \mid H_t)$, $\hat{\tilde{p}}^{(k)}_t(1 \mid S_t)$, and compute the weight $\hat{W}_t^{(k)} = \hat{\tilde{p}}^{(k)}_t(1 \mid S_t) / \hat{p}^{(k)}_t(1 \mid H_t)$.
 
-Step III. : For each $j \in I_k$ and time $t$, construct the pseudo-outcome $\tilde{Y}_{t+1}^{(DR)}$ as follows, then regress it on $f_t(S_t)^T \beta$ using weights $\tilde{p}_t^{(k)}(1 \mid S_t)(1-\tilde{p}_t^{(k)}(1 \mid S_t))$. \\
+Step III: For each $j \in I_k$ and time $t$, construct the pseudo-outcome $\tilde{Y}_{t+1}^{(DR)}$ as follows, then regress it on $f_t(S_t)^T \beta$ using weights $\tilde{p}_t^{(k)}(1 \mid S_t)(1-\tilde{p}_t^{(k)}(1 \mid S_t))$.
 
 $$
 \tilde{Y}^{(DR)}_{t+1,j} := 
@@ -57,7 +62,7 @@ $$
 \Bigr)
 $$
 
-To conduct variable selection, **DR_WCLS_LASSO** solves the problem 
+To conduct variable selection, **DR_WCLS_LASSO** solves the problem
 
 $$
 \min_{\beta} 
@@ -72,10 +77,9 @@ $$
 \lambda \lVert \beta \rVert_{1}
 \;-\;
 w^{\top}\beta
-$$
-, where $\lambda$ is the LASSO regularization parameter, $\omega$ is the noise vector. \\
+$$ , where $\lambda$ is the LASSO regularization parameter, $\omega$ is the noise vector.
 
-After the variable selection procedure, we conduct post-selection inference using DR-WCLS conditional on the selected variables. This provides estimates for the selected variables along with their corresponding confidence intervals. \\
+After the variable selection procedure, we conduct post-selection inference using DR-WCLS conditional on the selected variables. This provides estimates for the selected variables along with their corresponding confidence intervals.
 
 $$
 \min_{\beta}
@@ -88,7 +92,7 @@ $$
 \Bigr]
 $$
 
-## Installation
+# Installation
 
 The package can be installed from our GitHub repository.
 
@@ -100,17 +104,19 @@ The package can be installed from our GitHub repository.
 
 ## Loading the Package
 
-```{r}
+```{r warning=FALSE}
 library(MRTpostInfLASSO)
 ```
 
-## Example
+# Real Data Example
 
-We use the `HeartSteps` dataset to illustrate how the functions in the package work, specifically how to generate the pseudo outcome using LASSO, random forest, gradient boosting, and the DR_WCLS_LASSO function.\\
+## HeartSteps
 
-HeartSteps is an mHealth intervention that encourages regular physical activity by delivering personalized tailoring activity suggestions. The dataset arises from a 6-week micro-randomized trial (MRT) with 37 participants. During the study, participants were randomized at 5 decision points and would receive notificaitons 2-5 times per day. The total sample size of the dataset is 7770 with 5 records per day for each participants. Each record contains information on the decision point, whether a notification was sent, participant availability for walking at that time, and step counts 30 minutes before and after the decision point. \\
+We illustrate the functions in the MRTpostInfLASSO package using the `HeartSteps` dataset from the MRTAnalysis package. We demonstrate how to generate the pseudo-outcome, perform variable selection, and conduct valid post-selection inference.
 
-To begin, we load the `HeartSteps` data from MRTAnalysis using the following code:
+HeartSteps is a mobile health intervention designed to encourage physical activity by delivering tailored suggestions. The dataset comes from a 6-week micro-randomized trial involving 37 participants. Participants were randomized at 5 decision points per day and received 2-5 notificaitons daily. The dataset contains 7,770 records, with 5 observations per day for each participants. Each record includes the decision point, whether a notification was sent, participant availability for walking, and 30-minute step counts before and after the decision point.
+
+To begin, we load the `HeartSteps` data using the following code. A summary of `data_mimicHeartSteps` is as follows:
 
 ```{r}
 # Load HeartSteps Data
@@ -120,7 +126,7 @@ head(data_mimicHeartSteps)
 
 ```
 
-We specify the names of the variables for ID, history$H_t$, moderator$S_t$, treatment$A_t$, proximal outcome$Y_t$, and randomized probability$p_t$.
+We first specify the variable names for the participant ID, history$H_t$, moderator$S_t$, treatment$A_t$, proximal outcome$Y_t$, and randomization probability$p_t$.
 
 ```{r}
 set.seed(100)
@@ -132,9 +138,9 @@ outcome = 'logstep_30min'
 prob = 'rand_prob'
 ```
 
-### Generating Pseudo Outcome
+### Generating Pseudo-outcome
 
-To generate the pseudo outcome, we provide three methods: cross-validation LASSO, random forest and gradient boosting.
+To generate the pseudo-outcome, we provide three methods for estimating the nuisance functions: LASSO, random forest and gradient boosting.
 
 $$
 \tilde{Y}^{(DR)}_{t+1,j} := 
@@ -143,36 +149,30 @@ $$
 \hat{g}_t^{(k)}(H_{t,j},1) - \hat{g}_t^{(k)}(H_{t,j},0)
 \Bigr)
 $$
-Below are examples demonstrating how to use the `pseudo_outcome_generator_CVlasso`, `pseudo_outcome_generator_rf_v2`, and `pseudo_outcome_generator_gbm` functions.
+
+We illustrate their use use via the functions `pseudo_outcome_generator_CVlasso`, `pseudo_outcome_generator_rf_v2`, and `pseudo_outcome_generator_gbm`.
 
 ```{r}
 pseudo_outcome_CVlasso = pseudo_outcome_generator_CVlasso(fold = 5,ID = ID,
                                                      data = data_mimicHeartSteps, 
                                                      Ht = Ht, St = St, At = At, 
-                                                     prob = prob, outcome = outcome, 
-                                                     core_num = 5)
+                                                     prob = prob, outcome = outcome)
 
 pseudo_outcome_RF = pseudo_outcome_generator_rf_v2(fold = 5,ID = ID,
                                                    data = data_mimicHeartSteps, 
                                                    Ht = Ht, St = St, At = At, 
-                                                   prob = prob, outcome = outcome, 
-                                                   core_num = 5)
+                                                   prob = prob, outcome = outcome)
 
 
 pseudo_outcome_GBM = pseudo_outcome_generator_gbm(fold = 5,ID = ID,
                                                   data = data_mimicHeartSteps, 
                                                   Ht = Ht, St = St, At = At, 
-                                                  prob = prob, outcome = outcome, 
-                                                  core_num = 5)
-
-# pseudo_outcome_MERF = pseudo_outcome_generator_MERF(fold = 5,ID = ID,
-#                                                   data = data_mimicHeartSteps, 
-#                                                   Ht = Ht, St = St, At = At, 
-#                                                   prob = prob, outcome = outcome, 
-#                                                   core_num = 5)
+                                                  prob = prob, outcome = outcome)
 ```
 
 ### Variable Selection
+
+To perform variable selection, **DR_WCLS_LASSO** solves the problem
 
 $$
 \min_{\beta} 
@@ -189,7 +189,7 @@ $$
 w^{\top}\beta
 $$
 
-The variable selection is done by variable_selection_PY_penal_int/FISTA_backtracking function. Here is an example with a list of selected variables.
+Variable selection is performed using the `variable_selection_PY_penal_int` or `FISTA_backtracking` function. We first define `my_formula`, specifying the outcome and candidate variables. Below, we demonstrate the use of both functions.
 
 Python version
 
@@ -199,25 +199,31 @@ my_formula = as.formula(paste("yDR ~", paste(c("logstep_30min_lag1", "logstep_pr
                                        collapse = " + ")))
 
 set.seed(100)
-var_selection_python = variable_selection_PY_penal_int(data = pseudo_outcome_CVlasso,ID, my_formula, 
-                                lam = NULL, noise_scale = NULL, splitrat = 0.8,
-                                virtualenv_path = "fakepath/wcls", 
-                                ridge_term = 0, beta = NULL)
+var_selection_python = variable_selection_PY_penal_int(data = pseudo_outcome_CVlasso,ID,
+                                                       my_formula,
+                                                       lam = NULL, noise_scale = NULL,
+                                                       splitrat = 0.8,
+                                                       virtualenv_path = "fakepath/wcls",
+                                                       ridge_term = 0, beta = NULL)
 
-var_selection_python$E
+cat('The selected variable list:',var_selection_python$E)
 ```
 
 R version
 
 ```{r}
-set.seed(100)
-var_selection_R = FISTA_backtracking(data = pseudo_outcome_CVlasso, ID, my_formula, 
-                  lam = NULL, noise_scale = NULL,splitrat = 0.8, 
-                  max_ite = 10^(5), tol = 10^(-4), beta = NULL)
-var_selection_R$E
+# set.seed(100)
+# var_selection_R = FISTA_backtracking(data = pseudo_outcome_CVlasso, ID, my_formula,
+#                   lam = NULL, noise_scale = NULL,splitrat = 0.8,
+#                   max_ite = 10^(5), tol = 10^(-4), beta = NULL)
+# var_selection_R$E
+# 
+# cat('The selected variable list:',var_selection_R$E)
 ```
 
 ### Post-selection Inference
+
+After variable selection, we conduct post-selection inference using DR-WCLS, conditioning on the selected variables. This yields GEE coefficient estimates and corresponding confidence intervals.
 
 $$
 \min_{\beta}
@@ -230,65 +236,157 @@ $$
 \Bigr]
 $$
 
-`method_pesu` specifies the machine-learning method used to generate the pseudo-outcome (e.g., "CVLASSO", "RandomForest", "GradientBoosting")
-`CI_algorithm` controls the computation method for confidence-interval construction. Options include "parallel", "doParallel" or "lapply" by default.
-
+`DR_WCLS_LASSO` is used for post-selection inference. The input of the function are the data for inference, number of folds, and variable names for ID, time, $H_t$, $S_t$, $A_t$, $Y_t$ and randomization probability. `method_pesu` specifies the method used for pseudo-outcome generation (e.g., "CVLASSO", "RandomForest", "GradientBoosting"). `varSelect_program` indicates the variable selection programming language.
 
 ```{r}
-set.seed(100)
-UI_return = DR_WCLS_LASSO(data = data_mimicHeartSteps, 
-                          fold = 5, ID = ID, 
-                          time = "decision_point", 
-                          Ht = Ht, St = St, At = At, 
-                          prob = prob, outcome = outcome,
-                          method_pesu = "CVLASSO", varSelect_program = "R")
+set.seed(123)
 
-```
+# reticulate::py_run_string("
+# import random
+# import numpy as np
+# 
+# random.seed(123)
+# np.random.seed(123)
+# ")
 
-We can adjust the LASSO regularization term by specifying the 'lam'.
-
-```{r}
-set.seed(100)
-UI_return = DR_WCLS_LASSO(data = data_mimicHeartSteps, 
-                          fold = 5, ID = ID, 
-                          time = "decision_point", 
-                          Ht = Ht, St = St, At = At, 
+UI_return_python = DR_WCLS_LASSO(data = data_mimicHeartSteps,
+                          fold = 5, ID = ID,
+                          time = "decision_point",
+                          Ht = Ht, St = St, At = At,
                           prob = prob, outcome = outcome,
                           virtualenv_path = 'fakepath/wcls',
-                          method_pesu = "CVLASSO", lam = 10)
+                          method_pesu = "CVLASSO",
+                          varSelect_program = "Python",
+                          standardize_x = F, standardize_y = F)
 
+UI_return_python
 ```
-
-
-Split rate can be adjusted by specifying the 'splitrat'.
 
 ```{r}
 set.seed(100)
-UI_return = DR_WCLS_LASSO(data = data_mimicHeartSteps, 
-                          fold = 5, ID = ID, 
-                          time = "decision_point", 
-                          Ht = Ht, St = St, At = At, 
+
+UI_return_R = DR_WCLS_LASSO(data = data_mimicHeartSteps,
+                          fold = 5, ID = ID,
+                          time = "decision_point",
+                          Ht = Ht, St = St, At = At,
                           prob = prob, outcome = outcome,
                           method_pesu = "CVLASSO", 
-                          splitrat = 0.8)
-
+                          varSelect_program = "R",
+                          standardize_x = F, standardize_y = F)
+UI_return_R
 ```
+
+### A Comparison of Using Randomized LASSO and Weighted Centered Least Squares
+
+Select variables using randomized LASSO
+
+```{r}
+
+library(selectiveInference)
+res_randomizedLASSO = randomizedLasso(X = as.matrix(data_mimicHeartSteps[,St]), 
+                y = as.matrix(data_mimicHeartSteps[,outcome]), 
+                lam = 10000, 
+                family="gaussian",
+                noise_scale=NULL, 
+                ridge_term=NULL, 
+                max_iter=100,       
+                kkt_tol=1.e-4,      
+                parameter_tol=1.e-8,
+                objective_tol=1.e-8,
+                objective_stop=FALSE,
+                kkt_stop=TRUE,
+                parameter_stop=TRUE)
+
+St[res_randomizedLASSO$active_set]
+```
+
+Make inference using weighted centered least squares
+
+```{r}
+
+data_mimicHeartSteps$intervention = as.numeric(data_mimicHeartSteps$intervention)
+data_mimicHeartSteps$logstep_30min = as.numeric(data_mimicHeartSteps$logstep_30min)
+data_mimicHeartSteps$logstep_30min_lag1 = as.numeric(data_mimicHeartSteps$logstep_30min_lag1)
+data_mimicHeartSteps$logstep_pre30min = as.numeric(data_mimicHeartSteps$logstep_pre30min)
+data_mimicHeartSteps$is_at_home_or_work = as.numeric(data_mimicHeartSteps$is_at_home_or_work)
+data_mimicHeartSteps$day_in_study = as.numeric(data_mimicHeartSteps$day_in_study)
+
+wcls_fit = wcls(
+  data = data_mimicHeartSteps,
+  id = 'userid', 
+  outcome = 'logstep_30min', 
+  treatment = 'intervention', 
+  rand_prob = 0.5, 
+  moderator_formula= ~logstep_30min_lag1 + logstep_pre30min + day_in_study,
+  control_formula = ~logstep_30min_lag1 + logstep_pre30min + day_in_study,
+  availability = NULL,
+  numerator_prob = NULL,
+  verbose = TRUE
+)
+
+wcls_res = summary(wcls_fit)
+wcls_res$causal_excursion_effect
+
+UI_return_python
+UI_return_R
+```
+
+### Arguments in DR_WCLS_LASSO
+
+The pseudo outcome generation method can be specified using the `method_pesu` argument. Currently, three options are supported: CVLASSO, RandomForest, and GradientBoosting. The default is CVLASSO.
 
 ```{r}
 set.seed(100)
-UI_return = DR_WCLS_LASSO(data = data_mimicHeartSteps, 
-                          fold = 5, ID = ID, 
-                          time = "decision_point", Ht = Ht, St = St, At = At, 
-                          prob = prob, outcome = outcome,
-                          virtualenv_path = 'fakepath/wcls',
-                          method_pesu = "CVLASSO", lam = NULL,
-                          noise_scale = NULL, splitrat = 0.8,
-                          level = 0.9, core_num=3, CI_algorithm = 'lapply',
-                          max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "R")
 
+UI_return_method_pesu = DR_WCLS_LASSO(data = data_mimicHeartSteps,
+                                 fold = 5, ID = ID,
+                                 time = "decision_point",
+                                 Ht = Ht, St = St, At = At,
+                                 prob = prob, outcome = outcome,
+                                 virtualenv_path = NULL,
+                                 method_pesu = "CVLASSO",
+                                 standardize_x = F, standardize_y = F)
+
+UI_return_method_pesu
 ```
 
-Interaction terms can also be created and added to the lists of history and summary variables.
+The LASSO penalty can be adjusted by setting 'lam' in the `DR_WCLS_LASSO` function.
+
+```{r}
+set.seed(100)
+
+UI_return_lambda = DR_WCLS_LASSO(data = data_mimicHeartSteps,
+                                 fold = 5, ID = ID,
+                                 time = "decision_point",
+                                 Ht = Ht, St = St, At = At,
+                                 prob = prob, outcome = outcome,
+                                 virtualenv_path = NULL,
+                                 method_pesu = "CVLASSO",
+                                 lam = 100,
+                                 standardize_x = F, standardize_y = F)
+
+UI_return_lambda
+```
+
+The data split rate in Step 1 of the DR_WCLS algorithm can be set using 'splitrat' in the `DR_WCLS_LASSO` function.
+
+```{r}
+set.seed(100)
+UI_return_splitrat = DR_WCLS_LASSO(data = data_mimicHeartSteps, 
+                                   fold = 5, ID = ID, 
+                                   time = "decision_point", 
+                                   Ht = Ht, St = St, At = At, 
+                                   prob = prob, outcome = outcome,
+                                   method_pesu = "CVLASSO", 
+                                   splitrat = 0.8,
+                                   standardize_x = F, standardize_y = F)
+UI_return_splitrat
+```
+
+
+### Analysis Using Manually Created Interaction Terms
+
+Interaction terms can be manually created and included in the $H_t$ and $S_t$ variable lists. In this example, we create an indicator for whether the time in the study is over 14 days and include its interactions with `logstep_30min_lag1`, `logstep_pre30min`, and `is_at_home_or_work`.
 
 ```{r}
 data_mimicHeartSteps$timeover14 = as.numeric(data_mimicHeartSteps$decision_point>14)
@@ -298,6 +396,8 @@ data_mimicHeartSteps$int_pre30_timeover14 = data_mimicHeartSteps$logstep_pre30mi
 
 data_mimicHeartSteps$int_home_timeover14 = data_mimicHeartSteps$is_at_home_or_work * data_mimicHeartSteps$timeover14
 ```
+
+We add the interaction terms in the $H_t$ and $S_t$ variable lists and rerun the procedure.
 
 ```{r}
 set.seed(200)
@@ -311,82 +411,105 @@ outcome = 'logstep_30min'
 prob = 'rand_prob'
 
 
-UI_return_int = DR_WCLS_LASSO(data = data_mimicHeartSteps, 
+UI_return_int_python = DR_WCLS_LASSO(data = data_mimicHeartSteps, 
                           fold = 5, ID = ID, 
                           time = "decision_point", Ht = Ht_int, St = St_int, 
                           At = At, prob = prob, outcome = outcome,
                           virtualenv_path = 'fakepath/wcls',
-                          method_pesu = "CVLASSO", lam = NULL,
-                          noise_scale = NULL, splitrat = 0.8,
-                          level = 0.9, core_num=3, CI_algorithm = 'lapply',
-                          max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "Python")
+                          method_pesu = "CVLASSO", 
+                          varSelect_program = "Python",
+                          standardize_x = F, standardize_y = F)
 
+UI_return_int_python
 ```
 
+```{r}
+UI_return_int_R = DR_WCLS_LASSO(data = data_mimicHeartSteps, 
+                          fold = 5, ID = ID, 
+                          time = "decision_point", Ht = Ht_int, St = St_int, 
+                          At = At, prob = prob, outcome = outcome,
+                          virtualenv_path = 'fakepath/wcls',
+                          method_pesu = "CVLASSO", 
+                          varSelect_program = "R",
+                          standardize_x = F, standardize_y = F)
 
-Here is another example that uses data from the Intern Health Study.
+UI_return_int_R
+```
 
-Intern Health Study (IHS) is a 3-month micro-randomized trial on 859 medical interns. The aim of the study is to investigate how mHealth interventions affect participants' weekly mood, physical activity, and sleep. The tailored message was sent each day at 3pm with probability 0.5 of receiving it. The dataset includes 
+## Intern Health Study
+
+IHS is a micro-randomized trial involving 859 medical interns. The aim of the study is to investigate how mHealth interventions affect participants' weekly mood, physical activity, and sleep. Each day, participants had a 0.5 probability of receiving a tailored message. The dataset includes a range of variables collected from wearable devices.
 
 ```{r}
-
 df_IHS = read.csv('~/Desktop/25Winter/IHS Design/Hyperparameter/dfEventsThreeMonthsTimezones.csv')
 df_IHS$prob = rep(0.5, length(df_IHS$PARTICIPANTIDENTIFIER))
+df_IHS$less27 = (df_IHS$Age < 27)
 
 ID = 'PARTICIPANTIDENTIFIER'
-Ht = c('StepsPastDay', 'is_weekend', 'maxHRPast24Hours', 'HoursSinceLastMood')
-St = c('StepsPastDay', 'is_weekend', 'maxHRPast24Hours',  'HoursSinceLastMood')
+
+# Ht = c('StepsPastDay', 'is_weekend', 'maxHRPast24Hours', 'HoursSinceLastMood')
+# St = c('StepsPastDay', 'is_weekend', 'maxHRPast24Hours',  'HoursSinceLastMood')
+Ht = c('StepsPastDay', 'is_weekend', 'maxHRPast24Hours', 'HoursSinceLastMood','less27', "Sex", "has_child","StepsPastWeek",'PHQ10above0','exercisedPast24Hours')
+St = c('StepsPastDay', 'is_weekend', 'maxHRPast24Hours',  'HoursSinceLastMood', 'less27', "Sex", "has_child",'StepsPastWeek','PHQ10above0','exercisedPast24Hours')
 At = 'sent'
 outcome = 'LogStepsReward'
 prob = 'prob'
 
+set.seed(99)
 
-set.seed(200)
-UI_return_IHS = DR_WCLS_LASSO(data = df_IHS, 
-                          fold = 5, ID = ID, 
-                          time = "time", Ht = Ht, St = St, At = At, 
+df_IHS_cleaned = na.omit(df_IHS)
+
+UI_return_IHS_python = DR_WCLS_LASSO(data = df_IHS_cleaned,
+                          fold = 5, ID = ID,
+                          time = "time", Ht = Ht, St = St, At = At,
                           prob = prob, outcome = outcome,
                           virtualenv_path = 'fakepath/wcls',
-                          method_pesu = "CVLASSO", lam = NULL,
+                          method_pesu = "CVLASSO", lam = 65,
                           noise_scale = NULL, splitrat = 0.8,
                           level = 0.9, core_num=3, CI_algorithm = 'lapply',
-                          max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "Python")
+                          max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "Python",
+                          standardize_x =  T, standardize_y = T)
 
+UI_return_IHS_python
+```
+
+```{r}
+set.seed(100)
+UI_return_IHS_R = DR_WCLS_LASSO(data = df_IHS_cleaned,
+                          fold = 5, ID = ID,
+                          time = "time", Ht = Ht, St = St, At = At,
+                          prob = prob, outcome = outcome,
+                          virtualenv_path = 'fakepath/wcls',
+                          method_pesu = "CVLASSO", lam = 30,
+                          noise_scale = NULL, splitrat = 0.8,
+                          level = 0.9, core_num=3, CI_algorithm = 'lapply',
+                          max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "R",
+                          standardize_x =  T, standardize_y = T)
+
+UI_return_IHS_R
+```
+
+```{r}
+# df_IHS$sent = as.numeric(df_IHS$sent)
+# df_IHS$is_weekend = as.numeric(df_IHS$is_weekend)
+# library(MRTAnalysis)
+# wcls(
+#   data = df_IHS,
+#   id = 'PARTICIPANTIDENTIFIER',
+#   outcome = 'Steps24HoursAfter',
+#   treatment = 'sent',
+#   rand_prob = 'prob',
+#   moderator_formula= ~1,
+#   control_formula = ~StepsPastDay + is_weekend + maxHRPast24Hours + HoursSinceLastMood,
+#   availability = NULL,
+#   numerator_prob = NULL,
+#   verbose = TRUE
+# )
 
 ```
 
 ```{r}
-df_IHS$sent = as.numeric(df_IHS$sent)
-df_IHS$is_weekend = as.numeric(df_IHS$is_weekend)
-
-wcls(
-  data = df_IHS,
-  id = 'PARTICIPANTIDENTIFIER',
-  outcome = 'LogStepsReward',
-  treatment = 'sent',
-  rand_prob = 'prob',
-  moderator_formula= ~1,
-  control_formula = ~StepsPastDay + is_weekend + maxHRPast24Hours + HoursSinceLastMood,
-  availability = NULL,
-  numerator_prob = NULL,
-  verbose = TRUE
-)
-
-
-
-pscv = pseudo_outcome_generator_CVlasso(fold = 5,ID = ID,
-                                                     data = df_IHS, 
-                                                     Ht = Ht, St = St, At = At, 
-                                                     prob = prob, outcome = outcome, 
-                                                     core_num = 5)
-
-
-
+# formula_str = paste(outcome, "~", paste(Ht, collapse = " + "))
+# lm_model = lm(as.formula(formula_str), data = df_IHS)
+# car::vif(lm_model)
 ```
-
-```{r}
-formula_str = paste(outcome, "~", paste(Ht, collapse = " + "))
-lm_model = lm(as.formula(formula_str), data = df_IHS)
-car::vif(lm_model)
-```
-
