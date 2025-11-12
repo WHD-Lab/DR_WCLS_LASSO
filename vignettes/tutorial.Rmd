@@ -194,8 +194,8 @@ Variable selection is performed using the `variable_selection_PY_penal_int` or `
 Python version
 
 ```{r}
-my_formula = as.formula(paste("yDR ~", paste(c("logstep_30min_lag1", "logstep_pre30min", 
-                                      "is_at_home_or_work", "day_in_study"), 
+my_formula = as.formula(paste("yDR ~", paste(c("logstep_30min_lag1", "logstep_pre30min",
+                                      "is_at_home_or_work", "day_in_study"),
                                        collapse = " + ")))
 
 set.seed(100)
@@ -203,7 +203,7 @@ var_selection_python = variable_selection_PY_penal_int(data = pseudo_outcome_CVl
                                                        my_formula,
                                                        lam = NULL, noise_scale = NULL,
                                                        splitrat = 0.8,
-                                                       virtualenv_path = "fakepath/wcls",
+                                                       # virtualenv_path = "fakepath/wcls",
                                                        ridge_term = 0, beta = NULL)
 
 cat('The selected variable list:',var_selection_python$E)
@@ -254,7 +254,7 @@ UI_return_python = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           time = "decision_point",
                           Ht = Ht, St = St, At = At,
                           prob = prob, outcome = outcome,
-                          virtualenv_path = 'fakepath/wcls',
+                          # virtualenv_path = 'fakepath/wcls',
                           method_pesu = "CVLASSO",
                           varSelect_program = "Python",
                           standardize_x = F, standardize_y = F)
@@ -343,7 +343,7 @@ UI_return_method_pesu = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                                  time = "decision_point",
                                  Ht = Ht, St = St, At = At,
                                  prob = prob, outcome = outcome,
-                                 virtualenv_path = NULL,
+                                 # virtualenv_path = 'fakepath/wcls',
                                  method_pesu = "CVLASSO",
                                  standardize_x = F, standardize_y = F)
 
@@ -360,7 +360,7 @@ UI_return_lambda = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                                  time = "decision_point",
                                  Ht = Ht, St = St, At = At,
                                  prob = prob, outcome = outcome,
-                                 virtualenv_path = NULL,
+                                 # virtualenv_path = 'fakepath/wcls',
                                  method_pesu = "CVLASSO",
                                  lam = 100,
                                  standardize_x = F, standardize_y = F)
@@ -415,7 +415,7 @@ UI_return_int_python = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           fold = 5, ID = ID, 
                           time = "decision_point", Ht = Ht_int, St = St_int, 
                           At = At, prob = prob, outcome = outcome,
-                          virtualenv_path = 'fakepath/wcls',
+                          # virtualenv_path = 'fakepath/wcls',
                           method_pesu = "CVLASSO", 
                           varSelect_program = "Python",
                           standardize_x = F, standardize_y = F)
@@ -428,7 +428,7 @@ UI_return_int_R = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           fold = 5, ID = ID, 
                           time = "decision_point", Ht = Ht_int, St = St_int, 
                           At = At, prob = prob, outcome = outcome,
-                          virtualenv_path = 'fakepath/wcls',
+                          # virtualenv_path = 'fakepath/wcls',
                           method_pesu = "CVLASSO", 
                           varSelect_program = "R",
                           standardize_x = F, standardize_y = F)
@@ -463,7 +463,7 @@ UI_return_IHS_python = DR_WCLS_LASSO(data = df_IHS_cleaned,
                           fold = 5, ID = ID,
                           time = "time", Ht = Ht, St = St, At = At,
                           prob = prob, outcome = outcome,
-                          virtualenv_path = 'fakepath/wcls',
+                          # virtualenv_path = 'fakepath/wcls',
                           method_pesu = "CVLASSO", lam = 65,
                           noise_scale = NULL, splitrat = 0.8,
                           level = 0.9, core_num=3, CI_algorithm = 'lapply',
@@ -479,7 +479,7 @@ UI_return_IHS_R = DR_WCLS_LASSO(data = df_IHS_cleaned,
                           fold = 5, ID = ID,
                           time = "time", Ht = Ht, St = St, At = At,
                           prob = prob, outcome = outcome,
-                          virtualenv_path = 'fakepath/wcls',
+                          # virtualenv_path = 'fakepath/wcls',
                           method_pesu = "CVLASSO", lam = 30,
                           noise_scale = NULL, splitrat = 0.8,
                           level = 0.9, core_num=3, CI_algorithm = 'lapply',
