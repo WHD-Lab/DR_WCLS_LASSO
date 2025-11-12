@@ -17,6 +17,9 @@ Imports:
     tidyverse
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    pkgdown,
+    devtools
 VignetteBuilder: knitr
 URL: https://whd-lab.github.io/DR_WCLS_LASSO/
+Config/Needs/website: pkgdown, devtools
