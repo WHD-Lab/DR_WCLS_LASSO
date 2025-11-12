@@ -7,7 +7,7 @@ export(pseudo_outcome_generator_CVlasso)
 export(pseudo_outcome_generator_gbm)
 export(pseudo_outcome_generator_rf_v2)
 export(variable_selection_PY_penal_int)
-import(devtools)
+
 import(reticulate)
 import(doParallel)
 import(dplyr)

@@ -47,7 +47,6 @@
 #' @import parallel
 #' @import doParallel
 #' @import foreach
-#' @import devtools
 #' @import zoo
 #'
 #' @export
@@ -95,7 +94,6 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
     data[,outcome] = scale(data[,outcome], center = FALSE, scale = y_scale)
   }
 
-  require(devtools)
   if(method_pesu == "CVLASSO") {
     ps = pseudo_outcome_generator_CVlasso(fold, ID, data, Ht, St, At, prob=prob, outcome, core_num)
   }
