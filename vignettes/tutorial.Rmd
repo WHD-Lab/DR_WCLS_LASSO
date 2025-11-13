@@ -155,18 +155,21 @@ We illustrate their use use via the functions `pseudo_outcome_generator_CVlasso`
 pseudo_outcome_CVlasso = pseudo_outcome_generator_CVlasso(fold = 5,ID = ID,
                                                      data = data_mimicHeartSteps, 
                                                      Ht = Ht, St = St, At = At, 
-                                                     prob = prob, outcome = outcome)
+                                                     prob = prob, outcome = outcome,
+                                                     core_num = 1)
 
 pseudo_outcome_RF = pseudo_outcome_generator_rf_v2(fold = 5,ID = ID,
                                                    data = data_mimicHeartSteps, 
                                                    Ht = Ht, St = St, At = At, 
-                                                   prob = prob, outcome = outcome)
+                                                   prob = prob, outcome = outcome,
+                                                   core_num = 1)
 
 
 pseudo_outcome_GBM = pseudo_outcome_generator_gbm(fold = 5,ID = ID,
                                                   data = data_mimicHeartSteps, 
                                                   Ht = Ht, St = St, At = At, 
-                                                  prob = prob, outcome = outcome)
+                                                  prob = prob, outcome = outcome,
+                                                  core_num = 1)
 ```
 
 ### Variable Selection
@@ -280,11 +283,10 @@ UI_return_R
 Select variables using randomized LASSO
 
 ```{r}
-
 library(selectiveInference)
 res_randomizedLASSO = randomizedLasso(X = as.matrix(data_mimicHeartSteps[,St]), 
                 y = as.matrix(data_mimicHeartSteps[,outcome]), 
-                lam = 10000, 
+                lam = 100000, 
                 family="gaussian",
                 noise_scale=NULL, 
                 ridge_term=NULL, 
@@ -316,7 +318,7 @@ wcls_fit = wcls(
   outcome = 'logstep_30min', 
   treatment = 'intervention', 
   rand_prob = 0.5, 
-  moderator_formula= ~logstep_30min_lag1 + logstep_pre30min + day_in_study,
+  moderator_formula= ~ day_in_study,
   control_formula = ~logstep_30min_lag1 + logstep_pre30min + day_in_study,
   availability = NULL,
   numerator_prob = NULL,
@@ -328,7 +330,67 @@ wcls_res$causal_excursion_effect
 
 UI_return_python
 UI_return_R
+
 ```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tibble)
+
+DR_WCLS_R_df = UI_return_R %>%
+  transmute(
+    term  = E,
+    method = "DR_WCLS_LASSO (R)",
+    est   = GEE_est,
+    low   = lowCI,
+    up    = upperCI
+  )
+DR_WCLS_Py_df = UI_return_python %>%
+  transmute(
+    term  = E,
+    method = "DR_WCLS_LASSO (Python)",
+    est   = GEE_est,
+    low   = lowCI,
+    up    = upperCI
+  )
+
+wcls_df = as.data.frame(wcls_res$causal_excursion_effect) %>%
+  rownames_to_column("term") %>%       
+  transmute(
+    term,
+    method = "WCLS",
+    est  = Estimate,
+    low  = `95% LCL`,
+    up   = `95% UCL`
+  )
+
+
+box_plot_df = bind_rows(DR_WCLS_R_df, DR_WCLS_Py_df, wcls_df)
+
+intercept_df = box_plot_df[box_plot_df$term == '(Intercept)',]
+ggplot(intercept_df,
+       aes(x = term, y = est, color = method,
+           group = method)) +
+  geom_pointrange(aes(ymin = low, ymax = up),
+                  position = position_dodge(width = 0.5),
+                  linewidth = 1.1) +
+  labs(x = NULL, y = "Effect estimate",
+       color = "Method") +
+  theme_minimal()
+
+day_in_study_df = box_plot_df[box_plot_df$term == 'day_in_study',]
+ggplot(day_in_study_df,
+       aes(x = term, y = est, color = method,
+           group = method)) +
+  geom_pointrange(aes(ymin = low, ymax = up),
+                  position = position_dodge(width = 0.5),
+                  linewidth = 1.1) +
+  labs(x = NULL, y = "Effect estimate",
+       color = "Method") +
+  theme_minimal()
+```
+
 
 ### Arguments in DR_WCLS_LASSO
 
@@ -463,7 +525,7 @@ UI_return_IHS_python = DR_WCLS_LASSO(data = df_IHS_cleaned,
                           time = "time", Ht = Ht, St = St, At = At,
                           prob = prob, outcome = outcome,
                           # virtualenv_path = 'fakepath/wcls',
-                          method_pesu = "CVLASSO", lam = 65,
+                          method_pesu = "CVLASSO", lam = 55,
                           noise_scale = NULL, splitrat = 0.8,
                           level = 0.9, core_num=3, CI_algorithm = 'lapply',
                           max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "Python",
