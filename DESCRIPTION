@@ -3,7 +3,7 @@ Type: Package
 Title: Post-Selection Inference for MRTs
 Version: 1.0.0
 Authors@R: c(
-    person("Yuxuan","Chen",role=c("aut","cre"),email="yuxchen@umich.edu"),
+    person("Yuxuan","Chen",role=c("aut"),email="yuxchen@umich.edu"),
     person("Yaxuan","Huang",role=c("aut","cre"),email="yaxuanh@umich.edu"),
     person("Walter","Dempsey",role=c("aut"),email="wdem@umich.edu"))
 Description: Tools for conducting DR-WCLS with variable selection and 
