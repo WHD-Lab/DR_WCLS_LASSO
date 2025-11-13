@@ -1,17 +1,17 @@
 Package: MRTpostInfLASSO
 Type: Package
-Title: After LASSO variable selection, conduct post selective inference in the context of MRT.
-Version: 0.1.0
-Author: c(
-    person("Yuxuan","Chen",role=c("aut"),email="yuxchen@umich.edu"),
-    person("Yaxuan","Huang",role=c("aut"),email="yaxuanh@umich.edu"),
-    person("Walter","Dempsey",role=c("aut"),email="wdem@umich.edu")
-  )
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Title: Post-Selection Inference for MRTs
+Version: 1.0.0
+Authors@R: c(
+    person("Yuxuan","Chen",role=c("aut","cre"),email="yuxchen@umich.edu"),
+    person("Yaxuan","Huang",role=c("aut","cre"),email="yaxuanh@umich.edu"),
+    person("Walter","Dempsey",role=c("aut"),email="wdem@umich.edu"))
+Description: Tools for conducting DR-WCLS with variable selection and 
+    post-selection inference.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports:
     reticulate,
@@ -29,7 +29,12 @@ Imports:
 Suggests: 
     knitr,
     rmarkdown,
-    pkgdown
+    pkgdown,
+    dplyr,
+    ggplot2,
+    tibble,
+    selectiveInference,
+    MRTAnalysis
 Config/Needs/website: pkgdown
 VignetteBuilder: knitr
 URL: https://whd-lab.github.io/DR_WCLS_LASSO/
