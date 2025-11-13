@@ -35,71 +35,96 @@ DR_WCLS_LASSO(
 )
 }
 \arguments{
-\item{data}{raw data without pseudo-outcome, ptSt}
+\item{data}{A data frame with one row per decision time (raw data; no pseudo-outcomes).}
 
-\item{fold}{# of folds hope to split when generating pesudo outcome}
+\item{fold}{Number of folds used when estimating nuisance functions for the pseudo-outcome.}
 
-\item{ID}{the name of column where participants' ID are stored}
+\item{ID}{Column name of the participant identifier.}
 
-\item{time}{the name of column where time in study are stored}
+\item{time}{Column name of the time-in-study (decision point).}
 
-\item{Ht}{a vector that contains column names of control variables}
+\item{Ht}{A vector specifying history features.}
 
-\item{St}{a vector that contains column names of moderator variables; St should be a subset of Ht}
+\item{St}{A vector specifying moderator features.}
 
-\item{At}{column names of treatment (At)}
+\item{At}{Column name of the treatment indicator.}
 
-\item{prob}{column names of \eqn{p_t(A_t = 1|H_t)}, the experiment design treatment probability}
+\item{prob}{Column name of the design probability \eqn{p_t(A_t=1 \mid H_t)}.}
 
-\item{outcome}{column names of outcome variable}
+\item{outcome}{Column name of the outcome.}
 
-\item{method_pesu}{the machines learning method used when generate estimates of the nuisance parameters,
-and those values will be used to calculate the pseudo outcome. The available machine learning algorithms include
-cross validation LASSO ("CVLASSO"), Random Forest ("RandomForest"), and gradient boosting ("GradientBoosting").}
+\item{method_pesu}{ML method used to estimate nuisance functions for the
+pseudo-outcome. One of \code{"CVLASSO"}, \code{"RandomForest"}, \code{"GradientBoosting"}.}
 
-\item{lam}{the value of penalty term of randomized LASSO. If it is not provided, the default value will be used}
+\item{lam}{Penalty value for randomized LASSO; if \code{NULL}, a default is used.}
 
-\item{noise_scale}{Scale of Gaussian noise added to objective. Default is \eqn{\sqrt{\frac{(1 - \rho)}{\rho}*number\ of\ rows}*sd(y)} where \eqn{\rho} is the split rate.
-The random noises, \eqn{\omega}, are iid drawn from normal distribution with standard deviation noise_scale}
+\item{noise_scale}{Gaussian noise added to the objective.
+Default is \eqn{\sqrt{\frac{1-\rho}{\rho}\, n}\,\mathrm{sd}(y)} where \eqn{\rho}
+is the split rate and \eqn{n} is the number of rows.}
 
-\item{splitrat}{this value is corresponding to the data splitting rate. Details can read "Exact Selective Inference with Randomization" page 15 equation (10).
-This value will be used only when user doesn't provide the noise_scale.}
+\item{splitrat}{Data splitting rate \eqn{\rho}; used only if \code{noise_scale} is \code{NULL}.}
 
-\item{virtualenv_path}{Python virtual environment path}
+\item{virtualenv_path}{Path to a Python virtual environment (for \code{reticulate})
+when \code{varSelect_program = "Python"}.}
 
-\item{beta}{the true coefficient value (if simulation is conducted)}
+\item{beta}{True coefficients (for simulation use only).}
 
-\item{level}{the CI significant level}
+\item{level}{Confidence level (e.g., \code{0.90} for a 90\% interval).}
 
-\item{core_num}{the number of cores will be used for parallel calculation}
+\item{core_num}{Number of cores to use for parallel computation.}
 
-\item{CI_algorithm}{when calculate CI can choice using for loop, built-in parallel function, and doParallel function; "lapply", "parallel", "doParallel"}
+\item{CI_algorithm}{Method for CI computation: one of \code{"lapply"}, \code{"parallel"}, \code{"doParallel"}.}
 
-\item{max_tol}{the max error tolerance when calculate pivot value. The default value is \eqn{10^{-3}} i.e. the target pivot value is 5% for lower bound when calculating
-90% confidence interval, and the provided results is within 4.999% to 5.001%.}
+\item{max_iterate}{Maximum number of iterations used when searching for CI bounds.}
 
-\item{varSelect_program}{the user can decide using which program to do variable selection. If it is "Python", a valid virtual environment path must be provided, i.e.
-virtualenv_path can't be NULL. If it is "R", no virtual environment path is required.}
+\item{max_tol}{Maximum tolerance for the pivot error. Default \eqn{10^{-3}}.}
 
-\item{max_iterate:}{the max iteration number when searching CI}
+\item{varSelect_program}{\code{"Python"} (requires a valid \code{virtualenv_path}) or \code{"R"}.}
+
+\item{standardize_x, standardize_y}{Whether to standardize design matrix/outcome.}
 }
 \value{
-A table with the selected variables is returned. The returned table contains GEE estimate,
-the post selection true value (if simulation is conducted; Otherwise, NA is provided.)
-the p value,
-the confidence interval,
-the true corresponding pivot value for the lower bound and the upper bound.
+\describe{
+\item{selected_vars}{Selected variables.}
+\item{gee_est}{GEE estimates.}
+\item{p_value}{P-values for selected variables.}
+\item{CIs}{Confidence intervals.}
+\item{pivot_lower}{Target pivot value at the lower CI bound.}
+\item{pivot_upper}{Target pivot value at the upper CI bound.}
+}
 }
 \description{
-A function for basic LASSO DR-WCLS
+Fit a basic doubly robust weighted centered least squares (DR-WCLS)
+model with variable selection.
+}
+\details{
+The function generates a pseudo-outcome,
+performs variable selection, then conducts DR-WCLS to obtain
+inference with confidence intervals. Parallelism can be enabled via
+\code{CI_algorithm = "parallel"} or \code{"doParallel"}.
 }
 \examples{
+df = data.frame(
+    id = rep(1:10, each = 5),
+    decision_point = rep(1:5, times = 10),
+    intervention = rbinom(50, 1, 0.5),
+    rand_prob = 0.5,
+    logstep_30min = rnorm(50),
+    logstep_30min_lag1 = rnorm(50),
+    logstep_pre30min = rnorm(50),
+    is_at_home_or_work = sample(0:1, 50, TRUE),
+    day_in_study = rep(1:5, times = 10)
+  )
+Ht = c('logstep_30min_lag1','logstep_pre30min','is_at_home_or_work', 'day_in_study')
+St = c('logstep_30min_lag1','logstep_pre30min','is_at_home_or_work', 'day_in_study')
+UI_return = DR_WCLS_LASSO(
+  data = data, fold = 5, ID = "id", time = "decision_point",
+  At = "intervention", prob = "rand_prob", outcome = "logstep_30min",
+  method_pesu = "CVLASSO", lam = NULL, noise_scale = NULL, splitrat = 0.8,
+  beta = c(-0.2, 0.8, 0.3, 0.7, 0.3, rep(0, 21)),
+  level = 0.90, core_num = 3, CI_algorithm = "parallel",
+  varSelect_program = "R"
+)
 
-UI_return = DR_WCLS_LASSO(data = data, fold = 5, ID = "id", time = "decision_point",
-Ht = Ht, St = St, At = "action", prob = "prob", outcome = "outcome", method_pesu = "CVLASSO",
-lam = NULL, noise_scale = NULL, splitrat = 0.8,
-virtualenv_path = "path to selective-inference folder/env3",
-beta =  c(-0.2, 0.8, 0.3, 0.7, 0.3, rep(0, 21)), level = 0.9, core_num = 3,
-CI_algorithm = "parallel", varSelect_program = "R")
 
 }

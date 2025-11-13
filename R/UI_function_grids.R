@@ -1,49 +1,77 @@
 #' DR_WCLS_LASSO
 #'
-#' A function for basic LASSO DR-WCLS
+#' @description
+#' Fit a basic doubly robust weighted centered least squares (DR-WCLS)
+#' model with variable selection.
 #'
-#' @param data raw data without pseudo-outcome, ptSt
-#' @param fold # of folds hope to split when generating pesudo outcome
-#' @param ID the name of column where participants' ID are stored
-#' @param time the name of column where time in study are stored
-#' @param Ht a vector that contains column names of control variables
-#' @param St a vector that contains column names of moderator variables; St should be a subset of Ht
-#' @param At column names of treatment (At)
-#' @param prob column names of \eqn{p_t(A_t = 1|H_t)}, the experiment design treatment probability
-#' @param outcome column names of outcome variable
-#' @param method_pesu the machines learning method used when generate estimates of the nuisance parameters,
-#' and those values will be used to calculate the pseudo outcome. The available machine learning algorithms include
-#' cross validation LASSO ("CVLASSO"), Random Forest ("RandomForest"), and gradient boosting ("GradientBoosting").
-#' @param lam the value of penalty term of randomized LASSO. If it is not provided, the default value will be used
-#' @param noise_scale Scale of Gaussian noise added to objective. Default is \eqn{\sqrt{\frac{(1 - \rho)}{\rho}*number\ of\ rows}*sd(y)} where \eqn{\rho} is the split rate.
-#' The random noises, \eqn{\omega}, are iid drawn from normal distribution with standard deviation noise_scale
-#' @param splitrat this value is corresponding to the data splitting rate. Details can read "Exact Selective Inference with Randomization" page 15 equation (10).
-#' This value will be used only when user doesn't provide the noise_scale.
-#' @param virtualenv_path Python virtual environment path
-#' @param beta the true coefficient value (if simulation is conducted)
-#' @param level the CI significant level
-#' @param core_num the number of cores will be used for parallel calculation
-#' @param CI_algorithm when calculate CI can choice using for loop, built-in parallel function, and doParallel function; "lapply", "parallel", "doParallel"
-#' @param max_iterate: the max iteration number when searching CI
-#' @param max_tol the max error tolerance when calculate pivot value. The default value is \eqn{10^{-3}} i.e. the target pivot value is 5% for lower bound when calculating
-#' 90% confidence interval, and the provided results is within 4.999% to 5.001%.
-#' @param varSelect_program the user can decide using which program to do variable selection. If it is "Python", a valid virtual environment path must be provided, i.e.
-#' virtualenv_path can't be NULL. If it is "R", no virtual environment path is required.
+#' @param data A data frame with one row per decision time (raw data; no pseudo-outcomes).
+#' @param fold Number of folds used when estimating nuisance functions for the pseudo-outcome.
+#' @param ID Column name of the participant identifier.
+#' @param time Column name of the time-in-study (decision point).
+#' @param Ht A vector specifying history features.
+#' @param St A vector specifying moderator features.
+#' @param At Column name of the treatment indicator.
+#' @param prob Column name of the design probability \eqn{p_t(A_t=1 \mid H_t)}.
+#' @param outcome Column name of the outcome.
+#' @param method_pesu ML method used to estimate nuisance functions for the
+#'   pseudo-outcome. One of `"CVLASSO"`, `"RandomForest"`, `"GradientBoosting"`.
+#' @param lam Penalty value for randomized LASSO; if `NULL`, a default is used.
+#' @param noise_scale Gaussian noise added to the objective. 
+#'   Default is \eqn{\sqrt{\frac{1-\rho}{\rho}\, n}\,\mathrm{sd}(y)} where \eqn{\rho}
+#'   is the split rate and \eqn{n} is the number of rows.
+#' @param splitrat Data splitting rate \eqn{\rho}; used only if `noise_scale` is `NULL`.
+#' @param virtualenv_path Path to a Python virtual environment (for `reticulate`)
+#'   when `varSelect_program = "Python"`.
+#' @param beta True coefficients (for simulation use only).
+#' @param level Confidence level (e.g., `0.90` for a 90% interval).
+#' @param core_num Number of cores to use for parallel computation.
+#' @param CI_algorithm Method for CI computation: one of `"lapply"`, `"parallel"`, `"doParallel"`.
+#' @param max_iterate Maximum number of iterations used when searching for CI bounds.
+#' @param max_tol Maximum tolerance for the pivot error. Default \eqn{10^{-3}}.
+#' @param varSelect_program `"Python"` (requires a valid `virtualenv_path`) or `"R"`.
+#' @param standardize_x,standardize_y Whether to standardize design matrix/outcome.
 #'
-#' @return A table with the selected variables is returned. The returned table contains GEE estimate,
-#' the post selection true value (if simulation is conducted; Otherwise, NA is provided.)
-#' the p value,
-#' the confidence interval,
-#' the true corresponding pivot value for the lower bound and the upper bound.
+#' @return
+#' \describe{
+#'   \item{selected_vars}{Selected variables.}
+#'   \item{gee_est}{GEE estimates.}
+#'   \item{p_value}{P-values for selected variables.}
+#'   \item{CIs}{Confidence intervals.}
+#'   \item{pivot_lower}{Target pivot value at the lower CI bound.}
+#'   \item{pivot_upper}{Target pivot value at the upper CI bound.}
+#' }
+#'
+#' @details
+#' The function generates a pseudo-outcome,
+#' performs variable selection, then conducts DR-WCLS to obtain
+#' inference with confidence intervals. Parallelism can be enabled via
+#' `CI_algorithm = "parallel"` or `"doParallel"`.
+#'
 #' @examples
+#' df = data.frame(
+#'     id = rep(1:10, each = 5),
+#'     decision_point = rep(1:5, times = 10),
+#'     intervention = rbinom(50, 1, 0.5),
+#'     rand_prob = 0.5,
+#'     logstep_30min = rnorm(50),
+#'     logstep_30min_lag1 = rnorm(50),
+#'     logstep_pre30min = rnorm(50),
+#'     is_at_home_or_work = sample(0:1, 50, TRUE),
+#'     day_in_study = rep(1:5, times = 10)
+#'   )
+#' Ht = c('logstep_30min_lag1','logstep_pre30min','is_at_home_or_work', 'day_in_study')
+#' St = c('logstep_30min_lag1','logstep_pre30min','is_at_home_or_work', 'day_in_study')
+#' UI_return = DR_WCLS_LASSO(
+#'   data = data, fold = 5, ID = "id", time = "decision_point",
+#'   At = "intervention", prob = "rand_prob", outcome = "logstep_30min",
+#'   method_pesu = "CVLASSO", lam = NULL, noise_scale = NULL, splitrat = 0.8,
+#'   beta = c(-0.2, 0.8, 0.3, 0.7, 0.3, rep(0, 21)),
+#'   level = 0.90, core_num = 3, CI_algorithm = "parallel",
+#'   varSelect_program = "R"
+#' )
+#' 
 #'
-#' UI_return = DR_WCLS_LASSO(data = data, fold = 5, ID = "id", time = "decision_point",
-#' Ht = Ht, St = St, At = "action", prob = "prob", outcome = "outcome", method_pesu = "CVLASSO",
-#' lam = NULL, noise_scale = NULL, splitrat = 0.8,
-#' virtualenv_path = "path to selective-inference folder/env3",
-#' beta =  c(-0.2, 0.8, 0.3, 0.7, 0.3, rep(0, 21)), level = 0.9, core_num = 3,
-#' CI_algorithm = "parallel", varSelect_program = "R")
-#'
+#
 #' @import parallel
 #' @import doParallel
 #' @import foreach
