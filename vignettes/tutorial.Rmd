@@ -501,7 +501,7 @@ UI_return_int_R
 
 IHS is a micro-randomized trial involving 859 medical interns. The aim of the study is to investigate how mHealth interventions affect participants' weekly mood, physical activity, and sleep. Each day, participants had a 0.5 probability of receiving a tailored message. The dataset includes a range of variables collected from wearable devices.
 
-```{r}
+```{r, eval = FALSE}
 df_IHS = read.csv('~/Desktop/25Winter/IHS Design/Hyperparameter/dfEventsThreeMonthsTimezones.csv')
 df_IHS$prob = rep(0.5, length(df_IHS$PARTICIPANTIDENTIFIER))
 df_IHS$less27 = (df_IHS$Age < 27)
@@ -534,7 +534,7 @@ UI_return_IHS_python = DR_WCLS_LASSO(data = df_IHS_cleaned,
 UI_return_IHS_python
 ```
 
-```{r}
+```{r, eval = FALSE}
 set.seed(100)
 UI_return_IHS_R = DR_WCLS_LASSO(data = df_IHS_cleaned,
                           fold = 5, ID = ID,
