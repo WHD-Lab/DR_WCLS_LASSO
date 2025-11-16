@@ -5,14 +5,15 @@
 #' @param id the assigned id for this specific individual
 #' @param T the number of observations for this individual
 #' @param P the number of measurements or predictors
-#' @param sigma_residual the noise added to the moderator formula when generate pesudo outcome. This noise is
+#' @param sigma_residual the noise added to the moderator formula when generate pseudo outcome. This noise is
 #'                 generated using ARIMA
-#' @param sigma_randint the noise added to the moderator formula when generate pesudo outcome.
-#' @param main_rand the noise added to the control formula when generate pesudo outcome. This noise is generated using ARIMA
-#' @param rho this value is used to simulate state or predictors. We also use ARIMA when generating predictors, and
+#' @param sigma_randint the noise added to the moderator formula so the intercept is random across participants
+#'  when generate pseudo outcome.
+#' @param main_rand the noise added to the control formula when generate pseudo outcome. This noise is generated using ARIMA
+#' @param rho this value is used to simulate state or predictors and random noises. We also use ARIMA when generating predictors, and
 #'      rho defines how much of the past values influence the current value in an autoregressive model
-#' @param beta_logit the true value of beta when simulate the probability of assign treatment \eqn{p(A_t = 1|H_t)}
-#' @param model the true model for moderator when generate pesudo outcomes
+#' @param beta_logit the true value of beta when simulate the probability of assigning treatment \eqn{p(A_t = 1|H_t)}
+#' @param model the true model for moderator when generate pseudo outcomes
 #' @param beta the true coefficients for moderator
 #' @param theta1 the coefficients for the working model of control variables. For now, we just simply assume the working model
 #'       contains the all predictors with coefficients equal to theta1
@@ -44,14 +45,14 @@ generate_individual <- function(id=1, T, P, sigma_residual, sigma_randint, main_
   # id: the assigned id for this specific individual
   # T: the number of observations for this individual
   # P: the number of measurements or predictors
-  # sigma_residual: the noise added to the moderator formula when generate pesudo outcome. This noise is
+  # sigma_residual: the noise added to the moderator formula when generate pseudo outcome. This noise is
   #                 generated using ARIMA
-  # sigma_randint: the noise added to the moderator formula when generate pesudo outcome.
-  # main_rand: the noise added to the control formula when generate pesudo outcome. This noise is generated using ARIMA
+  # sigma_randint: the noise added to the moderator formula when generate pseudo outcome.
+  # main_rand: the noise added to the control formula when generate pseudo outcome. This noise is generated using ARIMA
   # rho: this value is used to simulate state or predictors. We also use ARIMA when generating predictors, and
   #      rho defines how much of the past values influence the current value in an autoregressive model
   # beta_logit: the true value of beta when simulate the probability of assign treatment p(At = 1|Ht). This value has to be a matrix.
-  # model: the true model for moderator when generate pesudo outcomes
+  # model: the true model for moderator when generate pseudo outcomes
   # beta: the true coefficients for moderator
   # theta1: the coefficients for the working model of control variables. For now, we just simply assume the working model
   #       contains the all predictors with coefficients equal to theta1
@@ -111,16 +112,16 @@ generate_individual <- function(id=1, T, P, sigma_residual, sigma_randint, main_
 #' Simulate a MRT dataset
 #'
 #' @param N the number of participants to simulate
-#' @param T the number of observations for this individual
+#' @param T the number of observations for each individual
 #' @param P the number of measurements or predictors
-#' @param sigma_residual the noise added to the moderator formula when generate pesudo outcome. This noise is
+#' @param sigma_residual the noise added to the moderator formula when generate pseudo outcome. This noise is
 #'                 generated using ARIMA
-#' @param sigma_randint the noise added to the moderator formula when generate pesudo outcome.
-#' @param main_rand the noise added to the control formula when generate pesudo outcome. This noise is generated using ARIMA
-#' @param rho this value is used to simulate state or predictors. We also use ARIMA when generating predictors, and
+#' @param sigma_randint the noise added to the moderator formula so the intercept is random across participants when generate pseudo outcome.
+#' @param main_rand the noise added to the control formula when generate pseudo outcome. This noise is generated using ARIMA
+#' @param rho this value is used to simulate state or predictors and random noises. We also use ARIMA when generating predictors, and
 #'      rho defines how much of the past values influence the current value in an autoregressive model
 #' @param beta_logit the true value of beta when simulate the probability of assign treatment \eqn{p(A_t = 1|H_t)}. This value has to be a matrix.
-#' @param model the true model for moderator when generate pesudo outcomes
+#' @param model the true model for moderator when generate pseudo outcomes
 #' @param beta the true coefficients for moderator
 #' @param theta1 the coefficients for the working model of control variables. For now, we just simply assume the working model
 #'       contains the all predictors with coefficients equal to theta1
@@ -150,14 +151,14 @@ generate_dataset <- function(N, T, P, sigma_residual, sigma_randint, main_rand =
   # N: the number of participants you hope to simulate
   # T: how many observations per participant
   # P: how many predictors to simulate
-  # sigma_residual: the noise added to the moderator formula when generate pesudo outcome. This noise is
+  # sigma_residual: the noise added to the moderator formula when generate pseudo outcome. This noise is
   #                 generated using ARIMA
-  # sigma_randint: the noise added to the moderator formula when generate pesudo outcome.
-  # main_rand: the noise added to the control formula when generate pesudo outcome. This noise is generated using ARIMA
+  # sigma_randint: the noise added to the moderator formula when generate pseudo outcome.
+  # main_rand: the noise added to the control formula when generate pseudo outcome. This noise is generated using ARIMA
   # rho: this value is used to simulate state or predictors. We also use ARIMA when generating predictors, and
   #      rho defines how much of the past values influence the current value in an autoregressive model
   # beta_logit: the true value of beta when simulate the probability of assign treatment p(At = 1|Ht)
-  # model: the true model for moderator when generate pesudo outcomes
+  # model: the true model for moderator when generate pseudo outcomes
   # beta: the true coefficients for moderator
   # theta1: the coefficients for the working model of control variables. For now, we just simply assume the working model
   #       contains the all predictors with coefficients equal to theta1

@@ -40,10 +40,20 @@ This function returns a dataset with pseudo outcome. It learns appropriate worki
 generates pseudo outcome using the DR-WCLS.
 }
 \description{
-This function uses Random Forest to conduct model training on each fold then estimates \eqn{E[Y_{t+1}|H_t, A_t], E[A_t|H_t], E[A_t|S_t]} for reserved fold. Then
+Cross-fitting is applied when generate the target pseudo-outcome.
+This function uses Random Forest to conduct model training on folds then estimates \eqn{E[Y_{t+1}|H_t, A_t], E[A_t|H_t], E[A_t|S_t]} for the reserved fold. Then
 the function returns a dataset with column named "yDR" for DR-WCLS pseudo outcome.
 }
 \examples{
-pseudo_outcome_generator_rf_v2(fold = 5,ID = "id", data, Ht, St, "action", "outcome",core_num = 5)
+
+sim_data = generate_dataset(N = 1000, T = 40, P = 50, sigma_residual = 1.5, sigma_randint = 1.5, main_rand = 3, rho = 0.7,
+  beta_logit = c(-1, 1.6 * rep(1/50, 50)), model = ~ state1 + state2 + state3 + state4,
+  beta = matrix(c(-1, 1.7, 1.5, -1.3, -1),ncol = 1),
+  theta1 = 0.8)
+
+Ht = unlist(lapply(1:50, FUN = function(X) paste0("state",X)))
+St = unlist(lapply(1:25, FUN = function(X) paste0("state",X)))
+
+pseudo_outcome_generator_rf_v2(fold = 5,ID = "id", sim_data, Ht, St, "action", "outcome",core_num = 5)
 
 }

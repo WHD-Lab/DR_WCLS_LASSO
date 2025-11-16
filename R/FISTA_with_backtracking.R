@@ -5,6 +5,66 @@
 # Sometimes this value is hard to obtain
 # so we can use below algorithm to estimate the Lipschitz constant
 
+
+#' FISTA_backtracking
+#'
+#' This fuction applies the FISTA algorithm with backtracking to solve randomized LASSO problem. Reference paper is
+#' "A Fast Iterative Shrinkage-Thresholding Algorithm for Linear Inverse Problems" by Amir Beck and Marc Teboulle.
+#'
+#' @param data the output of pseudo_outcomecal function
+#' @param ID the name of column where participants' ID are stored
+#' @param moderator_formula determines the formula for the f(St)T*beta function
+#' @param lam the value of penalty term of randomized LASSO. If it is not provided, the default value will be used.
+#' Default is
+#' \eqn{\sqrt{2n* logp} \rho sd(y)} where \eqn{\rho}
+#'   is the split rate and \eqn{n} is the number of rows.
+#' @param noise_scale Standard deviation of Gaussian noise added to objective.
+#' Default is \eqn{\sqrt{\frac{1-\rho}{\rho}\, n}\,\mathrm{sd}(y)} where \eqn{\rho}
+#'   is the split rate and \eqn{n} is the number of rows.
+#' The random noises, \eqn{\omega}, are iid drawn from normal distribution with standard deviation noise_scale
+#' @param splitrat this value is corresponding to the data splitting rate. Details can read "Exact Selective Inference with Randomization" page 15 equation (10).
+#' This value will be used only when user doesn't provide the `noise_scale` or `lam`.
+#' @param max_ite the maximum iteration for searching predictors
+#' @param tol when the improvement of residual sum of square less than this number, stop searching
+#' @param beta the true coefficient value (if simulation is conducted)
+#'
+#' @return
+#' \describe{
+#' \item{formula}{the raw model before selection}
+#' \item{E}{Selected variables}
+#' \item{NE}{Not selected variables}
+#' \item{n}{the number of participants in the study}
+#' \item{soln}{Estimated coefficients of selected variables from the penalized randomized regression.}
+#' \item{Z}{Subgradient of unselected variables.}
+#' \item{OMEGA}{The scaled variance for the added random noise. This value is scaled by 4.}
+#' \item{lam}{Scale orginal regularization parameter by -2 for later inference purpose.}
+#' \item{ori_lam}{Regularization parameter (lambda) used in the penalization.}
+#' \item{perturb}{Random noise added for each variables. This value is scaled by -2 for later inference purpose.}
+#' \item{nonzero}{Boolean vector indicating which variables were selected.}
+#' \item{postbeta}{True beta projected on space spinned by post-selection predictors}
+#' \item{sign_soln}{Signs of the estimated coefficients for selected variables}
+#' }
+#'
+#' @examples
+#'
+#' sim_data = generate_dataset(N = 1000, T = 40, P = 50, sigma_residual = 1.5, sigma_randint = 1.5, main_rand = 3, rho = 0.7,
+#'   beta_logit = c(-1, 1.6 * rep(1/50, 50)), model = ~ state1 + state2 + state3 + state4,
+#'   beta = matrix(c(-1, 1.7, 1.5, -1.3, -1),ncol = 1),
+#'   theta1 = 0.8)
+#'
+#' Ht = unlist(lapply(1:50, FUN = function(X) paste0("state",X)))
+#' St = unlist(lapply(1:25, FUN = function(X) paste0("state",X)))
+#'
+#' pseudo_outcome_CVlasso = pseudo_outcome_generator_CVlasso(fold = 5,ID = "id", sim_data, Ht,
+#'   St, "action", "outcome",core_num = 5)
+#'
+#' my_formula = as.formula(paste("yDR ~ ", paste(St, collapse = " + ")))
+#'
+#' FISTA_backtracking(data = sim_data, moderator_formula = my_formula, lam = NULL, noise_scale = NULL,
+#'   splitrat = 0.7, beta = matrix(c(-1, 1.7, 1.5, -1.3, -1, rep(0,21)), ncol = 1))
+#'
+#'
+
 FISTA_backtracking = function(data,ID, moderator_formula, lam = NULL, noise_scale = NULL,
                               splitrat = 0.8, max_ite = 10^(5), tol = 10^(-4), beta = NULL){
 

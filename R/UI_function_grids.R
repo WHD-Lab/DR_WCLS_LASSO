@@ -13,76 +13,77 @@
 #' @param At Column name of the treatment indicator.
 #' @param prob Column name of the design probability \eqn{p_t(A_t=1 \mid H_t)}.
 #' @param outcome Column name of the outcome.
-#' @param method_pesu ML method used to estimate nuisance functions for the
+#' @param method_pseu ML method used to estimate nuisance functions for the
 #'   pseudo-outcome. One of `"CVLASSO"`, `"RandomForest"`, `"GradientBoosting"`.
-#' @param lam Penalty value for randomized LASSO; if `NULL`, a default is used.
-#' @param noise_scale Gaussian noise added to the objective. 
+#' @param lam Penalty value for randomized LASSO; if `NULL`, a default is used. Default is
+#' \eqn{\sqrt{2n* logp} \rho sd(y)} where \eqn{\rho}
+#'   is the split rate and \eqn{n} is the number of rows.
+#' @param noise_scale Gaussian noise added to the objective.
 #'   Default is \eqn{\sqrt{\frac{1-\rho}{\rho}\, n}\,\mathrm{sd}(y)} where \eqn{\rho}
 #'   is the split rate and \eqn{n} is the number of rows.
-#' @param splitrat Data splitting rate \eqn{\rho}; used only if `noise_scale` is `NULL`.
+#' @param splitrat Data splitting rate \eqn{\rho}; used only if `noise_scale` or `lam` is `NULL`.
 #' @param virtualenv_path Path to a Python virtual environment (for `reticulate`)
 #'   when `varSelect_program = "Python"`.
 #' @param beta True coefficients (for simulation use only).
 #' @param level Confidence level (e.g., `0.90` for a 90% interval).
-#' @param core_num Number of cores to use for parallel computation.
-#' @param CI_algorithm Method for CI computation: one of `"lapply"`, `"parallel"`, `"doParallel"`.
-#' @param max_iterate Maximum number of iterations used when searching for CI bounds.
+#' @param core_num Number of cores to use for parallel computation when compute pseudo-outcome.
 #' @param max_tol Maximum tolerance for the pivot error. Default \eqn{10^{-3}}.
 #' @param varSelect_program `"Python"` (requires a valid `virtualenv_path`) or `"R"`.
-#' @param standardize_x,standardize_y Whether to standardize design matrix/outcome.
+#' @param standardize_x Logical flag for design matrix standardization, prior to the model selection.
+#' @param standardize_y Logical flag for outcome standardization, prior to the model selection.
 #'
 #' @return
 #' \describe{
-#'   \item{selected_vars}{Selected variables.}
-#'   \item{gee_est}{GEE estimates.}
+#'   \item{E}{Selected variables.}
+#'   \item{GEE_est}{GEE estimates without adjusting for selection events.}
+#'   \item{lowCI}{lower bound of confidence interval.}
+#'   \item{upperCI}{upper bound of confidence interval.}
+#'   \item{prop_low}{the exact quantile for the lower bound of confidence interval.}
+#'   \item{prop_up}{the exact quantile for the upper bound of confidence interval.}
 #'   \item{p_value}{P-values for selected variables.}
-#'   \item{CIs}{Confidence intervals.}
-#'   \item{pivot_lower}{Target pivot value at the lower CI bound.}
-#'   \item{pivot_upper}{Target pivot value at the upper CI bound.}
+#'   \item{post_true}{condition on the selection events, the true values for parameter \eqn{\beta_E}
+#'   if simulation is conducted and true \eqn{\beta} values are provided; Otherwise, this value will not be
+#'    present}.
+#'   \item{true_signal}{logical value indicating whether the selected parameter is one of the true signals
+#'   if simulation is conducted and true \eqn{\beta} values are provided; Otherwise, this value will not be
+#'    present}
 #' }
 #'
 #' @details
 #' The function generates a pseudo-outcome,
-#' performs variable selection, then conducts DR-WCLS to obtain
-#' inference with confidence intervals. Parallelism can be enabled via
-#' `CI_algorithm = "parallel"` or `"doParallel"`.
+#' performs variable selection, then conducts post-selective inference to obtain
+#' valid confidence intervals adjusted for data dependent model selection.
 #'
 #' @examples
-#' df = data.frame(
-#'     id = rep(1:10, each = 5),
-#'     decision_point = rep(1:5, times = 10),
-#'     intervention = rbinom(50, 1, 0.5),
-#'     rand_prob = 0.5,
-#'     logstep_30min = rnorm(50),
-#'     logstep_30min_lag1 = rnorm(50),
-#'     logstep_pre30min = rnorm(50),
-#'     is_at_home_or_work = sample(0:1, 50, TRUE),
-#'     day_in_study = rep(1:5, times = 10)
-#'   )
-#' Ht = c('logstep_30min_lag1','logstep_pre30min','is_at_home_or_work', 'day_in_study')
-#' St = c('logstep_30min_lag1','logstep_pre30min','is_at_home_or_work', 'day_in_study')
-#' UI_return = DR_WCLS_LASSO(
-#'   data = data, fold = 5, ID = "id", time = "decision_point",
-#'   At = "intervention", prob = "rand_prob", outcome = "logstep_30min",
-#'   method_pesu = "CVLASSO", lam = NULL, noise_scale = NULL, splitrat = 0.8,
-#'   beta = c(-0.2, 0.8, 0.3, 0.7, 0.3, rep(0, 21)),
-#'   level = 0.90, core_num = 3, CI_algorithm = "parallel",
-#'   varSelect_program = "R"
-#' )
-#' 
+#'   sim_data = generate_dataset(N = 1000, T = 40, P = 50, sigma_residual = 1.5, sigma_randint = 1.5, main_rand = 3, rho = 0.7,
+#'   beta_logit = c(-1, 1.6 * rep(1/50, 50)), model = ~ state1 + state2 + state3 + state4,
+#'   beta = matrix(c(-1, 1.7, 1.5, -1.3, -1),ncol = 1),
+#'   theta1 = 0.8)
+#'   Ht = unlist(lapply(1:50, FUN = function(X) paste0("state",X)))
+#'   St = unlist(lapply(1:25, FUN = function(X) paste0("state",X)))
+#'
+#'   UI_return = DR_WCLS_LASSO(data = sim_data,
+#'   fold = 5, ID = "id",
+#'   time = "decision_point",
+#'   Ht = Ht, St = St, At = "action",
+#'   prob = "prob", outcome = "outcome",
+#'   method_pseu = "CVLASSO", lam = NULL, noise_scale = NULL, splitrat = 0.7,
+#'   varSelect_program = "R", standardize_x = F, standardize_y = F)
+#'
+#'
+#'
 #'
 #
 #' @import parallel
-#' @import doParallel
 #' @import foreach
 #' @import zoo
 #'
 #' @export
 
-DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method_pesu,
+DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method_pseu,
                                  lam = NULL, noise_scale = NULL, splitrat = 0.8, virtualenv_path = '',
-                                 beta = NULL, level = 0.9, core_num = NULL, CI_algorithm = "lapply",
-                         max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "Python",
+                                 beta = NULL, level = 0.9, core_num = NULL,
+                         max_tol = 10^{-3}, varSelect_program = "Python",
                          standardize_x = TRUE, standardize_y = TRUE){
   # data: raw data without pesudo-outcome, ptSt.
   # fold: # of folds hope to split when generating pesudo outcome
@@ -92,7 +93,7 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
   # St: a vector that contains column names of moderator variables; St should be a subset of Ht
   # At: column names of treatment (At)
   # outcome: column names of outcome variable
-  # method_pesu: the machines learning method used when generate estimates of the nuisance parameters, and those values will be used to calculate the
+  # method_pseu: the machines learning method used when generate estimates of the nuisance parameters, and those values will be used to calculate the
   #             pesudo outcome
   # lam: the value of penalty term of randomized LASSO. If it is not provided, the default value will be used
   # noise_scale: Scale of Gaussian noise added to objective. Default is sqrt((1 - splitrat)/splitrat*NT)*sd(y).
@@ -103,8 +104,6 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
   # beta: the true coefficient value (if simulation is conducted)
   # level: the CI significant level
   # core_num: the number of cores will be used for parallel calculation
-  # CI_algorithm: when calculate CI can choice using for loop, built-in parallel function, and doParallel function; "lapply", "parallel", "doParallel"
-  # max_iterate: the max iteration number when searching CI
   # max_tol: the max error tolerance when calculate pivot value
   # varSelect_program: the user can decide using which program to do variable selection. If it is "Python", a valid virtual environment path must be provided, i.e.
   # virtualenv_path can't be NULL. If it is "R", no virtual environment path is required.
@@ -122,15 +121,15 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
     data[,outcome] = scale(data[,outcome], center = FALSE, scale = y_scale)
   }
 
-  if(method_pesu == "CVLASSO") {
+  if(method_pseu == "CVLASSO") {
     ps = pseudo_outcome_generator_CVlasso(fold, ID, data, Ht, St, At, prob=prob, outcome, core_num)
   }
 
-  if(method_pesu == "RandomForest") {
+  if(method_pseu == "RandomForest") {
     ps = pseudo_outcome_generator_rf_v2(fold, ID, data, Ht, St, At, prob=prob, outcome, core_num)
   }
 
-  if(method_pesu == "GradientBoosting") {
+  if(method_pseu == "GradientBoosting") {
     ps = pseudo_outcome_generator_gbm(fold, ID, data, Ht, St, At, prob=prob, outcome, core_num)
   }
 
@@ -142,13 +141,13 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
   ps = ps[!is.na(ps$yDR),]
 
   if(is.null(lam) & is.null(noise_scale)) {
-    if(varSelect_program == "Python") {select = variable_selection_PY_penal_int(ps, ID, my_formula, splitrat=splitrat, virtualenv_path= virtualenv_path, beta = beta)}
+    if(varSelect_program == "Python") {select = variable_selection_PY(ps, ID, my_formula, splitrat=splitrat, virtualenv_path= virtualenv_path, beta = beta)}
 
     if(varSelect_program == "R") {select = FISTA_backtracking(ps, ID, my_formula, splitrat=splitrat, beta = beta)}
   }
 
   if(!is.null(lam) & is.null(noise_scale)) {
-    if(varSelect_program == "Python") {select = variable_selection_PY_penal_int(ps, ID, my_formula, lam = lam, splitrat = splitrat,
+    if(varSelect_program == "Python") {select = variable_selection_PY(ps, ID, my_formula, lam = lam, splitrat = splitrat,
                                                                                 virtualenv_path= virtualenv_path, beta = beta)}
 
     if(varSelect_program == "R") {select = FISTA_backtracking(ps, ID, my_formula, lam = lam, splitrat = splitrat, beta = beta)}
@@ -156,7 +155,7 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
   }
 
   if(is.null(lam) & !is.null(noise_scale)) {
-    if(varSelect_program == "Python") {select = variable_selection_PY_penal_int(ps, ID, my_formula, noise_scale = noise_scale, splitrat = splitrat,
+    if(varSelect_program == "Python") {select = variable_selection_PY(ps, ID, my_formula, noise_scale = noise_scale, splitrat = splitrat,
                                                                                 virtualenv_path= virtualenv_path, beta = beta)}
     if(varSelect_program == "R") {
       select = FISTA_backtracking(ps, ID, my_formula, noise_scale = noise_scale, splitrat = splitrat, beta = beta)
@@ -165,7 +164,7 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
   }
 
   if(!is.null(lam) & !is.null(noise_scale)) {
-    if(varSelect_program == "Python") {select = variable_selection_PY_penal_int(ps, ID, my_formula, lam = lam, noise_scale = noise_scale,
+    if(varSelect_program == "Python") {select = variable_selection_PY(ps, ID, my_formula, lam = lam, noise_scale = noise_scale,
                                              splitrat = splitrat, virtualenv_path= virtualenv_path, beta = beta)}
 
     if(varSelect_program == "R") {select = FISTA_backtracking(ps, ID, my_formula, lam = lam, noise_scale = noise_scale,
@@ -205,7 +204,7 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
 
     CI = CI_grids(logW = logW, betaEjhat = AsyNormbeta_ej[["betaEj_cal"]][["betaEj"]],
                   var_name = select$E[i],
-                  condition = condition, tol = 10^(-3), level = 0.9)
+                  condition = condition, tol = max_tol, level = level)
 
     return(CI)
   }

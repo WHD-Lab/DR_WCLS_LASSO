@@ -21,23 +21,23 @@ generate_dataset(
 \arguments{
 \item{N}{the number of participants to simulate}
 
-\item{T}{the number of observations for this individual}
+\item{T}{the number of observations for each individual}
 
 \item{P}{the number of measurements or predictors}
 
-\item{sigma_residual}{the noise added to the moderator formula when generate pesudo outcome. This noise is
+\item{sigma_residual}{the noise added to the moderator formula when generate pseudo outcome. This noise is
 generated using ARIMA}
 
-\item{sigma_randint}{the noise added to the moderator formula when generate pesudo outcome.}
+\item{sigma_randint}{the noise added to the moderator formula so the intercept is random across participants when generate pseudo outcome.}
 
-\item{main_rand}{the noise added to the control formula when generate pesudo outcome. This noise is generated using ARIMA}
+\item{main_rand}{the noise added to the control formula when generate pseudo outcome. This noise is generated using ARIMA}
 
-\item{rho}{this value is used to simulate state or predictors. We also use ARIMA when generating predictors, and
+\item{rho}{this value is used to simulate state or predictors and random noises. We also use ARIMA when generating predictors, and
 rho defines how much of the past values influence the current value in an autoregressive model}
 
 \item{beta_logit}{the true value of beta when simulate the probability of assign treatment \eqn{p(A_t = 1|H_t)}. This value has to be a matrix.}
 
-\item{model}{the true model for moderator when generate pesudo outcomes}
+\item{model}{the true model for moderator when generate pseudo outcomes}
 
 \item{beta}{the true coefficients for moderator}
 

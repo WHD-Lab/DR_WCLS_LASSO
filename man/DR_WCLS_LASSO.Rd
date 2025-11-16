@@ -14,7 +14,7 @@ DR_WCLS_LASSO(
   At,
   prob,
   outcome,
-  method_pesu,
+  method_pseu,
   lam = NULL,
   noise_scale = NULL,
   splitrat = 0.8,
@@ -22,10 +22,6 @@ DR_WCLS_LASSO(
   beta = NULL,
   level = 0.9,
   core_num = NULL,
-  CI_algorithm = "lapply",
-  max_iterate = 10^{
-     6
- },
   max_tol = 10^{
      -3
  },
@@ -53,16 +49,18 @@ DR_WCLS_LASSO(
 
 \item{outcome}{Column name of the outcome.}
 
-\item{method_pesu}{ML method used to estimate nuisance functions for the
+\item{method_pseu}{ML method used to estimate nuisance functions for the
 pseudo-outcome. One of \code{"CVLASSO"}, \code{"RandomForest"}, \code{"GradientBoosting"}.}
 
-\item{lam}{Penalty value for randomized LASSO; if \code{NULL}, a default is used.}
+\item{lam}{Penalty value for randomized LASSO; if \code{NULL}, a default is used. Default is
+\eqn{\sqrt{2n* logp} \rho sd(y)} where \eqn{\rho}
+is the split rate and \eqn{n} is the number of rows.}
 
 \item{noise_scale}{Gaussian noise added to the objective.
 Default is \eqn{\sqrt{\frac{1-\rho}{\rho}\, n}\,\mathrm{sd}(y)} where \eqn{\rho}
 is the split rate and \eqn{n} is the number of rows.}
 
-\item{splitrat}{Data splitting rate \eqn{\rho}; used only if \code{noise_scale} is \code{NULL}.}
+\item{splitrat}{Data splitting rate \eqn{\rho}; used only if \code{noise_scale} or \code{lam} is \code{NULL}.}
 
 \item{virtualenv_path}{Path to a Python virtual environment (for \code{reticulate})
 when \code{varSelect_program = "Python"}.}
@@ -71,26 +69,31 @@ when \code{varSelect_program = "Python"}.}
 
 \item{level}{Confidence level (e.g., \code{0.90} for a 90\% interval).}
 
-\item{core_num}{Number of cores to use for parallel computation.}
-
-\item{CI_algorithm}{Method for CI computation: one of \code{"lapply"}, \code{"parallel"}, \code{"doParallel"}.}
-
-\item{max_iterate}{Maximum number of iterations used when searching for CI bounds.}
+\item{core_num}{Number of cores to use for parallel computation when compute pseudo-outcome.}
 
 \item{max_tol}{Maximum tolerance for the pivot error. Default \eqn{10^{-3}}.}
 
 \item{varSelect_program}{\code{"Python"} (requires a valid \code{virtualenv_path}) or \code{"R"}.}
 
-\item{standardize_x, standardize_y}{Whether to standardize design matrix/outcome.}
+\item{standardize_x}{Logical flag for design matrix standardization, prior to the model selection.}
+
+\item{standardize_y}{Logical flag for outcome standardization, prior to the model selection.}
 }
 \value{
 \describe{
-\item{selected_vars}{Selected variables.}
-\item{gee_est}{GEE estimates.}
+\item{E}{Selected variables.}
+\item{GEE_est}{GEE estimates without adjusting for selection events.}
+\item{lowCI}{lower bound of confidence interval.}
+\item{upperCI}{upper bound of confidence interval.}
+\item{prop_low}{the exact quantile for the lower bound of confidence interval.}
+\item{prop_up}{the exact quantile for the upper bound of confidence interval.}
 \item{p_value}{P-values for selected variables.}
-\item{CIs}{Confidence intervals.}
-\item{pivot_lower}{Target pivot value at the lower CI bound.}
-\item{pivot_upper}{Target pivot value at the upper CI bound.}
+\item{post_true}{condition on the selection events, the true values for parameter \eqn{\beta_E}
+if simulation is conducted and true \eqn{\beta} values are provided; Otherwise, this value will not be
+present}.
+\item{true_signal}{logical value indicating whether the selected parameter is one of the true signals
+if simulation is conducted and true \eqn{\beta} values are provided; Otherwise, this value will not be
+present}
 }
 }
 \description{
@@ -99,32 +102,26 @@ model with variable selection.
 }
 \details{
 The function generates a pseudo-outcome,
-performs variable selection, then conducts DR-WCLS to obtain
-inference with confidence intervals. Parallelism can be enabled via
-\code{CI_algorithm = "parallel"} or \code{"doParallel"}.
+performs variable selection, then conducts post-selective inference to obtain
+valid confidence intervals adjusted for data dependent model selection.
 }
 \examples{
-df = data.frame(
-    id = rep(1:10, each = 5),
-    decision_point = rep(1:5, times = 10),
-    intervention = rbinom(50, 1, 0.5),
-    rand_prob = 0.5,
-    logstep_30min = rnorm(50),
-    logstep_30min_lag1 = rnorm(50),
-    logstep_pre30min = rnorm(50),
-    is_at_home_or_work = sample(0:1, 50, TRUE),
-    day_in_study = rep(1:5, times = 10)
-  )
-Ht = c('logstep_30min_lag1','logstep_pre30min','is_at_home_or_work', 'day_in_study')
-St = c('logstep_30min_lag1','logstep_pre30min','is_at_home_or_work', 'day_in_study')
-UI_return = DR_WCLS_LASSO(
-  data = data, fold = 5, ID = "id", time = "decision_point",
-  At = "intervention", prob = "rand_prob", outcome = "logstep_30min",
-  method_pesu = "CVLASSO", lam = NULL, noise_scale = NULL, splitrat = 0.8,
-  beta = c(-0.2, 0.8, 0.3, 0.7, 0.3, rep(0, 21)),
-  level = 0.90, core_num = 3, CI_algorithm = "parallel",
-  varSelect_program = "R"
-)
+  sim_data = generate_dataset(N = 1000, T = 40, P = 50, sigma_residual = 1.5, sigma_randint = 1.5, main_rand = 3, rho = 0.7,
+  beta_logit = c(-1, 1.6 * rep(1/50, 50)), model = ~ state1 + state2 + state3 + state4,
+  beta = matrix(c(-1, 1.7, 1.5, -1.3, -1),ncol = 1),
+  theta1 = 0.8)
+  Ht = unlist(lapply(1:50, FUN = function(X) paste0("state",X)))
+  St = unlist(lapply(1:25, FUN = function(X) paste0("state",X)))
+
+  UI_return = DR_WCLS_LASSO(data = sim_data,
+  fold = 5, ID = "id",
+  time = "decision_point",
+  Ht = Ht, St = St, At = "action",
+  prob = "prob", outcome = "outcome",
+  method_pseu = "CVLASSO", lam = NULL, noise_scale = NULL, splitrat = 0.7,
+  varSelect_program = "R", standardize_x = F, standardize_y = F)
+
+
 
 
 }
