@@ -305,12 +305,6 @@ Make inference using weighted centered least squares
 
 ```{r}
 
-data_mimicHeartSteps$intervention = as.numeric(data_mimicHeartSteps$intervention)
-data_mimicHeartSteps$logstep_30min = as.numeric(data_mimicHeartSteps$logstep_30min)
-data_mimicHeartSteps$logstep_30min_lag1 = as.numeric(data_mimicHeartSteps$logstep_30min_lag1)
-data_mimicHeartSteps$logstep_pre30min = as.numeric(data_mimicHeartSteps$logstep_pre30min)
-data_mimicHeartSteps$is_at_home_or_work = as.numeric(data_mimicHeartSteps$is_at_home_or_work)
-data_mimicHeartSteps$day_in_study = as.numeric(data_mimicHeartSteps$day_in_study)
 
 wcls_fit = wcls(
   data = data_mimicHeartSteps,
@@ -555,27 +549,163 @@ UI_return_IHS_R = DR_WCLS_LASSO(data = df_IHS_cleaned,
 UI_return_IHS_R
 ```
 
-```{r}
-# df_IHS$sent = as.numeric(df_IHS$sent)
-# df_IHS$is_weekend = as.numeric(df_IHS$is_weekend)
-# library(MRTAnalysis)
-# wcls(
-#   data = df_IHS,
-#   id = 'PARTICIPANTIDENTIFIER',
-#   outcome = 'Steps24HoursAfter',
-#   treatment = 'sent',
-#   rand_prob = 'prob',
-#   moderator_formula= ~1,
-#   control_formula = ~StepsPastDay + is_weekend + maxHRPast24Hours + HoursSinceLastMood,
-#   availability = NULL,
-#   numerator_prob = NULL,
-#   verbose = TRUE
-# )
 
+## Simulated Data
+
+```{r}
+sim_data = generate_dataset(N = 1000, T = 40, P = 50, 
+                            sigma_residual = 1.5, sigma_randint = 1.5, 
+                            main_rand = 3, rho = 0.7,
+                            beta_logit = c(-1, 1.6 * rep(1/50, 50)), 
+                            model = ~ state1 + state2 + state3 + state4,
+                            beta = matrix(c(-1, 1.7, 1.5, -1.3, -1),ncol = 1),
+                            theta1 = 0.8)
+
+Ht = unlist(lapply(1:50, FUN = function(X) paste0("state",X)))
+St = unlist(lapply(1:25, FUN = function(X) paste0("state",X)))
+
+
+UI_return_sim_R = DR_WCLS_LASSO(data = sim_data,
+                                fold = 5, ID = "id",
+                                time = "decision_point",
+                                Ht = Ht, St = St, At = "action",
+                                prob = "prob", outcome = "outcome",
+                                method_pseu = "CVLASSO",
+                                varSelect_program = "R",
+                                standardize_x = F, standardize_y = F,
+                                beta = matrix(c(-1, 1.7, 1.5, -1.3, -1, rep(0, 21))))
+```
+
+
+
+```{r}
+sim_randomizedLASSO = randomizedLasso(X = as.matrix(sim_data[,St]), 
+                y = as.matrix(sim_data[,'outcome']), 
+                lam = 225000, 
+                family="gaussian",
+                noise_scale=NULL, 
+                ridge_term=NULL, 
+                max_iter=100,       
+                kkt_tol=1.e-4,      
+                parameter_tol=1.e-8,
+                objective_tol=1.e-8,
+                objective_stop=FALSE,
+                kkt_stop=TRUE,
+                parameter_stop=TRUE)
+
+St[sim_randomizedLASSO$active_set]
 ```
 
 ```{r}
-# formula_str = paste(outcome, "~", paste(Ht, collapse = " + "))
-# lm_model = lm(as.formula(formula_str), data = df_IHS)
-# car::vif(lm_model)
+mod_formula = as.formula(paste("~", paste0("state", 1:25, collapse = " + ")))
+
+ctrl_formula = as.formula(paste("~", paste0("state", 1:50, collapse = " + ")))
+
+wcls_args = list(
+  data      = sim_data,
+  id        = "id",
+  outcome   = "outcome",
+  treatment = "action",
+  rand_prob = "prob",
+  moderator_formula = mod_formula,
+  control_formula   = ctrl_formula,
+  availability      = NULL,
+  numerator_prob    = NULL,
+  verbose           = TRUE
+)
+
+wcls_sim_fit = do.call(wcls, wcls_args)
+
+wcls_sim_res = summary(wcls_sim_fit)
+wcls_sim_res$causal_excursion_effect
+```
+
+```{r, echo = FALSE}
+
+DR_WCLS_R_sim = UI_return_sim_R %>%
+  transmute(
+    term  = E,
+    method = "DR_WCLS_LASSO (R)",
+    est   = GEE_est,
+    low   = lowCI,
+    up    = upperCI
+  )
+# DR_WCLS_Py_df = UI_return_python %>%
+#   transmute(
+#     term  = E,
+#     method = "DR_WCLS_LASSO (Python)",
+#     est   = GEE_est,
+#     low   = lowCI,
+#     up    = upperCI
+#   )
+
+wcls_sim = as.data.frame(wcls_sim_res$causal_excursion_effect[1:5,]) %>%
+  rownames_to_column("term") %>%       
+  transmute(
+    term,
+    method = "WCLS",
+    est  = Estimate,
+    low  = `95% LCL`,
+    up   = `95% UCL`
+  )
+
+
+box_plot_sim = bind_rows(DR_WCLS_R_sim, 
+                        # DR_WCLS_Py_df, 
+                        wcls_sim)
+
+intercept_df = box_plot_sim[box_plot_sim$term == '(Intercept)',]
+ggplot(intercept_df,
+       aes(x = term, y = est, color = method,
+           group = method)) +
+  geom_pointrange(aes(ymin = low, ymax = up),
+                  position = position_dodge(width = 0.5),
+                  linewidth = 1.1) +
+  labs(x = NULL, y = "Effect estimate",
+       color = "Method") +
+  theme_minimal()
+
+state1_df = box_plot_sim[box_plot_sim$term == 'state1',]
+ggplot(state1_df,
+       aes(x = term, y = est, color = method,
+           group = method)) +
+  geom_pointrange(aes(ymin = low, ymax = up),
+                  position = position_dodge(width = 0.5),
+                  linewidth = 1.1) +
+  labs(x = NULL, y = "Effect estimate",
+       color = "Method") +
+  theme_minimal()
+
+state2_df = box_plot_sim[box_plot_sim$term == 'state2',]
+ggplot(state2_df,
+       aes(x = term, y = est, color = method,
+           group = method)) +
+  geom_pointrange(aes(ymin = low, ymax = up),
+                  position = position_dodge(width = 0.5),
+                  linewidth = 1.1) +
+  labs(x = NULL, y = "Effect estimate",
+       color = "Method") +
+  theme_minimal()
+
+state3_df = box_plot_sim[box_plot_sim$term == 'state3',]
+ggplot(state3_df,
+       aes(x = term, y = est, color = method,
+           group = method)) +
+  geom_pointrange(aes(ymin = low, ymax = up),
+                  position = position_dodge(width = 0.5),
+                  linewidth = 1.1) +
+  labs(x = NULL, y = "Effect estimate",
+       color = "Method") +
+  theme_minimal()
+
+state4_df = box_plot_sim[box_plot_sim$term == 'state4',]
+ggplot(state4_df,
+       aes(x = term, y = est, color = method,
+           group = method)) +
+  geom_pointrange(aes(ymin = low, ymax = up),
+                  position = position_dodge(width = 0.5),
+                  linewidth = 1.1) +
+  labs(x = NULL, y = "Effect estimate",
+       color = "Method") +
+  theme_minimal()
 ```
