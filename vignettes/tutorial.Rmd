@@ -31,18 +31,20 @@ Individual-level data of an MRT can be summarized as $\left\{O_1, A_1, O_2, A_2,
 
 Denote history $H_t = \left\{ O_1, A_1, O_2, A_2, \cdots, A_{t-1}, O_t \right\}$ and randomized probabilities $\boldsymbol{p} = \left\{p_t(A_t \mid H_t) \right\}_{t=1}^T$. The DR-WCLS criterion is given by
 
-$$
+\[
 \mathbb{P}_n
 \Bigl[
 \sum_{t=1}^{T}
   \tilde{\sigma}^2_t(S_t)\,
   \Bigl(
-  \frac{W_t(A_t-\tilde{p}_t(1 \mid S_t)) (Y_{t+1}-g_t(H_t,A_t))}         {\tilde{\sigma}^2_t(S_t)}\,
+  \frac{W_t(A_t-\tilde{p}_t(1 \mid S_t)) (Y_{t+1}-g_t(H_t,A_t))}{\tilde{\sigma}^2_t(S_t)}\,
   +\beta(t;H_t)-f_t(S_t)^T \beta\Bigr)\,
   f_t(S_t)
 \Bigr]
 = 0
-$$ where $\beta(t;H_t) := g_t(H_t,1) - g_t(H_t,0)$ is the causal excursion effect under the fully observed history $H_t$, and $\tilde{\sigma}^2_t(S_t) := \tilde{p}_t(1 \mid S_t)(1-\tilde{p}_t(1 \mid S_t))$.
+\]
+
+where $\beta(t;H_t) := g_t(H_t,1) - g_t(H_t,0)$ is the causal excursion effect under the fully observed history $H_t$, and $\tilde{\sigma}^2_t(S_t) := \tilde{p}_t(1 \mid S_t)(1-\tilde{p}_t(1 \mid S_t))$.
 
 The $\hat{\beta}_n^{(DR)}$ is a consistent estimator of the true $\beta$ if either the randomization probability $p_t(A_t \mid H_t)$ or the conditional expectation $g_t(H_t, A_t)$ is correctly specified.
 
@@ -54,17 +56,17 @@ Step II: For each fold $k$, use data from $I^∁_k$ to estimate the nuisance fun
 
 Step III: For each $j \in I_k$ and time $t$, construct the pseudo-outcome $\tilde{Y}_{t+1}^{(DR)}$ as follows, then regress it on $f_t(S_t)^T \beta$ using weights $\tilde{p}_t^{(k)}(1 \mid S_t)(1-\tilde{p}_t^{(k)}(1 \mid S_t))$.
 
-$$
+\[
 \tilde{Y}^{(DR)}_{t+1,j} := 
 \frac{\hat{W}_{t,j}^{(k)}(A_{t,j}-\hat{\tilde{p}}_t^{(k)}(1 \mid S_{t,j})) (Y_{t+1,j}-\hat{g}_t^{(k)}(H_{t,j},A_{t,j}))}{\hat{\tilde{p}}_t^{(k)}(1 \mid S_{t,j})(1-\hat{\tilde{p}}_t^{(k)}(1 \mid S_{t,j}))} \,
 + \Bigl(
 \hat{g}_t^{(k)}(H_{t,j},1) - \hat{g}_t^{(k)}(H_{t,j},0)
 \Bigr)
-$$
+\]
 
 To conduct variable selection, **DR_WCLS_LASSO** solves the problem
 
-$$
+\[
 \min_{\beta} 
 \frac{1}{n}
 \sum_{i=1}^{n}\sum_{t=1}^{T}
@@ -72,16 +74,16 @@ $$
   \hat{\tilde{p}}^{(k)}_{t}(1 \mid S_t)\,
   \bigl(1-\hat{\tilde{p}}^{(k)}_{t}(1 \mid S_t)\bigr)\,
   \bigl(\tilde{Y}^{(DR)}_{t+1,i}-f_t(S_t)^{\top}\beta\bigr)^2
-\Bigr]
-\;+\;
-\lambda \lVert \beta \rVert_{1}
-\;-\;
-w^{\top}\beta
-$$ , where $\lambda$ is the LASSO regularization parameter, $\omega$ is the noise vector.
+\Bigr] +
+\lambda \lVert \beta \rVert_{1} -
+w^{\top}\beta,
+\] 
+
+where $\lambda$ is the LASSO regularization parameter, $\omega$ is the noise vector.
 
 After the variable selection procedure, we conduct post-selection inference using DR-WCLS conditional on the selected variables. This provides estimates for the selected variables along with their corresponding confidence intervals.
 
-$$
+\[
 \min_{\beta}
 \frac{1}{n}
 \sum_{i=1}^{n}\sum_{t=1}^{T}
@@ -90,7 +92,7 @@ $$
   \bigl(1-\hat{\tilde{p}}^{(k)}_{t}(1 \mid S_t)\bigr)\,
   \bigl(\tilde{Y}^{(DR)}_{t+1,i}-f_t(S_t)^{\top}\beta_E\bigr)^2
 \Bigr]
-$$
+\]
 
 # Installation
 
@@ -141,13 +143,13 @@ prob = 'rand_prob'
 
 To generate the pseudo-outcome, we provide three methods for estimating the nuisance functions: LASSO, random forest and gradient boosting.
 
-$$
+\[
 \tilde{Y}^{(DR)}_{t+1,j} := 
 \frac{\hat{W}_{t,j}^{(k)}(A_{t,j}-\hat{\tilde{p}}_t^{(k)}(1 \mid S_{t,j})) (Y_{t+1,j}-\hat{g}_t^{(k)}(H_{t,j},A_{t,j}))}{\hat{\tilde{p}}_t^{(k)}(1 \mid S_{t,j})(1-\hat{\tilde{p}}_t^{(k)}(1 \mid S_{t,j}))} \,
 + \Bigl(
 \hat{g}_t^{(k)}(H_{t,j},1) - \hat{g}_t^{(k)}(H_{t,j},0)
 \Bigr)
-$$
+\]
 
 We illustrate their use use via the functions `pseudo_outcome_generator_CVlasso`, `pseudo_outcome_generator_rf_v2`, and `pseudo_outcome_generator_gbm`.
 
@@ -176,7 +178,7 @@ pseudo_outcome_GBM = pseudo_outcome_generator_gbm(fold = 5,ID = ID,
 
 To perform variable selection, **DR_WCLS_LASSO** solves the problem
 
-$$
+\[
 \min_{\beta} 
 \frac{1}{n}
 \sum_{i=1}^{n}\sum_{t=1}^{T}
@@ -184,12 +186,10 @@ $$
   \hat{\tilde{p}}^{(k)}_{t}(1 \mid S_t)\,
   \bigl(1-\hat{\tilde{p}}^{(k)}_{t}(1 \mid S_t)\bigr)\,
   \bigl(\tilde{Y}^{(DR)}_{t+1,i}-f_t(S_t)^{\top}\beta\bigr)^2
-\Bigr]
-\;+\;
-\lambda \lVert \beta \rVert_{1}
-\;-\;
+\Bigr] +
+\lambda \lVert \beta \rVert_{1} -
 w^{\top}\beta
-$$
+\]
 
 Variable selection is performed using the `variable_selection_PY_penal_int` or `FISTA_backtracking` function. We first define `my_formula`, specifying the outcome and candidate variables. Below, we demonstrate the use of both functions.
 
@@ -199,35 +199,35 @@ Python version
 my_formula = as.formula(paste("yDR ~", paste(c("logstep_30min_lag1", "logstep_pre30min",
                                       "is_at_home_or_work", "day_in_study"),
                                        collapse = " + ")))
-
-set.seed(100)
-var_selection_python = variable_selection_PY_penal_int(data = pseudo_outcome_CVlasso,ID,
-                                                       my_formula,
-                                                       lam = NULL, noise_scale = NULL,
-                                                       splitrat = 0.8,
-                                                       # virtualenv_path = "fakepath/wcls",
-                                                       ridge_term = 0, beta = NULL)
-
-cat('The selected variable list:',var_selection_python$E)
+# 
+# set.seed(100)
+# var_selection_python = variable_selection_PY_penal_int(data = pseudo_outcome_CVlasso,ID,
+#                                                        my_formula,
+#                                                        lam = NULL, noise_scale = NULL,
+#                                                        splitrat = 0.8,
+#                                                        # virtualenv_path = "fakepath/wcls",
+#                                                        ridge_term = 0, beta = NULL)
+# 
+# cat('The selected variable list:',var_selection_python$E)
 ```
 
 R version
 
 ```{r}
-# set.seed(100)
-# var_selection_R = FISTA_backtracking(data = pseudo_outcome_CVlasso, ID, my_formula,
-#                   lam = NULL, noise_scale = NULL,splitrat = 0.8,
-#                   max_ite = 10^(5), tol = 10^(-4), beta = NULL)
-# var_selection_R$E
-# 
-# cat('The selected variable list:',var_selection_R$E)
+set.seed(100)
+var_selection_R = FISTA_backtracking(data = pseudo_outcome_CVlasso, ID, my_formula,
+                  lam = NULL, noise_scale = NULL,splitrat = 0.8,
+                  max_ite = 10^(5), tol = 10^(-4), beta = NULL)
+var_selection_R$E
+
+cat('The selected variable list:',var_selection_R$E)
 ```
 
 ### Post-selection Inference
 
 After variable selection, we conduct post-selection inference using DR-WCLS, conditioning on the selected variables. This yields GEE coefficient estimates and corresponding confidence intervals.
 
-$$
+\[
 \min_{\beta}
 \frac{1}{n}
 \sum_{i=1}^{n}\sum_{t=1}^{T}
@@ -236,12 +236,12 @@ $$
   \bigl(1-\hat{\tilde{p}}^{(k)}_{t}(1 \mid S_t)\bigr)\,
   \bigl(\tilde{Y}^{(DR)}_{t+1,i}-f_t(S_t)^{\top}\beta_E\bigr)^2
 \Bigr]
-$$
+\]
 
-`DR_WCLS_LASSO` is used for post-selection inference. The input of the function are the data for inference, number of folds, and variable names for ID, time, $H_t$, $S_t$, $A_t$, $Y_t$ and randomization probability. `method_pesu` specifies the method used for pseudo-outcome generation (e.g., "CVLASSO", "RandomForest", "GradientBoosting"). `varSelect_program` indicates the variable selection programming language.
+`DR_WCLS_LASSO` is used for post-selection inference. The input of the function are the data for inference, number of folds, and variable names for ID, time, $H_t$, $S_t$, $A_t$, $Y_t$ and randomization probability. `method_pseu` specifies the method used for pseudo-outcome generation (e.g., "CVLASSO", "RandomForest", "GradientBoosting"). `varSelect_program` indicates the variable selection programming language.
 
 ```{r}
-set.seed(123)
+# set.seed(123)
 
 # reticulate::py_run_string("
 # import random
@@ -251,17 +251,17 @@ set.seed(123)
 # np.random.seed(123)
 # ")
 
-UI_return_python = DR_WCLS_LASSO(data = data_mimicHeartSteps,
-                          fold = 5, ID = ID,
-                          time = "decision_point",
-                          Ht = Ht, St = St, At = At,
-                          prob = prob, outcome = outcome,
-                          # virtualenv_path = 'fakepath/wcls',
-                          method_pesu = "CVLASSO",
-                          varSelect_program = "Python",
-                          standardize_x = F, standardize_y = F)
-
-UI_return_python
+# UI_return_python = DR_WCLS_LASSO(data = data_mimicHeartSteps,
+#                           fold = 5, ID = ID,
+#                           time = "decision_point",
+#                           Ht = Ht, St = St, At = At,
+#                           prob = prob, outcome = outcome,
+#                           # virtualenv_path = 'fakepath/wcls',
+#                           method_pseu = "CVLASSO",
+#                           varSelect_program = "Python",
+#                           standardize_x = F, standardize_y = F)
+# 
+# UI_return_python
 ```
 
 ```{r}
@@ -272,7 +272,7 @@ UI_return_R = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           time = "decision_point",
                           Ht = Ht, St = St, At = At,
                           prob = prob, outcome = outcome,
-                          method_pesu = "CVLASSO", 
+                          method_pseu = "CVLASSO", 
                           varSelect_program = "R",
                           standardize_x = F, standardize_y = F)
 UI_return_R
@@ -328,12 +328,12 @@ wcls_fit = wcls(
 wcls_res = summary(wcls_fit)
 wcls_res$causal_excursion_effect
 
-UI_return_python
+# UI_return_python
 UI_return_R
 
 ```
 
-```{r}
+```{r, echo = FALSE}
 library(dplyr)
 library(ggplot2)
 library(tibble)
@@ -346,14 +346,14 @@ DR_WCLS_R_df = UI_return_R %>%
     low   = lowCI,
     up    = upperCI
   )
-DR_WCLS_Py_df = UI_return_python %>%
-  transmute(
-    term  = E,
-    method = "DR_WCLS_LASSO (Python)",
-    est   = GEE_est,
-    low   = lowCI,
-    up    = upperCI
-  )
+# DR_WCLS_Py_df = UI_return_python %>%
+#   transmute(
+#     term  = E,
+#     method = "DR_WCLS_LASSO (Python)",
+#     est   = GEE_est,
+#     low   = lowCI,
+#     up    = upperCI
+#   )
 
 wcls_df = as.data.frame(wcls_res$causal_excursion_effect) %>%
   rownames_to_column("term") %>%       
@@ -366,7 +366,9 @@ wcls_df = as.data.frame(wcls_res$causal_excursion_effect) %>%
   )
 
 
-box_plot_df = bind_rows(DR_WCLS_R_df, DR_WCLS_Py_df, wcls_df)
+box_plot_df = bind_rows(DR_WCLS_R_df, 
+                        # DR_WCLS_Py_df, 
+                        wcls_df)
 
 intercept_df = box_plot_df[box_plot_df$term == '(Intercept)',]
 ggplot(intercept_df,
@@ -394,21 +396,22 @@ ggplot(day_in_study_df,
 
 ### Arguments in DR_WCLS_LASSO
 
-The pseudo outcome generation method can be specified using the `method_pesu` argument. Currently, three options are supported: CVLASSO, RandomForest, and GradientBoosting. The default is CVLASSO.
+The pseudo outcome generation method can be specified using the `method_pseu` argument. Currently, three options are supported: CVLASSO, RandomForest, and GradientBoosting. The default is CVLASSO.
 
 ```{r}
 set.seed(100)
 
-UI_return_method_pesu = DR_WCLS_LASSO(data = data_mimicHeartSteps,
+UI_return_method_pseu = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                                  fold = 5, ID = ID,
                                  time = "decision_point",
                                  Ht = Ht, St = St, At = At,
                                  prob = prob, outcome = outcome,
                                  # virtualenv_path = 'fakepath/wcls',
-                                 method_pesu = "CVLASSO",
+                                 method_pseu = "CVLASSO",
+                                 varSelect_program = "R",
                                  standardize_x = F, standardize_y = F)
 
-UI_return_method_pesu
+UI_return_method_pseu
 ```
 
 The LASSO penalty can be adjusted by setting 'lam' in the `DR_WCLS_LASSO` function.
@@ -422,7 +425,8 @@ UI_return_lambda = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                                  Ht = Ht, St = St, At = At,
                                  prob = prob, outcome = outcome,
                                  # virtualenv_path = 'fakepath/wcls',
-                                 method_pesu = "CVLASSO",
+                                 method_pseu = "CVLASSO",
+                                 varSelect_program = "R",
                                  lam = 100,
                                  standardize_x = F, standardize_y = F)
 
@@ -438,7 +442,8 @@ UI_return_splitrat = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                                    time = "decision_point", 
                                    Ht = Ht, St = St, At = At, 
                                    prob = prob, outcome = outcome,
-                                   method_pesu = "CVLASSO", 
+                                   method_pseu = "CVLASSO", 
+                                   varSelect_program = "R",
                                    splitrat = 0.8,
                                    standardize_x = F, standardize_y = F)
 UI_return_splitrat
@@ -472,16 +477,16 @@ outcome = 'logstep_30min'
 prob = 'rand_prob'
 
 
-UI_return_int_python = DR_WCLS_LASSO(data = data_mimicHeartSteps, 
-                          fold = 5, ID = ID, 
-                          time = "decision_point", Ht = Ht_int, St = St_int, 
-                          At = At, prob = prob, outcome = outcome,
-                          # virtualenv_path = 'fakepath/wcls',
-                          method_pesu = "CVLASSO", 
-                          varSelect_program = "Python",
-                          standardize_x = F, standardize_y = F)
-
-UI_return_int_python
+# UI_return_int_python = DR_WCLS_LASSO(data = data_mimicHeartSteps, 
+#                           fold = 5, ID = ID, 
+#                           time = "decision_point", Ht = Ht_int, St = St_int, 
+#                           At = At, prob = prob, outcome = outcome,
+#                           # virtualenv_path = 'fakepath/wcls',
+#                           method_pseu = "CVLASSO", 
+#                           varSelect_program = "Python",
+#                           standardize_x = F, standardize_y = F)
+# 
+# UI_return_int_python
 ```
 
 ```{r}
@@ -490,7 +495,7 @@ UI_return_int_R = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           time = "decision_point", Ht = Ht_int, St = St_int, 
                           At = At, prob = prob, outcome = outcome,
                           # virtualenv_path = 'fakepath/wcls',
-                          method_pesu = "CVLASSO", 
+                          method_pseu = "CVLASSO", 
                           varSelect_program = "R",
                           standardize_x = F, standardize_y = F)
 
@@ -520,18 +525,18 @@ set.seed(99)
 
 df_IHS_cleaned = na.omit(df_IHS)
 
-UI_return_IHS_python = DR_WCLS_LASSO(data = df_IHS_cleaned,
-                          fold = 5, ID = ID,
-                          time = "time", Ht = Ht, St = St, At = At,
-                          prob = prob, outcome = outcome,
-                          # virtualenv_path = 'fakepath/wcls',
-                          method_pesu = "CVLASSO", lam = 55,
-                          noise_scale = NULL, splitrat = 0.8,
-                          level = 0.9, core_num=3, CI_algorithm = 'lapply',
-                          max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "Python",
-                          standardize_x =  T, standardize_y = T)
-
-UI_return_IHS_python
+# UI_return_IHS_python = DR_WCLS_LASSO(data = df_IHS_cleaned,
+#                           fold = 5, ID = ID,
+#                           time = "time", Ht = Ht, St = St, At = At,
+#                           prob = prob, outcome = outcome,
+#                           # virtualenv_path = 'fakepath/wcls',
+#                           method_pseu = "CVLASSO", lam = 55,
+#                           noise_scale = NULL, splitrat = 0.8,
+#                           level = 0.9, core_num=3, CI_algorithm = 'lapply',
+#                           max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "Python",
+#                           standardize_x =  T, standardize_y = T)
+# 
+# UI_return_IHS_python
 ```
 
 ```{r, eval = FALSE}
@@ -541,7 +546,7 @@ UI_return_IHS_R = DR_WCLS_LASSO(data = df_IHS_cleaned,
                           time = "time", Ht = Ht, St = St, At = At,
                           prob = prob, outcome = outcome,
                           # virtualenv_path = 'fakepath/wcls',
-                          method_pesu = "CVLASSO", lam = 30,
+                          method_pseu = "CVLASSO", lam = 30,
                           noise_scale = NULL, splitrat = 0.8,
                           level = 0.9, core_num=3, CI_algorithm = 'lapply',
                           max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "R",
