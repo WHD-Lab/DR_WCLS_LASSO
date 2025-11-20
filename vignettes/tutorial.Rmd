@@ -29,7 +29,7 @@ This vignette introduces the **MRTpostInfLASSO** package. Its core function, **D
 
 Individual-level data of an MRT can be summarized as $\left\{O_1, A_1, O_2, A_2, \cdots, O_T, A_T, O_{T+1} \right\}$ where $T$ is the total decision times, $O_t$ is the information collected between $t-1$ and $t$, and $A_t$ is the treatment provided at time $t$. Here we consider treatment $A_t \in \left\{0,1\right\}$. Treatment options are intended to influence a proximal outcome $Y_{t+1} \in O_{t+1}$.
 
-Denote history $H_t = \left\{ O_1, A_1, O_2, A_2, \cdots, A_{t-1}, O_t \right\}$ and randomized probabilities $\boldsymbol{p} = \left\{p_t(A_t \mid H_t) \right\}_{t=1}^T$. The DR-WCLS criterion is given by
+Denote history $H_t = \left\{ O_1, A_1, O_2, A_2, \cdots, A_{t-1}, O_t \right\}$ and randomized probabilities $\mathbf{p} = \left\{p_t(A_t \mid H_t) \right\}_{t=1}^T$. The DR-WCLS criterion is given by
 
 \[
 \mathbb{P}_n
@@ -551,6 +551,8 @@ UI_return_IHS_R
 
 
 ## Simulated Data
+
+We also illustrate the use of the package with a simulated dataset and demonstrate why DR_WCLS is needed, rather than using randomized LASSO for selection and WCLS for inference.
 
 ```{r}
 sim_data = generate_dataset(N = 1000, T = 40, P = 50, 

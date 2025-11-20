@@ -15,4 +15,4 @@ You can install 'MRTpostInfLASSO' via github:
 
 ## Detailed tutorial
 
-[insert link]
+A detailed tutorial and parameter explanation can be found here <a href="https://whd-lab.github.io/DR_WCLS_LASSO/index.html" target="_blank"></a>.
