@@ -198,7 +198,7 @@ intervals adjusted for data dependent model selection.
   varSelect_program = "R", standardize_x = F, standardize_y = F)
 #> Loading required package: parallel
 #> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 386.489363835013"
+#> [1] "The current lambda value is: 386.491206918538"
 #> [1] "select predictors: (Intercept)" "select predictors: state1"     
 #> [3] "select predictors: state2"      "select predictors: state3"     
 #> [5] "select predictors: state4"     

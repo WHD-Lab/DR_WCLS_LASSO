@@ -19,82 +19,76 @@ function, **DR_WCLS_LASSO**, allows users to perform variable selection,
 estimate time-varying causal effects and make valid inferences
 conditional on the selected variables.
 
-Individual-level data of an MRT can be summarized as
-$\left\{ O_{1},A_{1},O_{2},A_{2},\cdots,O_{T},A_{T},O_{T + 1} \right\}$
-where $T$ is the total decision times, $O_{t}$ is the information
-collected between $t - 1$ and $t$, and $A_{t}$ is the treatment provided
-at time $t$. Here we consider treatment
-$A_{t} \in \left\{ 0,1 \right\}$. Treatment options are intended to
-influence a proximal outcome $Y_{t + 1} \in O_{t + 1}$.
+Individual-level data of an MRT can be summarized as \\\left\\O_1, A_1,
+O_2, A_2, \cdots, O_T, A_T, O\_{T+1} \right\\\\ where \\T\\ is the total
+decision times, \\O_t\\ is the information collected between \\t-1\\ and
+\\t\\, and \\A_t\\ is the treatment provided at time \\t\\. Here we
+consider treatment \\A_t \in \left\\0,1\right\\\\. Treatment options are
+intended to influence a proximal outcome \\Y\_{t+1} \in O\_{t+1}\\.
 
-Denote history
-$H_{t} = \left\{ O_{1},A_{1},O_{2},A_{2},\cdots,A_{t - 1},O_{t} \right\}$
-and randomized probabilities
-$\mathbf{p} = \left\{ p_{t}\left( A_{t} \mid H_{t} \right) \right\}_{t = 1}^{T}$.
-The DR-WCLS criterion is given by
+Denote history \\H_t = \left\\ O_1, A_1, O_2, A_2, \cdots, A\_{t-1}, O_t
+\right\\\\ and randomized probabilities \\\mathbf{p} = \left\\p_t(A_t
+\mid H_t) \right\\\_{t=1}^T\\. The DR-WCLS criterion is given by
 
-\$\$ \mathbb{P}\_n \Bigl\[ \sum\_{t=1}^{T} \tilde{\sigma}^2_t(S_t)\\
+\\ \mathbb{P}\_n \Bigl\[ \sum\_{t=1}^{T} \tilde{\sigma}^2_t(S_t)\\
 \Bigl( \frac{W_t(A_t-\tilde{p}\_t(1 \mid S_t))
 (Y\_{t+1}-g_t(H_t,A_t))}{\tilde{\sigma}^2_t(S_t)}\\
-+\beta(t;H_t)-f_t(S_t)^T \beta\Bigr)\\ f_t(S_t) \Bigr\] = 0 \$\$
++\beta(t;H_t)-f_t(S_t)^T \beta\Bigr)\\ f_t(S_t) \Bigr\] = 0 \\
 
-where
-$\beta\left( t;H_{t} \right):=g_{t}\left( H_{t},1 \right) - g_{t}\left( H_{t},0 \right)$
-is the causal excursion effect under the fully observed history $H_{t}$,
-and
-${\widetilde{\sigma}}_{t}^{2}\left( S_{t} \right):={\widetilde{p}}_{t}\left( 1 \mid S_{t} \right)\left( 1 - {\widetilde{p}}_{t}\left( 1 \mid S_{t} \right) \right)$.
+where \\\beta(t;H_t) := g_t(H_t,1) - g_t(H_t,0)\\ is the causal
+excursion effect under the fully observed history \\H_t\\, and
+\\\tilde{\sigma}^2_t(S_t) := \tilde{p}\_t(1 \mid S_t)(1-\tilde{p}\_t(1
+\mid S_t))\\.
 
-The ${\widehat{\beta}}_{n}^{(DR)}$ is a consistent estimator of the true
-$\beta$ if either the randomization probability
-$p_{t}\left( A_{t} \mid H_{t} \right)$ or the conditional expectation
-$g_{t}\left( H_{t},A_{t} \right)$ is correctly specified.
+The \\\hat{\beta}\_n^{(DR)}\\ is a consistent estimator of the true
+\\\beta\\ if either the randomization probability \\p_t(A_t \mid H_t)\\
+or the conditional expectation \\g_t(H_t, A_t)\\ is correctly specified.
 
 The **DR_WCLS** algorithm is as follows:
 
-Step I: Randomly split the $n$ individuals into $K$ equal folds
-$\left\{ I_{k} \right\}_{k = 1}^{K}$ assuming $n$ is a multiple of $K$.
-Let $I_{k}^{\complement}$ denote the complement of fold k.
+Step I: Randomly split the \\n\\ individuals into \\K\\ equal folds
+\\\left\\I_k\right\\^K\_{k=1}\\ assuming \\n\\ is a multiple of \\K\\.
+Let \\I^∁\_k\\ denote the complement of fold k.
 
-Step II: For each fold $k$, use data from $I_{k}^{\complement}$ to
-estimate the nuisance functions
-${\widehat{g}}_{t}^{(k)}\left( H_{t},A_{t} \right)$,${\widehat{p}}_{t}^{(k)}\left( 1 \mid H_{t} \right)$,
-${\widehat{\widetilde{p}}}_{t}^{(k)}\left( 1 \mid S_{t} \right)$, and
-compute the weight
-${\widehat{W}}_{t}^{(k)} = {\widehat{\widetilde{p}}}_{t}^{(k)}\left( 1 \mid S_{t} \right)/{\widehat{p}}_{t}^{(k)}\left( 1 \mid H_{t} \right)$.
+Step II: For each fold \\k\\, use data from \\I^∁\_k\\ to estimate the
+nuisance functions \\\hat{g}^{(k)}\_t(H_t,A_t)\\,\\\hat{p}^{(k)}\_t(1
+\mid H_t)\\, \\\hat{\tilde{p}}^{(k)}\_t(1 \mid S_t)\\, and compute the
+weight \\\hat{W}\_t^{(k)} = \hat{\tilde{p}}^{(k)}\_t(1 \mid S_t) /
+\hat{p}^{(k)}\_t(1 \mid H_t)\\.
 
-Step III: For each $j \in I_{k}$ and time $t$, construct the
-pseudo-outcome ${\widetilde{Y}}_{t + 1}^{(DR)}$ as follows, then regress
-it on $f_{t}\left( S_{t} \right)^{T}\beta$ using weights
-${\widetilde{p}}_{t}^{(k)}\left( 1 \mid S_{t} \right)\left( 1 - {\widetilde{p}}_{t}^{(k)}\left( 1 \mid S_{t} \right) \right)$.
+Step III: For each \\j \in I_k\\ and time \\t\\, construct the
+pseudo-outcome \\\tilde{Y}\_{t+1}^{(DR)}\\ as follows, then regress it
+on \\f_t(S_t)^T \beta\\ using weights \\\tilde{p}\_t^{(k)}(1 \mid
+S_t)(1-\tilde{p}\_t^{(k)}(1 \mid S_t))\\.
 
-\$\$ \tilde{Y}^{(DR)}\_{t+1,j} :=
+\\ \tilde{Y}^{(DR)}\_{t+1,j} :=
 \frac{\hat{W}\_{t,j}^{(k)}(A\_{t,j}-\hat{\tilde{p}}\_t^{(k)}(1 \mid
 S\_{t,j}))
 (Y\_{t+1,j}-\hat{g}\_t^{(k)}(H\_{t,j},A\_{t,j}))}{\hat{\tilde{p}}\_t^{(k)}(1
 \mid S\_{t,j})(1-\hat{\tilde{p}}\_t^{(k)}(1 \mid S\_{t,j}))} \\ + \Bigl(
-\hat{g}\_t^{(k)}(H\_{t,j},1) - \hat{g}\_t^{(k)}(H\_{t,j},0) \Bigr) \$\$
+\hat{g}\_t^{(k)}(H\_{t,j},1) - \hat{g}\_t^{(k)}(H\_{t,j},0) \Bigr) \\
 
 To conduct variable selection, **DR_WCLS_LASSO** solves the problem
 
-\$\$ \min\_{\beta} \frac{1}{n} \sum\_{i=1}^{n}\sum\_{t=1}^{T} \Bigl\[
+\\ \min\_{\beta} \frac{1}{n} \sum\_{i=1}^{n}\sum\_{t=1}^{T} \Bigl\[
 \hat{\tilde{p}}^{(k)}\_{t}(1 \mid S_t)\\
 \bigl(1-\hat{\tilde{p}}^{(k)}\_{t}(1 \mid S_t)\bigr)\\
 \bigl(\tilde{Y}^{(DR)}\_{t+1,i}-f_t(S_t)^{\top}\beta\bigr)^2 \Bigr\] +
-\lambda \lVert \beta \rVert\_{1} - w^{\top}\beta, \$\$
+\lambda \lVert \beta \rVert\_{1} - w^{\top}\beta, \\
 
-where $\lambda$ is the LASSO regularization parameter, $\omega$ is the
-noise vector.
+where \\\lambda\\ is the LASSO regularization parameter, \\\omega\\ is
+the noise vector.
 
 After the variable selection procedure, we conduct post-selection
 inference using DR-WCLS conditional on the selected variables. This
 provides estimates for the selected variables along with their
 corresponding confidence intervals.
 
-\$\$ \min\_{\beta} \frac{1}{n} \sum\_{i=1}^{n}\sum\_{t=1}^{T} \Bigl\[
+\\ \min\_{\beta} \frac{1}{n} \sum\_{i=1}^{n}\sum\_{t=1}^{T} \Bigl\[
 \hat{\tilde{p}}^{(k)}\_{t}(1 \mid S_t)\\
 \bigl(1-\hat{\tilde{p}}^{(k)}\_{t}(1 \mid S_t)\bigr)\\
 \bigl(\tilde{Y}^{(DR)}\_{t+1,i}-f_t(S_t)^{\top}\beta_E\bigr)^2 \Bigr\]
-\$\$
+\\
 
 ## Installation
 
@@ -155,8 +149,8 @@ head(data_mimicHeartSteps)
 ```
 
 We first specify the variable names for the participant ID,
-history$H_{t}$, moderator$S_{t}$, treatment$A_{t}$, proximal
-outcome$Y_{t}$, and randomization probability$p_{t}$.
+history\\H_t\\, moderator\\S_t\\, treatment\\A_t\\, proximal
+outcome\\Y_t\\, and randomization probability\\p_t\\.
 
 ``` r
 set.seed(100)
@@ -173,12 +167,12 @@ prob = 'rand_prob'
 To generate the pseudo-outcome, we provide three methods for estimating
 the nuisance functions: LASSO, random forest and gradient boosting.
 
-\$\$ \tilde{Y}^{(DR)}\_{t+1,j} :=
+\\ \tilde{Y}^{(DR)}\_{t+1,j} :=
 \frac{\hat{W}\_{t,j}^{(k)}(A\_{t,j}-\hat{\tilde{p}}\_t^{(k)}(1 \mid
 S\_{t,j}))
 (Y\_{t+1,j}-\hat{g}\_t^{(k)}(H\_{t,j},A\_{t,j}))}{\hat{\tilde{p}}\_t^{(k)}(1
 \mid S\_{t,j})(1-\hat{\tilde{p}}\_t^{(k)}(1 \mid S\_{t,j}))} \\ + \Bigl(
-\hat{g}\_t^{(k)}(H\_{t,j},1) - \hat{g}\_t^{(k)}(H\_{t,j},0) \Bigr) \$\$
+\hat{g}\_t^{(k)}(H\_{t,j},1) - \hat{g}\_t^{(k)}(H\_{t,j},0) \Bigr) \\
 
 We illustrate their use use via the functions
 `pseudo_outcome_generator_CVlasso`, `pseudo_outcome_generator_rf_v2`,
@@ -210,11 +204,11 @@ pseudo_outcome_GBM = pseudo_outcome_generator_gbm(fold = 5,ID = ID,
 
 To perform variable selection, **DR_WCLS_LASSO** solves the problem
 
-\$\$ \min\_{\beta} \frac{1}{n} \sum\_{i=1}^{n}\sum\_{t=1}^{T} \Bigl\[
+\\ \min\_{\beta} \frac{1}{n} \sum\_{i=1}^{n}\sum\_{t=1}^{T} \Bigl\[
 \hat{\tilde{p}}^{(k)}\_{t}(1 \mid S_t)\\
 \bigl(1-\hat{\tilde{p}}^{(k)}\_{t}(1 \mid S_t)\bigr)\\
 \bigl(\tilde{Y}^{(DR)}\_{t+1,i}-f_t(S_t)^{\top}\beta\bigr)^2 \Bigr\] +
-\lambda \lVert \beta \rVert\_{1} - w^{\top}\beta \$\$
+\lambda \lVert \beta \rVert\_{1} - w^{\top}\beta \\
 
 Variable selection is performed using the
 `variable_selection_PY_penal_int` or `FISTA_backtracking` function. We
@@ -259,15 +253,15 @@ After variable selection, we conduct post-selection inference using
 DR-WCLS, conditioning on the selected variables. This yields GEE
 coefficient estimates and corresponding confidence intervals.
 
-\$\$ \min\_{\beta} \frac{1}{n} \sum\_{i=1}^{n}\sum\_{t=1}^{T} \Bigl\[
+\\ \min\_{\beta} \frac{1}{n} \sum\_{i=1}^{n}\sum\_{t=1}^{T} \Bigl\[
 \hat{\tilde{p}}^{(k)}\_{t}(1 \mid S_t)\\
 \bigl(1-\hat{\tilde{p}}^{(k)}\_{t}(1 \mid S_t)\bigr)\\
 \bigl(\tilde{Y}^{(DR)}\_{t+1,i}-f_t(S_t)^{\top}\beta_E\bigr)^2 \Bigr\]
-\$\$
+\\
 
 `DR_WCLS_LASSO` is used for post-selection inference. The input of the
 function are the data for inference, number of folds, and variable names
-for ID, time, $H_{t}$, $S_{t}$, $A_{t}$, $Y_{t}$ and randomization
+for ID, time, \\H_t\\, \\S_t\\, \\A_t\\, \\Y_t\\ and randomization
 probability. `method_pseu` specifies the method used for pseudo-outcome
 generation (e.g., “CVLASSO”, “RandomForest”, “GradientBoosting”).
 `varSelect_program` indicates the variable selection programming
@@ -309,7 +303,7 @@ UI_return_R = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           varSelect_program = "R",
                           standardize_x = F, standardize_y = F)
 #> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 130.866162891048"
+#> [1] "The current lambda value is: 130.875622692401"
 #> [1] "select predictors: (Intercept)"  "select predictors: day_in_study"
 #> [1] FALSE
 #> [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"
@@ -323,12 +317,12 @@ UI_return_R = DR_WCLS_LASSO(data = data_mimicHeartSteps,
 #> 
 #>     intersect, setdiff, setequal, union
 UI_return_R
-#>              E     GEE_est       lowCI     upperCI   prop_low   prop_up
-#> 1  (Intercept)  0.56759741  0.37129126  0.72773895 0.05036305 0.9500748
-#> 2 day_in_study -0.02086483 -0.02869376 -0.01229072 0.04921956 0.9506399
+#>              E     GEE_est      lowCI     upperCI   prop_low   prop_up
+#> 1  (Intercept)  0.56779396  0.3716397  0.72776335 0.05044121 0.9499924
+#> 2 day_in_study -0.02085767 -0.0286707 -0.01230142 0.04944023 0.9504154
 #>         pvalue
-#> 1 1.277582e-06
-#> 2 1.648253e-04
+#> 1 1.249038e-06
+#> 2 1.641057e-04
 ```
 
 #### A Comparison of Using Randomized LASSO and Weighted Centered Least Squares
@@ -405,12 +399,12 @@ wcls_res$causal_excursion_effect
 
 # UI_return_python
 UI_return_R
-#>              E     GEE_est       lowCI     upperCI   prop_low   prop_up
-#> 1  (Intercept)  0.56759741  0.37129126  0.72773895 0.05036305 0.9500748
-#> 2 day_in_study -0.02086483 -0.02869376 -0.01229072 0.04921956 0.9506399
+#>              E     GEE_est      lowCI     upperCI   prop_low   prop_up
+#> 1  (Intercept)  0.56779396  0.3716397  0.72776335 0.05044121 0.9499924
+#> 2 day_in_study -0.02085767 -0.0286707 -0.01230142 0.04944023 0.9504154
 #>         pvalue
-#> 1 1.277582e-06
-#> 2 1.648253e-04
+#> 1 1.249038e-06
+#> 2 1.641057e-04
 ```
 
 ![](tutorial_files/figure-html/unnamed-chunk-13-1.png)![](tutorial_files/figure-html/unnamed-chunk-13-2.png)
@@ -434,18 +428,18 @@ UI_return_method_pseu = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                                  varSelect_program = "R",
                                  standardize_x = F, standardize_y = F)
 #> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 130.889909642224"
+#> [1] "The current lambda value is: 130.874430913628"
 #> [1] "select predictors: (Intercept)"  "select predictors: day_in_study"
 #> [1] FALSE
 #> [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"
 
 UI_return_method_pseu
 #>              E     GEE_est       lowCI     upperCI   prop_low   prop_up
-#> 1  (Intercept)  0.56818818  0.37189786  0.72824709 0.05036282 0.9500658
-#> 2 day_in_study -0.02087943 -0.02871229 -0.01229916 0.04913298 0.9507166
+#> 1  (Intercept)  0.56844965  0.37212341  0.72853390 0.05039441 0.9500313
+#> 2 day_in_study -0.02089795 -0.02872757 -0.01232027 0.04913065 0.9506675
 #>         pvalue
-#> 1 1.234250e-06
-#> 2 1.633391e-04
+#> 1 1.217928e-06
+#> 2 1.595093e-04
 ```
 
 The LASSO penalty can be adjusted by setting ‘lam’ in the
@@ -472,11 +466,11 @@ UI_return_lambda = DR_WCLS_LASSO(data = data_mimicHeartSteps,
 
 UI_return_lambda
 #>              E     GEE_est       lowCI     upperCI   prop_low   prop_up
-#> 1  (Intercept)  0.56947929  0.37432032  0.72976664 0.04989399 0.9493513
-#> 2 day_in_study -0.02094124 -0.02873574 -0.01240348 0.04911450 0.9502059
+#> 1  (Intercept)  0.56913165  0.37408863  0.72926844 0.05002324 0.9492241
+#> 2 day_in_study -0.02092669 -0.02871173 -0.01239679 0.04924098 0.9500773
 #>         pvalue
-#> 1 9.798347e-07
-#> 2 1.346040e-04
+#> 1 9.928750e-07
+#> 2 1.354456e-04
 ```
 
 The data split rate in Step 1 of the DR_WCLS algorithm can be set using
@@ -494,23 +488,23 @@ UI_return_splitrat = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                                    splitrat = 0.8,
                                    standardize_x = F, standardize_y = F)
 #> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 130.869632345127"
+#> [1] "The current lambda value is: 130.874723988392"
 #> [1] "select predictors: (Intercept)"  "select predictors: day_in_study"
 #> [1] FALSE
 #> [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"
 UI_return_splitrat
-#>              E     GEE_est      lowCI     upperCI   prop_low  prop_up
-#> 1  (Intercept)  0.56761565  0.3717071  0.72747868 0.05056567 0.949869
-#> 2 day_in_study -0.02085637 -0.0286649 -0.01231026 0.04952827 0.950318
+#>              E    GEE_est       lowCI     upperCI   prop_low   prop_up
+#> 1  (Intercept)  0.5681533  0.37196098  0.72816041 0.05043564 0.9499928
+#> 2 day_in_study -0.0208761 -0.02869056 -0.01231765 0.04939291 0.9504397
 #>         pvalue
-#> 1 1.243780e-06
-#> 2 1.630793e-04
+#> 1 1.229547e-06
+#> 2 1.615734e-04
 ```
 
 #### Analysis Using Manually Created Interaction Terms
 
-Interaction terms can be manually created and included in the $H_{t}$
-and $S_{t}$ variable lists. In this example, we create an indicator for
+Interaction terms can be manually created and included in the \\H_t\\
+and \\S_t\\ variable lists. In this example, we create an indicator for
 whether the time in the study is over 14 days and include its
 interactions with `logstep_30min_lag1`, `logstep_pre30min`, and
 `is_at_home_or_work`.
@@ -524,7 +518,7 @@ data_mimicHeartSteps$int_pre30_timeover14 = data_mimicHeartSteps$logstep_pre30mi
 data_mimicHeartSteps$int_home_timeover14 = data_mimicHeartSteps$is_at_home_or_work * data_mimicHeartSteps$timeover14
 ```
 
-We add the interaction terms in the $H_{t}$ and $S_{t}$ variable lists
+We add the interaction terms in the \\H_t\\ and \\S_t\\ variable lists
 and rerun the procedure.
 
 ``` r
@@ -561,7 +555,7 @@ UI_return_int_R = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           varSelect_program = "R",
                           standardize_x = F, standardize_y = F)
 #> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 152.876623632235"
+#> [1] "The current lambda value is: 152.858404333928"
 #> [1] "select predictors: (Intercept)"       
 #> [2] "select predictors: logstep_30min_lag1"
 #> [3] "select predictors: logstep_pre30min"  
@@ -571,16 +565,16 @@ UI_return_int_R = DR_WCLS_LASSO(data = data_mimicHeartSteps,
 #> [4] "int_pre30_timeover14" "int_home_timeover14"
 
 UI_return_int_R
-#>                    E      GEE_est       lowCI    upperCI   prop_low   prop_up
-#> 1        (Intercept)  0.564290725 -0.59682637  0.6166878 0.04937688 0.9493620
-#> 2 logstep_30min_lag1 -0.001954718 -0.03970519  0.1384967 0.05001387 0.9499660
-#> 3   logstep_pre30min -0.001166410 -0.01388489  0.1566902 0.04983102 0.9499593
-#> 4       day_in_study -0.020373065 -0.02885162 -0.0072407 0.04977266 0.9491078
+#>                    E      GEE_est       lowCI     upperCI   prop_low   prop_up
+#> 1        (Intercept)  0.567524285 -0.47444120  0.66217094 0.04924123 0.9504657
+#> 2 logstep_30min_lag1 -0.002280636 -0.04139731  0.12778499 0.05028444 0.9498846
+#> 3   logstep_pre30min -0.001329584 -0.01784046  0.14310874 0.04958894 0.9492032
+#> 4       day_in_study -0.020471589 -0.02903725 -0.01115698 0.04997574 0.9491035
 #>       pvalue
-#> 1 0.85663206
-#> 2 0.56792669
-#> 3 0.20354449
-#> 4 0.01956453
+#> 1 0.66162061
+#> 2 0.62371553
+#> 3 0.25826528
+#> 4 0.00215414
 ```
 
 ### Intern Health Study
@@ -642,6 +636,10 @@ UI_return_IHS_R
 
 ### Simulated Data
 
+We also illustrate the use of the package with a simulated dataset and
+demonstrate why DR_WCLS is needed, rather than using randomized LASSO
+for selection and WCLS for inference.
+
 ``` r
 sim_data = generate_dataset(N = 1000, T = 40, P = 50, 
                             sigma_residual = 1.5, sigma_randint = 1.5, 
@@ -665,7 +663,7 @@ UI_return_sim_R = DR_WCLS_LASSO(data = sim_data,
                                 standardize_x = F, standardize_y = F,
                                 beta = matrix(c(-1, 1.7, 1.5, -1.3, -1, rep(0, 21))))
 #> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 442.781651848933"
+#> [1] "The current lambda value is: 442.789879628912"
 #> [1] "select predictors: (Intercept)" "select predictors: state1"     
 #> [3] "select predictors: state2"      "select predictors: state3"     
 #> [5] "select predictors: state4"     

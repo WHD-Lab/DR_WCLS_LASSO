@@ -29,4 +29,5 @@ remotes::install_github("WHD-Lab/DR_WCLS_LASSO")
 
 ## Detailed tutorial
 
-\[insert link\]
+A detailed tutorial and parameter explanation can be found here
+[](https://whd-lab.github.io/DR_WCLS_LASSO/index.html).

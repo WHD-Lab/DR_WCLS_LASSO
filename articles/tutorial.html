@@ -6,7 +6,13 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>MRTpostInfLASSO • MRTpostInfLASSO</title>
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
+  window.MathJax = {
+    chtml: {
+      fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
+    }
+  };
+</script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -81,30 +87,18 @@ time-varying causal effects in longitudinal settings.</p>
 package. Its core function, <strong>DR_WCLS_LASSO</strong>, allows users
 to perform variable selection, estimate time-varying causal effects and
 make valid inferences conditional on the selected variables.</p>
-<p>Individual-level data of an MRT can be summarized as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">{</mo><msub><mi>O</mi><mn>1</mn></msub><mo>,</mo><msub><mi>A</mi><mn>1</mn></msub><mo>,</mo><msub><mi>O</mi><mn>2</mn></msub><mo>,</mo><msub><mi>A</mi><mn>2</mn></msub><mo>,</mo><mi>⋯</mi><mo>,</mo><msub><mi>O</mi><mi>T</mi></msub><mo>,</mo><msub><mi>A</mi><mi>T</mi></msub><mo>,</mo><msub><mi>O</mi><mrow><mi>T</mi><mo>+</mo><mn>1</mn></mrow></msub><mo stretchy="true" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\left\{O_1, A_1, O_2, A_2, \cdots, O_T, A_T, O_{T+1} \right\}</annotation></semantics></math>
-where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
-is the total decision times,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>O</mi><mi>t</mi></msub><annotation encoding="application/x-tex">O_t</annotation></semantics></math>
-is the information collected between
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">t-1</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>,
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>A</mi><mi>t</mi></msub><annotation encoding="application/x-tex">A_t</annotation></semantics></math>
-is the treatment provided at time
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>.
-Here we consider treatment
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mi>t</mi></msub><mo>∈</mo><mrow><mo stretchy="true" form="prefix">{</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">}</mo></mrow></mrow><annotation encoding="application/x-tex">A_t \in \left\{0,1\right\}</annotation></semantics></math>.
-Treatment options are intended to influence a proximal outcome
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Y</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>∈</mo><msub><mi>O</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub></mrow><annotation encoding="application/x-tex">Y_{t+1} \in O_{t+1}</annotation></semantics></math>.</p>
-<p>Denote history
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>t</mi></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><msub><mi>O</mi><mn>1</mn></msub><mo>,</mo><msub><mi>A</mi><mn>1</mn></msub><mo>,</mo><msub><mi>O</mi><mn>2</mn></msub><mo>,</mo><msub><mi>A</mi><mn>2</mn></msub><mo>,</mo><mi>⋯</mi><mo>,</mo><msub><mi>A</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>,</mo><msub><mi>O</mi><mi>t</mi></msub><mo stretchy="true" form="postfix">}</mo></mrow></mrow><annotation encoding="application/x-tex">H_t = \left\{ O_1, A_1, O_2, A_2, \cdots, A_{t-1}, O_t \right\}</annotation></semantics></math>
-and randomized probabilities
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐩</mi><mo>=</mo><msubsup><mrow><mo stretchy="true" form="prefix">{</mo><msub><mi>p</mi><mi>t</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>A</mi><mi>t</mi></msub><mo>∣</mo><msub><mi>H</mi><mi>t</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">}</mo></mrow><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></msubsup></mrow><annotation encoding="application/x-tex">\boldsymbol{p} = \left\{p_t(A_t \mid H_t) \right\}_{t=1}^T</annotation></semantics></math>.
-The DR-WCLS criterion is given by</p>
-<p><span class="math display">$$
+<p>Individual-level data of an MRT can be summarized as <span class="math inline">\(\left\{O_1, A_1, O_2, A_2, \cdots, O_T, A_T,
+O_{T+1} \right\}\)</span> where <span class="math inline">\(T\)</span>
+is the total decision times, <span class="math inline">\(O_t\)</span> is
+the information collected between <span class="math inline">\(t-1\)</span> and <span class="math inline">\(t\)</span>, and <span class="math inline">\(A_t\)</span> is the treatment provided at time
+<span class="math inline">\(t\)</span>. Here we consider treatment <span class="math inline">\(A_t \in \left\{0,1\right\}\)</span>. Treatment
+options are intended to influence a proximal outcome <span class="math inline">\(Y_{t+1} \in O_{t+1}\)</span>.</p>
+<p>Denote history <span class="math inline">\(H_t = \left\{ O_1, A_1,
+O_2, A_2, \cdots, A_{t-1}, O_t \right\}\)</span> and randomized
+probabilities <span class="math inline">\(\mathbf{p} = \left\{p_t(A_t
+\mid H_t) \right\}_{t=1}^T\)</span>. The DR-WCLS criterion is given
+by</p>
+<p><span class="math display">\[
 \mathbb{P}_n
 \Bigl[
 \sum_{t=1}^{T}
@@ -116,56 +110,35 @@ The DR-WCLS criterion is given by</p>
   f_t(S_t)
 \Bigr]
 = 0
-$$</span></p>
-<p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo>;</mo><msub><mi>H</mi><mi>t</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>:=</mo><msub><mi>g</mi><mi>t</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>H</mi><mi>t</mi></msub><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><msub><mi>g</mi><mi>t</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>H</mi><mi>t</mi></msub><mo>,</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta(t;H_t) := g_t(H_t,1) - g_t(H_t,0)</annotation></semantics></math>
-is the causal excursion effect under the fully observed history
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mi>t</mi></msub><annotation encoding="application/x-tex">H_t</annotation></semantics></math>,
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mover><mi>σ</mi><mo accent="true">̃</mo></mover><mi>t</mi><mn>2</mn></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>S</mi><mi>t</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>:=</mo><msub><mover><mi>p</mi><mo accent="true">̃</mo></mover><mi>t</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>∣</mo><msub><mi>S</mi><mi>t</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mover><mi>p</mi><mo accent="true">̃</mo></mover><mi>t</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>∣</mo><msub><mi>S</mi><mi>t</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\tilde{\sigma}^2_t(S_t) := \tilde{p}_t(1 \mid S_t)(1-\tilde{p}_t(1 \mid S_t))</annotation></semantics></math>.</p>
-<p>The
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mover><mi>β</mi><mo accent="true">̂</mo></mover><mi>n</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>D</mi><mi>R</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">\hat{\beta}_n^{(DR)}</annotation></semantics></math>
-is a consistent estimator of the true
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
-if either the randomization probability
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mi>t</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>A</mi><mi>t</mi></msub><mo>∣</mo><msub><mi>H</mi><mi>t</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">p_t(A_t \mid H_t)</annotation></semantics></math>
-or the conditional expectation
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>g</mi><mi>t</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>H</mi><mi>t</mi></msub><mo>,</mo><msub><mi>A</mi><mi>t</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">g_t(H_t, A_t)</annotation></semantics></math>
-is correctly specified.</p>
+\]</span></p>
+<p>where <span class="math inline">\(\beta(t;H_t) := g_t(H_t,1) -
+g_t(H_t,0)\)</span> is the causal excursion effect under the fully
+observed history <span class="math inline">\(H_t\)</span>, and <span class="math inline">\(\tilde{\sigma}^2_t(S_t) := \tilde{p}_t(1 \mid
+S_t)(1-\tilde{p}_t(1 \mid S_t))\)</span>.</p>
+<p>The <span class="math inline">\(\hat{\beta}_n^{(DR)}\)</span> is a
+consistent estimator of the true <span class="math inline">\(\beta\)</span> if either the randomization
+probability <span class="math inline">\(p_t(A_t \mid H_t)\)</span> or
+the conditional expectation <span class="math inline">\(g_t(H_t,
+A_t)\)</span> is correctly specified.</p>
 <p>The <strong>DR_WCLS</strong> algorithm is as follows:</p>
-<p>Step I: Randomly split the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
-individuals into
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
-equal folds
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mrow><mo stretchy="true" form="prefix">{</mo><msub><mi>I</mi><mi>k</mi></msub><mo stretchy="true" form="postfix">}</mo></mrow><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></msubsup><annotation encoding="application/x-tex">\left\{I_k\right\}^K_{k=1}</annotation></semantics></math>
-assuming
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
-is a multiple of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>.
-Let
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>I</mi><mi>k</mi><mi>∁</mi></msubsup><annotation encoding="application/x-tex">I^∁_k</annotation></semantics></math>
-denote the complement of fold k.</p>
-<p>Step II: For each fold
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>,
-use data from
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>I</mi><mi>k</mi><mi>∁</mi></msubsup><annotation encoding="application/x-tex">I^∁_k</annotation></semantics></math>
-to estimate the nuisance functions
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mover><mi>g</mi><mo accent="true">̂</mo></mover><mi>t</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>H</mi><mi>t</mi></msub><mo>,</mo><msub><mi>A</mi><mi>t</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat{g}^{(k)}_t(H_t,A_t)</annotation></semantics></math>,<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mover><mi>p</mi><mo accent="true">̂</mo></mover><mi>t</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>∣</mo><msub><mi>H</mi><mi>t</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat{p}^{(k)}_t(1 \mid H_t)</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mover><mover><mi>p</mi><mo accent="true">̃</mo></mover><mo accent="true">̂</mo></mover><mi>t</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>∣</mo><msub><mi>S</mi><mi>t</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat{\tilde{p}}^{(k)}_t(1 \mid S_t)</annotation></semantics></math>,
-and compute the weight
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mover><mi>W</mi><mo accent="true">̂</mo></mover><mi>t</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>=</mo><msubsup><mover><mover><mi>p</mi><mo accent="true">̃</mo></mover><mo accent="true">̂</mo></mover><mi>t</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>∣</mo><msub><mi>S</mi><mi>t</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><msubsup><mover><mi>p</mi><mo accent="true">̂</mo></mover><mi>t</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>∣</mo><msub><mi>H</mi><mi>t</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat{W}_t^{(k)} = \hat{\tilde{p}}^{(k)}_t(1 \mid S_t) / \hat{p}^{(k)}_t(1 \mid H_t)</annotation></semantics></math>.</p>
-<p>Step III: For each
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>∈</mo><msub><mi>I</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">j \in I_k</annotation></semantics></math>
-and time
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>,
-construct the pseudo-outcome
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mover><mi>Y</mi><mo accent="true">̃</mo></mover><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>D</mi><mi>R</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">\tilde{Y}_{t+1}^{(DR)}</annotation></semantics></math>
-as follows, then regress it on
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mi>t</mi></msub><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>S</mi><mi>t</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>T</mi></msup><mi>β</mi></mrow><annotation encoding="application/x-tex">f_t(S_t)^T \beta</annotation></semantics></math>
-using weights
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mover><mi>p</mi><mo accent="true">̃</mo></mover><mi>t</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>∣</mo><msub><mi>S</mi><mi>t</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msubsup><mover><mi>p</mi><mo accent="true">̃</mo></mover><mi>t</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>∣</mo><msub><mi>S</mi><mi>t</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\tilde{p}_t^{(k)}(1 \mid S_t)(1-\tilde{p}_t^{(k)}(1 \mid S_t))</annotation></semantics></math>.</p>
-<p><span class="math display">$$
+<p>Step I: Randomly split the <span class="math inline">\(n\)</span>
+individuals into <span class="math inline">\(K\)</span> equal folds
+<span class="math inline">\(\left\{I_k\right\}^K_{k=1}\)</span> assuming
+<span class="math inline">\(n\)</span> is a multiple of <span class="math inline">\(K\)</span>. Let <span class="math inline">\(I^∁_k\)</span> denote the complement of fold
+k.</p>
+<p>Step II: For each fold <span class="math inline">\(k\)</span>, use
+data from <span class="math inline">\(I^∁_k\)</span> to estimate the
+nuisance functions <span class="math inline">\(\hat{g}^{(k)}_t(H_t,A_t)\)</span>,<span class="math inline">\(\hat{p}^{(k)}_t(1 \mid H_t)\)</span>, <span class="math inline">\(\hat{\tilde{p}}^{(k)}_t(1 \mid S_t)\)</span>, and
+compute the weight <span class="math inline">\(\hat{W}_t^{(k)} =
+\hat{\tilde{p}}^{(k)}_t(1 \mid S_t) / \hat{p}^{(k)}_t(1 \mid
+H_t)\)</span>.</p>
+<p>Step III: For each <span class="math inline">\(j \in I_k\)</span> and
+time <span class="math inline">\(t\)</span>, construct the
+pseudo-outcome <span class="math inline">\(\tilde{Y}_{t+1}^{(DR)}\)</span> as follows, then
+regress it on <span class="math inline">\(f_t(S_t)^T \beta\)</span>
+using weights <span class="math inline">\(\tilde{p}_t^{(k)}(1 \mid
+S_t)(1-\tilde{p}_t^{(k)}(1 \mid S_t))\)</span>.</p>
+<p><span class="math display">\[
 \tilde{Y}^{(DR)}_{t+1,j} :=
 \frac{\hat{W}_{t,j}^{(k)}(A_{t,j}-\hat{\tilde{p}}_t^{(k)}(1 \mid
 S_{t,j}))
@@ -174,10 +147,10 @@ S_{t,j}))
 + \Bigl(
 \hat{g}_t^{(k)}(H_{t,j},1) - \hat{g}_t^{(k)}(H_{t,j},0)
 \Bigr)
-$$</span></p>
+\]</span></p>
 <p>To conduct variable selection, <strong>DR_WCLS_LASSO</strong> solves
 the problem</p>
-<p><span class="math display">$$
+<p><span class="math display">\[
 \min_{\beta}
 \frac{1}{n}
 \sum_{i=1}^{n}\sum_{t=1}^{T}
@@ -188,17 +161,15 @@ the problem</p>
 \Bigr] +
 \lambda \lVert \beta \rVert_{1} -
 w^{\top}\beta,
-$$</span></p>
-<p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
-is the LASSO regularization parameter,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ω</mi><annotation encoding="application/x-tex">\omega</annotation></semantics></math>
-is the noise vector.</p>
+\]</span></p>
+<p>where <span class="math inline">\(\lambda\)</span> is the LASSO
+regularization parameter, <span class="math inline">\(\omega\)</span> is
+the noise vector.</p>
 <p>After the variable selection procedure, we conduct post-selection
 inference using DR-WCLS conditional on the selected variables. This
 provides estimates for the selected variables along with their
 corresponding confidence intervals.</p>
-<p><span class="math display">$$
+<p><span class="math display">\[
 \min_{\beta}
 \frac{1}{n}
 \sum_{i=1}^{n}\sum_{t=1}^{T}
@@ -207,7 +178,7 @@ corresponding confidence intervals.</p>
   \bigl(1-\hat{\tilde{p}}^{(k)}_{t}(1 \mid S_t)\bigr)\,
   \bigl(\tilde{Y}^{(DR)}_{t+1,i}-f_t(S_t)^{\top}\beta_E\bigr)^2
 \Bigr]
-$$</span></p>
+\]</span></p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -265,13 +236,7 @@ follows:</p>
 <span><span class="co">#&gt; 5        3.2945170                  0            0       0.6     0</span></span>
 <span><span class="co">#&gt; 6        4.6658254                  1            0       0.6     0</span></span></code></pre></div>
 <p>We first specify the variable names for the participant ID,
-history<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mi>t</mi></msub><annotation encoding="application/x-tex">H_t</annotation></semantics></math>,
-moderator<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>S</mi><mi>t</mi></msub><annotation encoding="application/x-tex">S_t</annotation></semantics></math>,
-treatment<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>A</mi><mi>t</mi></msub><annotation encoding="application/x-tex">A_t</annotation></semantics></math>,
-proximal
-outcome<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Y</mi><mi>t</mi></msub><annotation encoding="application/x-tex">Y_t</annotation></semantics></math>,
-and randomization
-probability<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>t</mi></msub><annotation encoding="application/x-tex">p_t</annotation></semantics></math>.</p>
+history<span class="math inline">\(H_t\)</span>, moderator<span class="math inline">\(S_t\)</span>, treatment<span class="math inline">\(A_t\)</span>, proximal outcome<span class="math inline">\(Y_t\)</span>, and randomization probability<span class="math inline">\(p_t\)</span>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
 <span><span class="va">ID</span> <span class="op">=</span> <span class="st">'userid'</span></span>
@@ -286,7 +251,7 @@ probability<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><se
 <p>To generate the pseudo-outcome, we provide three methods for
 estimating the nuisance functions: LASSO, random forest and gradient
 boosting.</p>
-<p><span class="math display">$$
+<p><span class="math display">\[
 \tilde{Y}^{(DR)}_{t+1,j} :=
 \frac{\hat{W}_{t,j}^{(k)}(A_{t,j}-\hat{\tilde{p}}_t^{(k)}(1 \mid
 S_{t,j}))
@@ -295,7 +260,7 @@ S_{t,j}))
 + \Bigl(
 \hat{g}_t^{(k)}(H_{t,j},1) - \hat{g}_t^{(k)}(H_{t,j},0)
 \Bigr)
-$$</span></p>
+\]</span></p>
 <p>We illustrate their use use via the functions
 <code>pseudo_outcome_generator_CVlasso</code>,
 <code>pseudo_outcome_generator_rf_v2</code>, and
@@ -326,7 +291,7 @@ $$</span></p>
 </h4>
 <p>To perform variable selection, <strong>DR_WCLS_LASSO</strong> solves
 the problem</p>
-<p><span class="math display">$$
+<p><span class="math display">\[
 \min_{\beta}
 \frac{1}{n}
 \sum_{i=1}^{n}\sum_{t=1}^{T}
@@ -337,7 +302,7 @@ the problem</p>
 \Bigr] +
 \lambda \lVert \beta \rVert_{1} -
 w^{\top}\beta
-$$</span></p>
+\]</span></p>
 <p>Variable selection is performed using the
 <code>variable_selection_PY_penal_int</code> or
 <code>FISTA_backtracking</code> function. We first define
@@ -376,7 +341,7 @@ Below, we demonstrate the use of both functions.</p>
 <p>After variable selection, we conduct post-selection inference using
 DR-WCLS, conditioning on the selected variables. This yields GEE
 coefficient estimates and corresponding confidence intervals.</p>
-<p><span class="math display">$$
+<p><span class="math display">\[
 \min_{\beta}
 \frac{1}{n}
 \sum_{i=1}^{n}\sum_{t=1}^{T}
@@ -385,18 +350,15 @@ coefficient estimates and corresponding confidence intervals.</p>
   \bigl(1-\hat{\tilde{p}}^{(k)}_{t}(1 \mid S_t)\bigr)\,
   \bigl(\tilde{Y}^{(DR)}_{t+1,i}-f_t(S_t)^{\top}\beta_E\bigr)^2
 \Bigr]
-$$</span></p>
+\]</span></p>
 <p><code>DR_WCLS_LASSO</code> is used for post-selection inference. The
 input of the function are the data for inference, number of folds, and
-variable names for ID, time,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mi>t</mi></msub><annotation encoding="application/x-tex">H_t</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>S</mi><mi>t</mi></msub><annotation encoding="application/x-tex">S_t</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>A</mi><mi>t</mi></msub><annotation encoding="application/x-tex">A_t</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Y</mi><mi>t</mi></msub><annotation encoding="application/x-tex">Y_t</annotation></semantics></math>
-and randomization probability. <code>method_pseu</code> specifies the
-method used for pseudo-outcome generation (e.g., “CVLASSO”,
-“RandomForest”, “GradientBoosting”). <code>varSelect_program</code>
-indicates the variable selection programming language.</p>
+variable names for ID, time, <span class="math inline">\(H_t\)</span>,
+<span class="math inline">\(S_t\)</span>, <span class="math inline">\(A_t\)</span>, <span class="math inline">\(Y_t\)</span> and randomization probability.
+<code>method_pseu</code> specifies the method used for pseudo-outcome
+generation (e.g., “CVLASSO”, “RandomForest”, “GradientBoosting”).
+<code>varSelect_program</code> indicates the variable selection
+programming language.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># set.seed(123)</span></span>
 <span></span>
@@ -431,7 +393,7 @@ indicates the variable selection programming language.</p>
 <span>                          varSelect_program <span class="op">=</span> <span class="st">"R"</span>,</span>
 <span>                          standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "remove 0 lines of data due to NA produced for yDR"</span></span>
-<span><span class="co">#&gt; [1] "The current lambda value is: 130.866162891048"</span></span>
+<span><span class="co">#&gt; [1] "The current lambda value is: 130.875622692401"</span></span>
 <span><span class="co">#&gt; [1] "select predictors: (Intercept)"  "select predictors: day_in_study"</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span>
 <span><span class="co">#&gt; [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"</span></span>
@@ -445,12 +407,12 @@ indicates the variable selection programming language.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
 <span><span class="va">UI_return_R</span></span>
-<span><span class="co">#&gt;              E     GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1  (Intercept)  0.56759741  0.37129126  0.72773895 0.05036305 0.9500748</span></span>
-<span><span class="co">#&gt; 2 day_in_study -0.02086483 -0.02869376 -0.01229072 0.04921956 0.9506399</span></span>
+<span><span class="co">#&gt;              E     GEE_est      lowCI     upperCI   prop_low   prop_up</span></span>
+<span><span class="co">#&gt; 1  (Intercept)  0.56779396  0.3716397  0.72776335 0.05044121 0.9499924</span></span>
+<span><span class="co">#&gt; 2 day_in_study -0.02085767 -0.0286707 -0.01230142 0.04944023 0.9504154</span></span>
 <span><span class="co">#&gt;         pvalue</span></span>
-<span><span class="co">#&gt; 1 1.277582e-06</span></span>
-<span><span class="co">#&gt; 2 1.648253e-04</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 1.249038e-06</span></span>
+<span><span class="co">#&gt; 2 1.641057e-04</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="a-comparison-of-using-randomized-lasso-and-weighted-centered-least-squares">A Comparison of Using Randomized LASSO and Weighted Centered Least
@@ -524,12 +486,12 @@ Squares<a class="anchor" aria-label="anchor" href="#a-comparison-of-using-random
 <span></span>
 <span><span class="co"># UI_return_python</span></span>
 <span><span class="va">UI_return_R</span></span>
-<span><span class="co">#&gt;              E     GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1  (Intercept)  0.56759741  0.37129126  0.72773895 0.05036305 0.9500748</span></span>
-<span><span class="co">#&gt; 2 day_in_study -0.02086483 -0.02869376 -0.01229072 0.04921956 0.9506399</span></span>
+<span><span class="co">#&gt;              E     GEE_est      lowCI     upperCI   prop_low   prop_up</span></span>
+<span><span class="co">#&gt; 1  (Intercept)  0.56779396  0.3716397  0.72776335 0.05044121 0.9499924</span></span>
+<span><span class="co">#&gt; 2 day_in_study -0.02085767 -0.0286707 -0.01230142 0.04944023 0.9504154</span></span>
 <span><span class="co">#&gt;         pvalue</span></span>
-<span><span class="co">#&gt; 1 1.277582e-06</span></span>
-<span><span class="co">#&gt; 2 1.648253e-04</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 1.249038e-06</span></span>
+<span><span class="co">#&gt; 2 1.641057e-04</span></span></code></pre></div>
 <p><img src="tutorial_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" width="700"><img src="tutorial_files/figure-html/unnamed-chunk-13-2.png" class="r-plt" width="700"></p>
 </div>
 <div class="section level4">
@@ -552,18 +514,18 @@ CVLASSO.</p>
 <span>                                 varSelect_program <span class="op">=</span> <span class="st">"R"</span>,</span>
 <span>                                 standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "remove 0 lines of data due to NA produced for yDR"</span></span>
-<span><span class="co">#&gt; [1] "The current lambda value is: 130.889909642224"</span></span>
+<span><span class="co">#&gt; [1] "The current lambda value is: 130.874430913628"</span></span>
 <span><span class="co">#&gt; [1] "select predictors: (Intercept)"  "select predictors: day_in_study"</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span>
 <span><span class="co">#&gt; [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"</span></span>
 <span></span>
 <span><span class="va">UI_return_method_pseu</span></span>
 <span><span class="co">#&gt;              E     GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1  (Intercept)  0.56818818  0.37189786  0.72824709 0.05036282 0.9500658</span></span>
-<span><span class="co">#&gt; 2 day_in_study -0.02087943 -0.02871229 -0.01229916 0.04913298 0.9507166</span></span>
+<span><span class="co">#&gt; 1  (Intercept)  0.56844965  0.37212341  0.72853390 0.05039441 0.9500313</span></span>
+<span><span class="co">#&gt; 2 day_in_study -0.02089795 -0.02872757 -0.01232027 0.04913065 0.9506675</span></span>
 <span><span class="co">#&gt;         pvalue</span></span>
-<span><span class="co">#&gt; 1 1.234250e-06</span></span>
-<span><span class="co">#&gt; 2 1.633391e-04</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 1.217928e-06</span></span>
+<span><span class="co">#&gt; 2 1.595093e-04</span></span></code></pre></div>
 <p>The LASSO penalty can be adjusted by setting ‘lam’ in the
 <code>DR_WCLS_LASSO</code> function.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
@@ -587,11 +549,11 @@ CVLASSO.</p>
 <span></span>
 <span><span class="va">UI_return_lambda</span></span>
 <span><span class="co">#&gt;              E     GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1  (Intercept)  0.56947929  0.37432032  0.72976664 0.04989399 0.9493513</span></span>
-<span><span class="co">#&gt; 2 day_in_study -0.02094124 -0.02873574 -0.01240348 0.04911450 0.9502059</span></span>
+<span><span class="co">#&gt; 1  (Intercept)  0.56913165  0.37408863  0.72926844 0.05002324 0.9492241</span></span>
+<span><span class="co">#&gt; 2 day_in_study -0.02092669 -0.02871173 -0.01239679 0.04924098 0.9500773</span></span>
 <span><span class="co">#&gt;         pvalue</span></span>
-<span><span class="co">#&gt; 1 9.798347e-07</span></span>
-<span><span class="co">#&gt; 2 1.346040e-04</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 9.928750e-07</span></span>
+<span><span class="co">#&gt; 2 1.354456e-04</span></span></code></pre></div>
 <p>The data split rate in Step 1 of the DR_WCLS algorithm can be set
 using ‘splitrat’ in the <code>DR_WCLS_LASSO</code> function.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
@@ -606,29 +568,25 @@ using ‘splitrat’ in the <code>DR_WCLS_LASSO</code> function.</p>
 <span>                                   splitrat <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>                                   standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "remove 0 lines of data due to NA produced for yDR"</span></span>
-<span><span class="co">#&gt; [1] "The current lambda value is: 130.869632345127"</span></span>
+<span><span class="co">#&gt; [1] "The current lambda value is: 130.874723988392"</span></span>
 <span><span class="co">#&gt; [1] "select predictors: (Intercept)"  "select predictors: day_in_study"</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span>
 <span><span class="co">#&gt; [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"</span></span>
 <span><span class="va">UI_return_splitrat</span></span>
-<span><span class="co">#&gt;              E     GEE_est      lowCI     upperCI   prop_low  prop_up</span></span>
-<span><span class="co">#&gt; 1  (Intercept)  0.56761565  0.3717071  0.72747868 0.05056567 0.949869</span></span>
-<span><span class="co">#&gt; 2 day_in_study -0.02085637 -0.0286649 -0.01231026 0.04952827 0.950318</span></span>
+<span><span class="co">#&gt;              E    GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
+<span><span class="co">#&gt; 1  (Intercept)  0.5681533  0.37196098  0.72816041 0.05043564 0.9499928</span></span>
+<span><span class="co">#&gt; 2 day_in_study -0.0208761 -0.02869056 -0.01231765 0.04939291 0.9504397</span></span>
 <span><span class="co">#&gt;         pvalue</span></span>
-<span><span class="co">#&gt; 1 1.243780e-06</span></span>
-<span><span class="co">#&gt; 2 1.630793e-04</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 1.229547e-06</span></span>
+<span><span class="co">#&gt; 2 1.615734e-04</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="analysis-using-manually-created-interaction-terms">Analysis Using Manually Created Interaction Terms<a class="anchor" aria-label="anchor" href="#analysis-using-manually-created-interaction-terms"></a>
 </h4>
-<p>Interaction terms can be manually created and included in the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mi>t</mi></msub><annotation encoding="application/x-tex">H_t</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>S</mi><mi>t</mi></msub><annotation encoding="application/x-tex">S_t</annotation></semantics></math>
-variable lists. In this example, we create an indicator for whether the
-time in the study is over 14 days and include its interactions with
-<code>logstep_30min_lag1</code>, <code>logstep_pre30min</code>, and
-<code>is_at_home_or_work</code>.</p>
+<p>Interaction terms can be manually created and included in the <span class="math inline">\(H_t\)</span> and <span class="math inline">\(S_t\)</span> variable lists. In this example, we
+create an indicator for whether the time in the study is over 14 days
+and include its interactions with <code>logstep_30min_lag1</code>,
+<code>logstep_pre30min</code>, and <code>is_at_home_or_work</code>.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">timeover14</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">decision_point</span><span class="op">&gt;</span><span class="fl">14</span><span class="op">)</span></span>
 <span><span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">int_lag1_timeover14</span> <span class="op">=</span> <span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">logstep_30min_lag1</span> <span class="op">*</span> <span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">timeover14</span></span>
@@ -636,11 +594,8 @@ time in the study is over 14 days and include its interactions with
 <span><span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">int_pre30_timeover14</span> <span class="op">=</span> <span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">logstep_pre30min</span> <span class="op">*</span> <span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">timeover14</span></span>
 <span></span>
 <span><span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">int_home_timeover14</span> <span class="op">=</span> <span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">is_at_home_or_work</span> <span class="op">*</span> <span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">timeover14</span></span></code></pre></div>
-<p>We add the interaction terms in the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mi>t</mi></msub><annotation encoding="application/x-tex">H_t</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>S</mi><mi>t</mi></msub><annotation encoding="application/x-tex">S_t</annotation></semantics></math>
-variable lists and rerun the procedure.</p>
+<p>We add the interaction terms in the <span class="math inline">\(H_t\)</span> and <span class="math inline">\(S_t\)</span> variable lists and rerun the
+procedure.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">200</span><span class="op">)</span></span>
 <span><span class="va">ID</span> <span class="op">=</span> <span class="st">'userid'</span></span>
@@ -673,7 +628,7 @@ variable lists and rerun the procedure.</p>
 <span>                          varSelect_program <span class="op">=</span> <span class="st">"R"</span>,</span>
 <span>                          standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "remove 0 lines of data due to NA produced for yDR"</span></span>
-<span><span class="co">#&gt; [1] "The current lambda value is: 152.876623632235"</span></span>
+<span><span class="co">#&gt; [1] "The current lambda value is: 152.858404333928"</span></span>
 <span><span class="co">#&gt; [1] "select predictors: (Intercept)"       </span></span>
 <span><span class="co">#&gt; [2] "select predictors: logstep_30min_lag1"</span></span>
 <span><span class="co">#&gt; [3] "select predictors: logstep_pre30min"  </span></span>
@@ -683,16 +638,16 @@ variable lists and rerun the procedure.</p>
 <span><span class="co">#&gt; [4] "int_pre30_timeover14" "int_home_timeover14"</span></span>
 <span></span>
 <span><span class="va">UI_return_int_R</span></span>
-<span><span class="co">#&gt;                    E      GEE_est       lowCI    upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1        (Intercept)  0.564290725 -0.59682637  0.6166878 0.04937688 0.9493620</span></span>
-<span><span class="co">#&gt; 2 logstep_30min_lag1 -0.001954718 -0.03970519  0.1384967 0.05001387 0.9499660</span></span>
-<span><span class="co">#&gt; 3   logstep_pre30min -0.001166410 -0.01388489  0.1566902 0.04983102 0.9499593</span></span>
-<span><span class="co">#&gt; 4       day_in_study -0.020373065 -0.02885162 -0.0072407 0.04977266 0.9491078</span></span>
+<span><span class="co">#&gt;                    E      GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
+<span><span class="co">#&gt; 1        (Intercept)  0.567524285 -0.47444120  0.66217094 0.04924123 0.9504657</span></span>
+<span><span class="co">#&gt; 2 logstep_30min_lag1 -0.002280636 -0.04139731  0.12778499 0.05028444 0.9498846</span></span>
+<span><span class="co">#&gt; 3   logstep_pre30min -0.001329584 -0.01784046  0.14310874 0.04958894 0.9492032</span></span>
+<span><span class="co">#&gt; 4       day_in_study -0.020471589 -0.02903725 -0.01115698 0.04997574 0.9491035</span></span>
 <span><span class="co">#&gt;       pvalue</span></span>
-<span><span class="co">#&gt; 1 0.85663206</span></span>
-<span><span class="co">#&gt; 2 0.56792669</span></span>
-<span><span class="co">#&gt; 3 0.20354449</span></span>
-<span><span class="co">#&gt; 4 0.01956453</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 0.66162061</span></span>
+<span><span class="co">#&gt; 2 0.62371553</span></span>
+<span><span class="co">#&gt; 3 0.25826528</span></span>
+<span><span class="co">#&gt; 4 0.00215414</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -753,6 +708,9 @@ devices.</p>
 <div class="section level3">
 <h3 id="simulated-data">Simulated Data<a class="anchor" aria-label="anchor" href="#simulated-data"></a>
 </h3>
+<p>We also illustrate the use of the package with a simulated dataset
+and demonstrate why DR_WCLS is needed, rather than using randomized
+LASSO for selection and WCLS for inference.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sim_data</span> <span class="op">=</span> <span class="fu"><a href="../reference/generate_dataset.html">generate_dataset</a></span><span class="op">(</span>N <span class="op">=</span> <span class="fl">1000</span>, T <span class="op">=</span> <span class="fl">40</span>, P <span class="op">=</span> <span class="fl">50</span>, </span>
 <span>                            sigma_residual <span class="op">=</span> <span class="fl">1.5</span>, sigma_randint <span class="op">=</span> <span class="fl">1.5</span>, </span>
@@ -776,7 +734,7 @@ devices.</p>
 <span>                                standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span>,</span>
 <span>                                beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1.7</span>, <span class="fl">1.5</span>, <span class="op">-</span><span class="fl">1.3</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">21</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "remove 0 lines of data due to NA produced for yDR"</span></span>
-<span><span class="co">#&gt; [1] "The current lambda value is: 442.781651848933"</span></span>
+<span><span class="co">#&gt; [1] "The current lambda value is: 442.789879628912"</span></span>
 <span><span class="co">#&gt; [1] "select predictors: (Intercept)" "select predictors: state1"     </span></span>
 <span><span class="co">#&gt; [3] "select predictors: state2"      "select predictors: state3"     </span></span>
 <span><span class="co">#&gt; [5] "select predictors: state4"     </span></span>
