@@ -63,7 +63,8 @@
 #' FISTA_backtracking(data = sim_data, moderator_formula = my_formula, lam = NULL, noise_scale = NULL,
 #'   splitrat = 0.7, beta = matrix(c(-1, 1.7, 1.5, -1.3, -1, rep(0,21)), ncol = 1))
 #'
-#'
+#' @export
+#' 
 
 FISTA_backtracking = function(data,ID, moderator_formula, lam = NULL, noise_scale = NULL,
                               splitrat = 0.8, max_ite = 10^(5), tol = 10^(-4), beta = NULL){
