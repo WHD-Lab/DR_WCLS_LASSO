@@ -32,6 +32,8 @@
 #' @import ranger
 #' @import parallel
 #' @import tidyverse
+#' @import modelr
+#' @import dplyr
 #'
 #' @export
 

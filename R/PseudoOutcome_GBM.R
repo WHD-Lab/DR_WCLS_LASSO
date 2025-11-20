@@ -32,6 +32,7 @@
 #' @import xgboost
 #' @import parallel
 #' @import dplyr
+#' @import modelr
 #'
 #' @export
 

@@ -36,7 +36,9 @@
 #' @import glmnet
 #' @import tidyverse
 #' @import parallel
-#'
+#' @import modelr
+#' @import dplyr
+#' 
 #' @export
 
 
