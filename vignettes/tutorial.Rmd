@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-Micro-randomized trials (MRTs) are designed to evaluate the effectiveness of mobile health (mHealth) interventions delivered via smartphones. In practice, the assumptions required for MRTs are often difficult to satisfy: randomization probabilities can be uncertain, observations are frequently incomplete, and prespecifying features from high-dimensional contexts for linear working models is also challenging. To address these issues, the **doubly robust weighted centered least squares (DR-WCLS)** framework provides a flexible procedure for variable selection and inference. The methods incorporates supervised learning algorithms and enables valid inference on time-varying causal effects in longitudinal settings.
+Micro-randomized trials (MRTs) are designed to evaluate the effectiveness of mobile health (mHealth) interventions delivered via smartphones. In practice, the assumptions required for MRTs are often difficult to satisfy: randomization probabilities can be uncertain, observations are frequently incomplete, and prespecifying features from high-dimensional contexts for linear working models is also challenging. To address these issues, the **doubly robust weighted centered least squares (DR-WCLS)** framework provides a flexible procedure for variable selection and inference. The methods incorporates supervised learning algorithms and enables valid inference on time-varying causal effects in longitudinal settings. (talk about DR)
 
 This vignette introduces the **MRTpostInfLASSO** package. Its core function, **DR_WCLS_LASSO**, allows users to perform variable selection, estimate time-varying causal effects and make valid inferences conditional on the selected variables.
 
@@ -251,17 +251,17 @@ After variable selection, we conduct post-selection inference using DR-WCLS, con
 # np.random.seed(123)
 # ")
 
-# UI_return_python = DR_WCLS_LASSO(data = data_mimicHeartSteps,
-#                           fold = 5, ID = ID,
-#                           time = "decision_point",
-#                           Ht = Ht, St = St, At = At,
-#                           prob = prob, outcome = outcome,
-#                           # virtualenv_path = 'fakepath/wcls',
-#                           method_pseu = "CVLASSO",
-#                           varSelect_program = "Python",
-#                           standardize_x = F, standardize_y = F)
-# 
-# UI_return_python
+UI_return_python = DR_WCLS_LASSO(data = data_mimicHeartSteps,
+                          fold = 5, ID = ID,
+                          time = "decision_point",
+                          Ht = Ht, St = St, At = At,
+                          prob = prob, outcome = outcome,
+                          # virtualenv_path = 'fakepath/wcls',
+                          method_pseu = "CVLASSO",
+                          varSelect_program = "Python",
+                          standardize_x = F, standardize_y = F)
+
+UI_return_python
 ```
 
 ```{r}
@@ -283,6 +283,7 @@ UI_return_R
 Select variables using randomized LASSO
 
 ```{r}
+
 library(selectiveInference)
 res_randomizedLASSO = randomizedLasso(X = as.matrix(data_mimicHeartSteps[,St]), 
                 y = as.matrix(data_mimicHeartSteps[,outcome]), 
@@ -312,8 +313,8 @@ wcls_fit = wcls(
   outcome = 'logstep_30min', 
   treatment = 'intervention', 
   rand_prob = 0.5, 
-  moderator_formula= ~ day_in_study,
-  control_formula = ~logstep_30min_lag1 + logstep_pre30min + day_in_study,
+  moderator_formula = ~ day_in_study,
+  control_formula = ~ logstep_30min_lag1 + logstep_pre30min + day_in_study,
   availability = NULL,
   numerator_prob = NULL,
   verbose = TRUE
@@ -550,7 +551,7 @@ UI_return_IHS_R
 ```
 
 
-## Simulated Data
+# Simulated Data
 
 We also illustrate the use of the package with a simulated dataset and demonstrate why DR_WCLS is needed, rather than using randomized LASSO for selection and WCLS for inference.
 
@@ -566,7 +567,8 @@ sim_data = generate_dataset(N = 1000, T = 40, P = 50,
 Ht = unlist(lapply(1:50, FUN = function(X) paste0("state",X)))
 St = unlist(lapply(1:25, FUN = function(X) paste0("state",X)))
 
-
+sim_data$prob_false = rep(0.5, length(sim_data$id))
+set.seed(1001)
 UI_return_sim_R = DR_WCLS_LASSO(data = sim_data,
                                 fold = 5, ID = "id",
                                 time = "decision_point",
@@ -581,25 +583,40 @@ UI_return_sim_R = DR_WCLS_LASSO(data = sim_data,
 
 
 ```{r}
-sim_randomizedLASSO = randomizedLasso(X = as.matrix(sim_data[,St]), 
-                y = as.matrix(sim_data[,'outcome']), 
-                lam = 225000, 
-                family="gaussian",
-                noise_scale=NULL, 
-                ridge_term=NULL, 
-                max_iter=100,       
-                kkt_tol=1.e-4,      
-                parameter_tol=1.e-8,
-                objective_tol=1.e-8,
-                objective_stop=FALSE,
-                kkt_stop=TRUE,
-                parameter_stop=TRUE)
+my_formula = as.formula(
+  paste0("yDR ~ ", paste0("state", 1:50, collapse = " + "))
+)
+set.seed(1001)
+pseudo_outcome_CVlasso = pseudo_outcome_generator_CVlasso(fold = 5,ID = 'id',
+                                                     data = sim_data, 
+                                                     Ht = Ht, St = St, At = 'action', 
+                                                     prob = 'prob', outcome = 'outcome',
+                                                     core_num = 1)
 
-St[sim_randomizedLASSO$active_set]
+# randomized LASSO
+sim_variable_sel = FISTA_backtracking(data = pseudo_outcome_CVlasso, ID = 'id', 
+                                      my_formula, lam = NULL, noise_scale = 0, 
+                                      splitrat = 0.8, max_ite = 10^(5), 
+                                      tol = 10^(-4), beta = NULL)
+# sim_randomizedLASSO = randomizedLasso(X = as.matrix(sim_data[,St]), 
+#                 y = as.matrix(sim_data[,'outcome']), 
+#                 lam = 225000, 
+#                 family="gaussian",
+#                 noise_scale=NULL, 
+#                 ridge_term=NULL, 
+#                 max_iter=100,       
+#                 kkt_tol=1.e-4,      
+#                 parameter_tol=1.e-8,
+#                 objective_tol=1.e-8,
+#                 objective_stop=FALSE,
+#                 kkt_stop=TRUE,
+#                 parameter_stop=TRUE)
+
+sim_variable_sel$E[-1]
 ```
 
 ```{r}
-mod_formula = as.formula(paste("~", paste0("state", 1:25, collapse = " + ")))
+mod_formula = as.formula(paste("~", paste0("state", 1:4, collapse = " + ")))
 
 ctrl_formula = as.formula(paste("~", paste0("state", 1:50, collapse = " + ")))
 
@@ -608,7 +625,7 @@ wcls_args = list(
   id        = "id",
   outcome   = "outcome",
   treatment = "action",
-  rand_prob = "prob",
+  rand_prob = "prob_false",
   moderator_formula = mod_formula,
   control_formula   = ctrl_formula,
   availability      = NULL,
@@ -674,6 +691,7 @@ ggplot(state1_df,
   geom_pointrange(aes(ymin = low, ymax = up),
                   position = position_dodge(width = 0.5),
                   linewidth = 1.1) +
+  geom_hline(yintercept = 1.7, linetype = "dashed", color = "black") +
   labs(x = NULL, y = "Effect estimate",
        color = "Method") +
   theme_minimal()
@@ -685,6 +703,7 @@ ggplot(state2_df,
   geom_pointrange(aes(ymin = low, ymax = up),
                   position = position_dodge(width = 0.5),
                   linewidth = 1.1) +
+  geom_hline(yintercept = 1.5, linetype = "dashed", color = "black") +
   labs(x = NULL, y = "Effect estimate",
        color = "Method") +
   theme_minimal()
@@ -696,6 +715,7 @@ ggplot(state3_df,
   geom_pointrange(aes(ymin = low, ymax = up),
                   position = position_dodge(width = 0.5),
                   linewidth = 1.1) +
+  geom_hline(yintercept = -1.3, linetype = "dashed", color = "black") +
   labs(x = NULL, y = "Effect estimate",
        color = "Method") +
   theme_minimal()
@@ -707,6 +727,7 @@ ggplot(state4_df,
   geom_pointrange(aes(ymin = low, ymax = up),
                   position = position_dodge(width = 0.5),
                   linewidth = 1.1) +
+  geom_hline(yintercept = -1, linetype = "dashed", color = "black") +
   labs(x = NULL, y = "Effect estimate",
        color = "Method") +
   theme_minimal()
