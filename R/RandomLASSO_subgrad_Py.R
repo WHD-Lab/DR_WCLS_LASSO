@@ -16,7 +16,6 @@
 #' The random noises, \eqn{\omega}, are iid drawn from normal distribution with standard deviation noise_scale
 #' @param splitrat this value is corresponding to the data splitting rate. Details can read "Exact Selective Inference with Randomization" page 15 equation (10).
 #' This value will be used only when user doesn't provide the `noise_scale` or `lam`.
-#' @param virtualenv_path Python virtual environment path
 #' @param beta True coefficients (for simulation use only).
 #'
 #' @return
@@ -60,7 +59,7 @@
 #' @export
 #'
 variable_selection_PY = function(data,ID, moderator_formula, lam = NULL, noise_scale = NULL,
-                                           splitrat = 0.8, virtualenv_path = '', beta = NULL) {
+                                           splitrat = 0.8, venv, beta = NULL) {
   # data: the output of pesudo_outcomecal function
   # ID: the name of column where participants' ID are stored
   # moderator_formula: determines the formula for the f(St)T*beta function
@@ -70,7 +69,16 @@ variable_selection_PY = function(data,ID, moderator_formula, lam = NULL, noise_s
   # splitrat: the corresponding to the data splitting rate. Details can read "Exact Selective Inference with Randomization" page 15 equation (10).
   #           This value will be used only when user doesn't provide the noise_scale.
   # virtualenv_path: Python virtual environment path
-
+    
+  use_virtualenv(venv, required = TRUE)
+    
+  np = import("numpy", convert = FALSE)
+  lassopy = import("selectinf.randomized.lasso", convert = FALSE)$lasso
+  # selected_targets = import("selectinf.base", convert = FALSE)$selected_targets  
+  const = lassopy$gaussian
+  exact_grid_inference = import("selectinf.randomized.exact_reference", convert = FALSE)$exact_grid_inference  
+ 
+  
   ptSt = data[,"ptSt"]
   n = dplyr::n_distinct(data[,ID])
   wssqrt = c(sqrt(ptSt*(1-ptSt)*2/n^(1/2)))
@@ -93,19 +101,13 @@ variable_selection_PY = function(data,ID, moderator_formula, lam = NULL, noise_s
   if(is.null(lam)) {lam = sqrt(2*log(dim(Xw)[2]))*sd(yw)*splitrat*sqrt(dim(Xw)[1])}
 
   # load python virtualenv
-  require(reticulate)
-  if (isTRUE(nzchar(trimws(virtualenv_path)))) {
-    use_virtualenv(virtualenv_path)
-  } else {
-    use_condaenv(condaenv = 'env3', conda = "/opt/anaconda3/bin/conda", required = TRUE)
-  }
+  # require(reticulate)
+  # if (isTRUE(nzchar(trimws(virtualenv_path)))) {
+  #   use_virtualenv(virtualenv_path)
+  # } else {
+  #   use_condaenv(condaenv = 'env3', conda = "/opt/anaconda3/bin/conda", required = TRUE)
+  # }
   # load required modules and functions
-  np = import("numpy")
-  selectinf = import("selectinf")
-  lassopy = selectinf$randomized$lasso$lasso
-  selected_targets = selectinf$base$selected_targets
-  const = lassopy$gaussian
-  exact_grid_inference = selectinf$randomized$exact_reference$exact_grid_inference
 
   # convert data to Python array
   X1 = array_reshape(Xw, c(dim(Xw)[1], dim(Xw)[2]))

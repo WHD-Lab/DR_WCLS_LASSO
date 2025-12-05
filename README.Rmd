@@ -1,13 +1,24 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
 
 # mypkg
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
-The goal of mypkg is to …
+The goal of mypkg is to ...
 
 ## Installation
 
@@ -24,7 +35,7 @@ install()
 
 ## Set-up
 
-``` r
+```{r setup, eval = FALSE}
 library(mypkg)
 
 # Configure virtual environment
@@ -37,18 +48,22 @@ print(venv)
 library(reticulate)
 np = import("numpy", convert = FALSE)
 lasso_mod = import("selectinf.randomized.lasso", convert = FALSE)$lasso
-
+py_get_attr(selectinf$randomized$lasso, "__file__")
 # Simple test
 run_simple_lasso_test_snigdha_fixed(venv)
 ```
 
-## Or, if already configured, use
+## Or, if already configured, use 
 
-``` r
+```{r}
 library(mypkg)
 library(reticulate)
-#> Warning: package 'reticulate' was built under R version 4.5.2
 use_virtualenv("a9c268bc", required = TRUE)
 np = import("numpy", convert = FALSE)
-lasso_mod = import("selectinf.randomized.lasso", convert = FALSE)$lasso
+lassopy = import("selectinf.randomized.lasso", convert = FALSE)$lasso
+# selected_targets = import("selectinf.base", convert = FALSE)$selected_targets  
+const = lassopy$gaussian
+exact_grid_inference = import("selectinf.randomized.exact_reference", convert = FALSE)$exact_grid_inference  
+
 ```
+

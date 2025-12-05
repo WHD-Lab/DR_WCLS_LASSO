@@ -1,40 +1,17 @@
-Package: MRTpostInfLASSO
+Package: mypkg
 Type: Package
-Title: Post-Selection Inference for MRTs
-Version: 1.0.0
-Authors@R: c(
-    person("Yuxuan","Chen",role=c("aut"),email="yuxchen@umich.edu"),
-    person("Yaxuan","Huang",role=c("aut","cre"),email="yaxuanh@umich.edu"),
-    person("Walter","Dempsey",role=c("aut"),email="wdem@umich.edu"))
-Description: Tools for conducting DR-WCLS with variable selection and 
-    post-selection inference.
-License: What license is it under?
+Title: Example Reticulate-Powered R Package
+Version: 0.1.0
+Authors@R: 
+    person("First", "Last", email = "me@example.com", role = c("aut", "cre"))
+Description: Minimal example of an R package that integrates Python using modern reticulate features including py_require() and delayed module loading.
+License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
-Imports:
-    reticulate,
-    doParallel,
-    dplyr,
-    foreach,
-    parallel,
-    ranger,
-    xgboost,
-    zoo,
-    stats,
-    modelr,
-    glmnet,
-    tidyverse
-Suggests: 
-    knitr,
-    rmarkdown,
-    pkgdown,
-    dplyr,
-    ggplot2,
-    tibble,
-    selectiveInference,
-    MRTAnalysis
-Config/Needs/website: pkgdown
-VignetteBuilder: knitr
-URL: https://whd-lab.github.io/DR_WCLS_LASSO/
+LazyData: false
+Depends: 
+    R (>= 4.3)
+Imports: 
+    reticulate (>= 1.44),
+    digest
+Suggests:
+    testthat
