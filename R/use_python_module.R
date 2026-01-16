@@ -30,30 +30,6 @@ get_venv_info = function(salt = "") {
     )
     
 }
- 
-# clone_selective_inference <- function() {
-#     tmp <- tempfile("selective-inference-")
-#     
-#     # Step 1 — git clone (creates the directory)
-#     status <- system2("git",
-#                       c("clone", "https://github.com/snigdhagit/selective-inference.git", tmp),
-#                       stdout = TRUE, stderr = TRUE
-#     )
-#     if (!is.null(attr(status, "status"))) {
-#         stop("git clone failed:\n", paste(status, collapse = "\n"))
-#     }
-#     
-#     # Step 2 — init submodules
-#     status2 <- system2("git",
-#                        c("-C", tmp, "submodule", "update", "--init"),
-#                        stdout = TRUE, stderr = TRUE
-#     )
-#     if (!is.null(attr(status2, "status"))) {
-#         stop("git submodule update failed:\n", paste(status2, collapse = "\n"))
-#     }
-#     
-#     tmp
-# }
 
 clone_selective_inference <- function(branch = "refactor_names") {
     tmp <- tempfile("selective-inference-")
@@ -90,7 +66,7 @@ clone_selective_inference <- function(branch = "refactor_names") {
     
     tmp
 }
-mypkg_config = function(salt = "") {
+venv_config = function(salt = "") {
     install_python("3.9:latest")
     venv_info = get_venv_info(salt)
     repo_dir <- clone_selective_inference()
