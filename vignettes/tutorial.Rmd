@@ -114,7 +114,7 @@ library(MRTpostInfLASSO)
 
 To configure a Python virtual environment in R, please run the following code:
 
-```{r setup}
+```{r}
 
 # Configure virtual environment
 venv_info = venv_config()
@@ -130,7 +130,7 @@ lasso_mod = import("selectinf.randomized.lasso", convert = FALSE)$lasso
 
 Or, if already configured, use 
 
-```{r setup, eval = FALSE}
+```{r, eval = FALSE}
 library(reticulate)
 venv = "a9c268bc"
 use_virtualenv(venv, required = TRUE)
