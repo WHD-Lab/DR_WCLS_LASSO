@@ -59,13 +59,6 @@ run_simple_lasso_test_snigdha_fixed(venv)
 Or, if already configured, use
 
 ``` r
-library(MRTpostInfLASSO)
-#> Warning: replacing previous import 'dplyr::lag' by 'stats::lag' when loading
-#> 'MRTpostInfLASSO'
-#> Warning: replacing previous import 'dplyr::filter' by 'stats::filter' when
-#> loading 'MRTpostInfLASSO'
-#> Warning: replacing previous import 'dplyr::slice' by 'xgboost::slice' when
-#> loading 'MRTpostInfLASSO'
 library(reticulate)
 use_virtualenv("a9c268bc", required = TRUE)
 np = import("numpy", convert = FALSE)
