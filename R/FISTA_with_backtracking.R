@@ -251,7 +251,7 @@ i_finder = function(L_kmins1, y_k, design_matrix, outcome, wt, n, perturb, lam_v
     loss_F = F_loss_function(p_L_return)
     QL_x_y = Q_loss_function(p_L_return)
   }
-
+  
   return(L_bar)
 }
 

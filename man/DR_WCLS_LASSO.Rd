@@ -18,7 +18,7 @@ DR_WCLS_LASSO(
   lam = NULL,
   noise_scale = NULL,
   splitrat = 0.8,
-  virtualenv_path = "",
+  venv,
   beta = NULL,
   level = 0.9,
   core_num = NULL,
@@ -62,9 +62,6 @@ is the split rate and \eqn{n} is the number of rows.}
 
 \item{splitrat}{Data splitting rate \eqn{\rho}; used only if \code{noise_scale} or \code{lam} is \code{NULL}.}
 
-\item{virtualenv_path}{Path to a Python virtual environment (for \code{reticulate})
-when \code{varSelect_program = "Python"}.}
-
 \item{beta}{True coefficients (for simulation use only).}
 
 \item{level}{Confidence level (e.g., \code{0.90} for a 90\% interval).}
@@ -78,6 +75,9 @@ when \code{varSelect_program = "Python"}.}
 \item{standardize_x}{Logical flag for design matrix standardization, prior to the model selection.}
 
 \item{standardize_y}{Logical flag for outcome standardization, prior to the model selection.}
+
+\item{virtualenv_path}{Path to a Python virtual environment (for \code{reticulate})
+when \code{varSelect_program = "Python"}.}
 }
 \value{
 \describe{
