@@ -11,7 +11,7 @@ variable_selection_PY(
   lam = NULL,
   noise_scale = NULL,
   splitrat = 0.8,
-  virtualenv_path = "",
+  venv,
   beta = NULL
 )
 }
@@ -34,8 +34,6 @@ The random noises, \eqn{\omega}, are iid drawn from normal distribution with sta
 
 \item{splitrat}{this value is corresponding to the data splitting rate. Details can read "Exact Selective Inference with Randomization" page 15 equation (10).
 This value will be used only when user doesn't provide the \code{noise_scale} or \code{lam}.}
-
-\item{virtualenv_path}{Python virtual environment path}
 
 \item{beta}{True coefficients (for simulation use only).}
 }

@@ -81,7 +81,7 @@
 #' @export
 
 DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method_pseu,
-                                 lam = NULL, noise_scale = NULL, splitrat = 0.8, virtualenv_path = '',
+                                 lam = NULL, noise_scale = NULL, splitrat = 0.8, venv,
                                  beta = NULL, level = 0.9, core_num = NULL,
                          max_tol = 10^{-3}, varSelect_program = "Python",
                          standardize_x = TRUE, standardize_y = TRUE){
@@ -141,14 +141,15 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
   ps = ps[!is.na(ps$yDR),]
 
   if(is.null(lam) & is.null(noise_scale)) {
-    if(varSelect_program == "Python") {select = variable_selection_PY(ps, ID, my_formula, splitrat=splitrat, virtualenv_path= virtualenv_path, beta = beta)}
+    if(varSelect_program == "Python") {select = variable_selection_PY(ps, ID, my_formula, splitrat=splitrat, 
+                                                                      venv = venv, beta = beta)}
 
     if(varSelect_program == "R") {select = FISTA_backtracking(ps, ID, my_formula, splitrat=splitrat, beta = beta)}
   }
 
   if(!is.null(lam) & is.null(noise_scale)) {
     if(varSelect_program == "Python") {select = variable_selection_PY(ps, ID, my_formula, lam = lam, splitrat = splitrat,
-                                                                                virtualenv_path= virtualenv_path, beta = beta)}
+                                                                      venv = venv, beta = beta)}
 
     if(varSelect_program == "R") {select = FISTA_backtracking(ps, ID, my_formula, lam = lam, splitrat = splitrat, beta = beta)}
 
@@ -156,7 +157,7 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
 
   if(is.null(lam) & !is.null(noise_scale)) {
     if(varSelect_program == "Python") {select = variable_selection_PY(ps, ID, my_formula, noise_scale = noise_scale, splitrat = splitrat,
-                                                                                virtualenv_path= virtualenv_path, beta = beta)}
+                                                                                venv = venv, beta = beta)}
     if(varSelect_program == "R") {
       select = FISTA_backtracking(ps, ID, my_formula, noise_scale = noise_scale, splitrat = splitrat, beta = beta)
     }
@@ -165,7 +166,7 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
 
   if(!is.null(lam) & !is.null(noise_scale)) {
     if(varSelect_program == "Python") {select = variable_selection_PY(ps, ID, my_formula, lam = lam, noise_scale = noise_scale,
-                                             splitrat = splitrat, virtualenv_path= virtualenv_path, beta = beta)}
+                                             splitrat = splitrat, venv = venv, beta = beta)}
 
     if(varSelect_program == "R") {select = FISTA_backtracking(ps, ID, my_formula, lam = lam, noise_scale = noise_scale,
                                                               splitrat = splitrat, beta = beta)}

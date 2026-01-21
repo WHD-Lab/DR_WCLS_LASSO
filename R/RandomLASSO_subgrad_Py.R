@@ -16,7 +16,6 @@
 #' The random noises, \eqn{\omega}, are iid drawn from normal distribution with standard deviation noise_scale
 #' @param splitrat this value is corresponding to the data splitting rate. Details can read "Exact Selective Inference with Randomization" page 15 equation (10).
 #' This value will be used only when user doesn't provide the `noise_scale` or `lam`.
-#' @param virtualenv_path Python virtual environment path
 #' @param beta True coefficients (for simulation use only).
 #'
 #' @return
@@ -60,7 +59,7 @@
 #' @export
 #'
 variable_selection_PY = function(data,ID, moderator_formula, lam = NULL, noise_scale = NULL,
-                                           splitrat = 0.8, virtualenv_path = '', beta = NULL) {
+                                           splitrat = 0.8, venv, beta = NULL) {
   # data: the output of pesudo_outcomecal function
   # ID: the name of column where participants' ID are stored
   # moderator_formula: determines the formula for the f(St)T*beta function
@@ -70,7 +69,16 @@ variable_selection_PY = function(data,ID, moderator_formula, lam = NULL, noise_s
   # splitrat: the corresponding to the data splitting rate. Details can read "Exact Selective Inference with Randomization" page 15 equation (10).
   #           This value will be used only when user doesn't provide the noise_scale.
   # virtualenv_path: Python virtual environment path
-
+    
+  use_virtualenv(venv, required = TRUE)
+    
+  np = import("numpy", convert = FALSE)
+  lassopy = import("selectinf.randomized.lasso", convert = FALSE)$lasso
+  # selected_targets = import("selectinf.base", convert = FALSE)$selected_targets  
+  const = lassopy$gaussian
+  exact_grid_inference = import("selectinf.randomized.exact_reference", convert = FALSE)$exact_grid_inference  
+ 
+  
   ptSt = data[,"ptSt"]
   n = dplyr::n_distinct(data[,ID])
   wssqrt = c(sqrt(ptSt*(1-ptSt)*2/n^(1/2)))
@@ -93,19 +101,13 @@ variable_selection_PY = function(data,ID, moderator_formula, lam = NULL, noise_s
   if(is.null(lam)) {lam = sqrt(2*log(dim(Xw)[2]))*sd(yw)*splitrat*sqrt(dim(Xw)[1])}
 
   # load python virtualenv
-  require(reticulate)
-  if (isTRUE(nzchar(trimws(virtualenv_path)))) {
-    use_virtualenv(virtualenv_path)
-  } else {
-    use_condaenv(condaenv = 'env3', conda = "/opt/anaconda3/bin/conda", required = TRUE)
-  }
+  # require(reticulate)
+  # if (isTRUE(nzchar(trimws(virtualenv_path)))) {
+  #   use_virtualenv(virtualenv_path)
+  # } else {
+  #   use_condaenv(condaenv = 'env3', conda = "/opt/anaconda3/bin/conda", required = TRUE)
+  # }
   # load required modules and functions
-  np = import("numpy")
-  selectinf = import("selectinf")
-  lassopy = selectinf$randomized$lasso$lasso
-  selected_targets = selectinf$base$selected_targets
-  const = lassopy$gaussian
-  exact_grid_inference = selectinf$randomized$exact_reference$exact_grid_inference
 
   # convert data to Python array
   X1 = array_reshape(Xw, c(dim(Xw)[1], dim(Xw)[2]))
@@ -122,20 +124,23 @@ variable_selection_PY = function(data,ID, moderator_formula, lam = NULL, noise_s
   nonzero = (signs!=0)
   # beta_lambdaE and subgradient
   perturb = py_get_attr(conv, "_initial_omega")
-  soln = c(conv$observed_soln)
-  subgrad = c(conv$observed_subgrad/lam)
+  soln = as.numeric(reticulate::py_to_r(conv$observed_soln))
+  subgrad = reticulate::py_to_r(conv$observed_subgrad)
+  subgrad = as.numeric(subgrad) / lam 
   perturb = c(perturb$T)
+  perturb_vector = as.numeric(reticulate::py_to_r(perturb[[1]])) / (-2)
 
-  E = colnames(X)[nonzero]
-  NE = colnames(X)[!nonzero] # NE may include intercept
-  Z = subgrad[!nonzero]
+  nonzero_r = reticulate::py_to_r(nonzero)
+  E = colnames(X)[nonzero_r]
+  NE = colnames(X)[!nonzero_r]
+  Z = subgrad[!nonzero_r]
 
   # calculate the post selection beta
-  if(!is.null(beta) & sum(nonzero) > 1) {
-    postbeta = np$dot(np$linalg$pinv(Xw[, nonzero]), np$dot(Xw, beta))
-  } else if(!is.null(beta) & sum(nonzero) == 1) {
-    postbeta = solve(t(Xw[, nonzero]) %*% Xw[, nonzero]) %*% t(Xw[, nonzero]) %*% Xw %*% beta
-  } else {postbeta = rep(NA, sum(nonzero))}
+  if(!is.null(beta) & sum(nonzero_r) > 1) {
+    postbeta = np$dot(np$linalg$pinv(Xw[, nonzero_r]), np$dot(Xw, beta))
+  } else if(!is.null(beta) & sum(nonzero_r) == 1) {
+    postbeta = solve(t(Xw[, nonzero_r]) %*% Xw[, nonzero_r]) %*% t(Xw[, nonzero_r]) %*% Xw %*% beta
+  } else {postbeta = rep(NA, sum(nonzero_r))}
   # below calculation matched with the above
   # But be careful if you change the weights, have to double check two calculation
   #wt = ptSt * (1-ptSt)
@@ -154,8 +159,8 @@ variable_selection_PY = function(data,ID, moderator_formula, lam = NULL, noise_s
   #grids = as.matrix(G$stat_grid)
 
   return(list(formula = moderator_formula, E = E, NE = NE, n = n,
-              perturb = perturb/(-2), ori_lam = lam, lam = lam/(-2), Z = Z, OMEGA = (noise_scale)^2/4,
-              sign_soln = signs[nonzero], soln = soln, postbeta = postbeta, nonzero = nonzero
+              perturb = perturb_vector, ori_lam = lam, lam = lam/(-2), Z = Z, OMEGA = (noise_scale)^2/4,
+              sign_soln = reticulate::py_to_r(signs[nonzero_r]), soln = soln, postbeta = postbeta, nonzero = nonzero_r
               #Python_Output = list(conv = conv,
               #                     target_spec = target_spec,
               #                     result = result,

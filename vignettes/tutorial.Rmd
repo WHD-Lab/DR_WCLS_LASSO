@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-Micro-randomized trials (MRTs) are designed to evaluate the effectiveness of mobile health (mHealth) interventions delivered via smartphones. In practice, the assumptions required for MRTs are often difficult to satisfy: randomization probabilities can be uncertain, observations are frequently incomplete, and prespecifying features from high-dimensional contexts for linear working models is also challenging. To address these issues, the **doubly robust weighted centered least squares (DR-WCLS)** framework provides a flexible procedure for variable selection and inference. The methods incorporates supervised learning algorithms and enables valid inference on time-varying causal effects in longitudinal settings. (talk about DR)
+Micro-randomized trials (MRTs) are designed to evaluate the effectiveness of mobile health (mHealth) interventions delivered via smartphones. In practice, the assumptions required for MRTs are often difficult to satisfy: randomization probabilities can be uncertain, observations are frequently incomplete, and prespecifying features from high-dimensional contexts for linear working models is also challenging. To address these issues, the **doubly robust weighted centered least squares (DR-WCLS)** framework provides a flexible procedure for variable selection and inference. The methods incorporates supervised learning algorithms and enables valid inference on time-varying causal effects in longitudinal settings.
 
 This vignette introduces the **MRTpostInfLASSO** package. Its core function, **DR_WCLS_LASSO**, allows users to perform variable selection, estimate time-varying causal effects and make valid inferences conditional on the selected variables.
 
@@ -107,6 +107,42 @@ The package can be installed from our GitHub repository.
 
 ```{r warning=FALSE}
 library(MRTpostInfLASSO)
+```
+
+
+## Set-up
+
+To configure a Python virtual environment in R, please run the following code:
+
+```{r setup, eval = FALSE}
+
+# Configure virtual environment
+venv_info = venv_config()
+venv = venv_info$hash
+print(venv)
+# [1] "a9c268bc"
+
+# Do the python deps load?
+library(reticulate)
+np = import("numpy", convert = FALSE)
+lasso_mod = import("selectinf.randomized.lasso", convert = FALSE)$lasso
+
+# Simple test
+run_simple_lasso_test_snigdha_fixed(venv)
+```
+
+Or, if already configured, use 
+
+```{r}
+library(MRTpostInfLASSO)
+library(reticulate)
+venv = use_virtualenv("a9c268bc", required = TRUE)
+np = import("numpy", convert = FALSE)
+lassopy = import("selectinf.randomized.lasso", convert = FALSE)$lasso
+selected_targets = import("selectinf.base", convert = FALSE)$selected_targets  
+const = lassopy$gaussian
+exact_grid_inference = import("selectinf.randomized.exact_reference", convert = FALSE)$exact_grid_inference  
+
 ```
 
 # Real Data Example
@@ -199,16 +235,16 @@ Python version
 my_formula = as.formula(paste("yDR ~", paste(c("logstep_30min_lag1", "logstep_pre30min",
                                       "is_at_home_or_work", "day_in_study"),
                                        collapse = " + ")))
-# 
-# set.seed(100)
-# var_selection_python = variable_selection_PY_penal_int(data = pseudo_outcome_CVlasso,ID,
-#                                                        my_formula,
-#                                                        lam = NULL, noise_scale = NULL,
-#                                                        splitrat = 0.8,
-#                                                        # virtualenv_path = "fakepath/wcls",
-#                                                        ridge_term = 0, beta = NULL)
-# 
-# cat('The selected variable list:',var_selection_python$E)
+
+set.seed(100)
+var_selection_python = variable_selection_PY(data = pseudo_outcome_CVlasso,ID,
+                                             my_formula,
+                                             lam = NULL, noise_scale = NULL,
+                                             venv = venv,
+                                             splitrat = 0.8,
+                                             beta = NULL)
+
+cat('The selected variable list:',var_selection_python$E)
 ```
 
 R version
@@ -244,11 +280,10 @@ After variable selection, we conduct post-selection inference using DR-WCLS, con
 # set.seed(123)
 
 # reticulate::py_run_string("
-# import random
-# import numpy as np
-# 
-# random.seed(123)
-# np.random.seed(123)
+#   import random
+#   import numpy as np
+#   random.seed(123)
+#   np.random.seed(123)
 # ")
 
 UI_return_python = DR_WCLS_LASSO(data = data_mimicHeartSteps,
@@ -256,16 +291,15 @@ UI_return_python = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           time = "decision_point",
                           Ht = Ht, St = St, At = At,
                           prob = prob, outcome = outcome,
-                          # virtualenv_path = 'fakepath/wcls',
+                          venv = venv,
                           method_pseu = "CVLASSO",
                           varSelect_program = "Python",
                           standardize_x = F, standardize_y = F)
-
 UI_return_python
 ```
 
 ```{r}
-set.seed(100)
+set.seed(123)
 
 UI_return_R = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           fold = 5, ID = ID,
@@ -401,7 +435,6 @@ UI_return_method_pseu = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                                  time = "decision_point",
                                  Ht = Ht, St = St, At = At,
                                  prob = prob, outcome = outcome,
-                                 # virtualenv_path = 'fakepath/wcls',
                                  method_pseu = "CVLASSO",
                                  varSelect_program = "R",
                                  standardize_x = F, standardize_y = F)
@@ -419,7 +452,6 @@ UI_return_lambda = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                                  time = "decision_point",
                                  Ht = Ht, St = St, At = At,
                                  prob = prob, outcome = outcome,
-                                 # virtualenv_path = 'fakepath/wcls',
                                  method_pseu = "CVLASSO",
                                  varSelect_program = "R",
                                  lam = 100,
@@ -472,16 +504,16 @@ outcome = 'logstep_30min'
 prob = 'rand_prob'
 
 
-# UI_return_int_python = DR_WCLS_LASSO(data = data_mimicHeartSteps, 
-#                           fold = 5, ID = ID, 
-#                           time = "decision_point", Ht = Ht_int, St = St_int, 
-#                           At = At, prob = prob, outcome = outcome,
-#                           # virtualenv_path = 'fakepath/wcls',
-#                           method_pseu = "CVLASSO", 
-#                           varSelect_program = "Python",
-#                           standardize_x = F, standardize_y = F)
-# 
-# UI_return_int_python
+UI_return_int_python = DR_WCLS_LASSO(data = data_mimicHeartSteps,
+                          fold = 5, ID = ID,
+                          time = "decision_point", Ht = Ht_int, St = St_int,
+                          At = At, prob = prob, outcome = outcome,
+                          venv = venv,
+                          method_pseu = "CVLASSO",
+                          varSelect_program = "Python",
+                          standardize_x = F, standardize_y = F)
+
+UI_return_int_python
 ```
 
 ```{r}
@@ -489,7 +521,6 @@ UI_return_int_R = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           fold = 5, ID = ID, 
                           time = "decision_point", Ht = Ht_int, St = St_int, 
                           At = At, prob = prob, outcome = outcome,
-                          # virtualenv_path = 'fakepath/wcls',
                           method_pseu = "CVLASSO", 
                           varSelect_program = "R",
                           standardize_x = F, standardize_y = F)
@@ -520,18 +551,18 @@ set.seed(99)
 
 df_IHS_cleaned = na.omit(df_IHS)
 
-# UI_return_IHS_python = DR_WCLS_LASSO(data = df_IHS_cleaned,
-#                           fold = 5, ID = ID,
-#                           time = "time", Ht = Ht, St = St, At = At,
-#                           prob = prob, outcome = outcome,
-#                           # virtualenv_path = 'fakepath/wcls',
-#                           method_pseu = "CVLASSO", lam = 55,
-#                           noise_scale = NULL, splitrat = 0.8,
-#                           level = 0.9, core_num=3, CI_algorithm = 'lapply',
-#                           max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "Python",
-#                           standardize_x =  T, standardize_y = T)
-# 
-# UI_return_IHS_python
+UI_return_IHS_python = DR_WCLS_LASSO(data = df_IHS_cleaned,
+                          fold = 5, ID = ID,
+                          time = "time", Ht = Ht, St = St, At = At,
+                          prob = prob, outcome = outcome,
+                          venv = venv,
+                          method_pseu = "CVLASSO", lam = 55,
+                          noise_scale = NULL, splitrat = 0.8,
+                          level = 0.9, core_num=3,
+                          varSelect_program = "Python",
+                          standardize_x =  T, standardize_y = T)
+
+UI_return_IHS_python
 ```
 
 ```{r, eval = FALSE}
@@ -540,11 +571,11 @@ UI_return_IHS_R = DR_WCLS_LASSO(data = df_IHS_cleaned,
                           fold = 5, ID = ID,
                           time = "time", Ht = Ht, St = St, At = At,
                           prob = prob, outcome = outcome,
-                          # virtualenv_path = 'fakepath/wcls',
+                          venv = venv,
                           method_pseu = "CVLASSO", lam = 30,
                           noise_scale = NULL, splitrat = 0.8,
-                          level = 0.9, core_num=3, CI_algorithm = 'lapply',
-                          max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "R",
+                          level = 0.9, core_num=3, 
+                          varSelect_program = "R",
                           standardize_x =  T, standardize_y = T)
 
 UI_return_IHS_R
@@ -556,6 +587,7 @@ UI_return_IHS_R
 We also illustrate the use of the package with a simulated dataset and demonstrate why DR_WCLS is needed, rather than using randomized LASSO for selection and WCLS for inference.
 
 ```{r}
+set.seed(100)
 sim_data = generate_dataset(N = 1000, T = 40, P = 50, 
                             sigma_residual = 1.5, sigma_randint = 1.5, 
                             main_rand = 3, rho = 0.7,
@@ -568,12 +600,12 @@ Ht = unlist(lapply(1:50, FUN = function(X) paste0("state",X)))
 St = unlist(lapply(1:25, FUN = function(X) paste0("state",X)))
 
 sim_data$prob_false = rep(0.5, length(sim_data$id))
-set.seed(1001)
+
 UI_return_sim_R = DR_WCLS_LASSO(data = sim_data,
                                 fold = 5, ID = "id",
                                 time = "decision_point",
                                 Ht = Ht, St = St, At = "action",
-                                prob = "prob", outcome = "outcome",
+                                prob = "prob_false", outcome = "outcome",
                                 method_pseu = "CVLASSO",
                                 varSelect_program = "R",
                                 standardize_x = F, standardize_y = F,
@@ -593,11 +625,11 @@ pseudo_outcome_CVlasso = pseudo_outcome_generator_CVlasso(fold = 5,ID = 'id',
                                                      prob = 'prob', outcome = 'outcome',
                                                      core_num = 1)
 
-# randomized LASSO
-sim_variable_sel = FISTA_backtracking(data = pseudo_outcome_CVlasso, ID = 'id', 
-                                      my_formula, lam = NULL, noise_scale = 0, 
-                                      splitrat = 0.8, max_ite = 10^(5), 
-                                      tol = 10^(-4), beta = NULL)
+# randomized LASSO (FISTA_backtracking in our package and set noise_scale as 0)
+sim_variable_sel = FISTA_backtracking(data = pseudo_outcome_CVlasso, ID = 'id', my_formula,
+                  lam = NULL, noise_scale = 0, splitrat = 0.8,
+                  max_ite = 10^(5), tol = 10^(-4), beta = NULL)
+
 # sim_randomizedLASSO = randomizedLasso(X = as.matrix(sim_data[,St]), 
 #                 y = as.matrix(sim_data[,'outcome']), 
 #                 lam = 225000, 
@@ -691,7 +723,6 @@ ggplot(state1_df,
   geom_pointrange(aes(ymin = low, ymax = up),
                   position = position_dodge(width = 0.5),
                   linewidth = 1.1) +
-  geom_hline(yintercept = 1.7, linetype = "dashed", color = "black") +
   labs(x = NULL, y = "Effect estimate",
        color = "Method") +
   theme_minimal()
@@ -703,7 +734,6 @@ ggplot(state2_df,
   geom_pointrange(aes(ymin = low, ymax = up),
                   position = position_dodge(width = 0.5),
                   linewidth = 1.1) +
-  geom_hline(yintercept = 1.5, linetype = "dashed", color = "black") +
   labs(x = NULL, y = "Effect estimate",
        color = "Method") +
   theme_minimal()
@@ -715,7 +745,6 @@ ggplot(state3_df,
   geom_pointrange(aes(ymin = low, ymax = up),
                   position = position_dodge(width = 0.5),
                   linewidth = 1.1) +
-  geom_hline(yintercept = -1.3, linetype = "dashed", color = "black") +
   labs(x = NULL, y = "Effect estimate",
        color = "Method") +
   theme_minimal()
@@ -727,7 +756,6 @@ ggplot(state4_df,
   geom_pointrange(aes(ymin = low, ymax = up),
                   position = position_dodge(width = 0.5),
                   linewidth = 1.1) +
-  geom_hline(yintercept = -1, linetype = "dashed", color = "black") +
   labs(x = NULL, y = "Effect estimate",
        color = "Method") +
   theme_minimal()
