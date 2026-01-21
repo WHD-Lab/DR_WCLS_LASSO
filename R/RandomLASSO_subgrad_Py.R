@@ -124,20 +124,23 @@ variable_selection_PY = function(data,ID, moderator_formula, lam = NULL, noise_s
   nonzero = (signs!=0)
   # beta_lambdaE and subgradient
   perturb = py_get_attr(conv, "_initial_omega")
-  soln = c(conv$observed_soln)
-  subgrad = c(conv$observed_subgrad/lam)
+  soln = as.numeric(reticulate::py_to_r(conv$observed_soln))
+  subgrad = reticulate::py_to_r(conv$observed_subgrad)
+  subgrad = as.numeric(subgrad) / lam 
   perturb = c(perturb$T)
+  perturb_vector = as.numeric(reticulate::py_to_r(perturb[[1]])) / (-2)
 
-  E = colnames(X)[nonzero]
-  NE = colnames(X)[!nonzero] # NE may include intercept
-  Z = subgrad[!nonzero]
+  nonzero_r = reticulate::py_to_r(nonzero)
+  E = colnames(X)[nonzero_r]
+  NE = colnames(X)[!nonzero_r]
+  Z = subgrad[!nonzero_r]
 
   # calculate the post selection beta
-  if(!is.null(beta) & sum(nonzero) > 1) {
-    postbeta = np$dot(np$linalg$pinv(Xw[, nonzero]), np$dot(Xw, beta))
-  } else if(!is.null(beta) & sum(nonzero) == 1) {
-    postbeta = solve(t(Xw[, nonzero]) %*% Xw[, nonzero]) %*% t(Xw[, nonzero]) %*% Xw %*% beta
-  } else {postbeta = rep(NA, sum(nonzero))}
+  if(!is.null(beta) & sum(nonzero_r) > 1) {
+    postbeta = np$dot(np$linalg$pinv(Xw[, nonzero_r]), np$dot(Xw, beta))
+  } else if(!is.null(beta) & sum(nonzero_r) == 1) {
+    postbeta = solve(t(Xw[, nonzero_r]) %*% Xw[, nonzero_r]) %*% t(Xw[, nonzero_r]) %*% Xw %*% beta
+  } else {postbeta = rep(NA, sum(nonzero_r))}
   # below calculation matched with the above
   # But be careful if you change the weights, have to double check two calculation
   #wt = ptSt * (1-ptSt)
@@ -156,8 +159,8 @@ variable_selection_PY = function(data,ID, moderator_formula, lam = NULL, noise_s
   #grids = as.matrix(G$stat_grid)
 
   return(list(formula = moderator_formula, E = E, NE = NE, n = n,
-              perturb = perturb/(-2), ori_lam = lam, lam = lam/(-2), Z = Z, OMEGA = (noise_scale)^2/4,
-              sign_soln = signs[nonzero], soln = soln, postbeta = postbeta, nonzero = nonzero
+              perturb = perturb_vector, ori_lam = lam, lam = lam/(-2), Z = Z, OMEGA = (noise_scale)^2/4,
+              sign_soln = reticulate::py_to_r(signs[nonzero_r]), soln = soln, postbeta = postbeta, nonzero = nonzero_r
               #Python_Output = list(conv = conv,
               #                     target_spec = target_spec,
               #                     result = result,
