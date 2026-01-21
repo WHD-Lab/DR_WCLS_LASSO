@@ -134,14 +134,13 @@ run_simple_lasso_test_snigdha_fixed(venv)
 Or, if already configured, use 
 
 ```{r}
-library(MRTpostInfLASSO)
-library(reticulate)
-venv = use_virtualenv("a9c268bc", required = TRUE)
-np = import("numpy", convert = FALSE)
-lassopy = import("selectinf.randomized.lasso", convert = FALSE)$lasso
-selected_targets = import("selectinf.base", convert = FALSE)$selected_targets  
-const = lassopy$gaussian
-exact_grid_inference = import("selectinf.randomized.exact_reference", convert = FALSE)$exact_grid_inference  
+# library(reticulate)
+# use_virtualenv("a9c268bc", required = TRUE)
+# np = import("numpy", convert = FALSE)
+# lassopy = import("selectinf.randomized.lasso", convert = FALSE)$lasso
+# selected_targets = import("selectinf.base", convert = FALSE)$selected_targets  
+# const = lassopy$gaussian
+# exact_grid_inference = import("selectinf.randomized.exact_reference", convert = FALSE)$exact_grid_inference  
 
 ```
 
