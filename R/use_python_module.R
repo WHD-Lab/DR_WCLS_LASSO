@@ -1,3 +1,40 @@
+#' venv_config
+#' 
+#' @description
+#' This function helps to build a Python virtual environment in R
+#' 
+#' 
+#' @export
+
+venv_config = function(salt = "") {
+  install_python("3.9:latest")
+  venv_info = get_venv_info(salt)
+  repo_dir <- clone_selective_inference()
+  
+  virtualenv_create(venv_info$hash, version = venv_info$deps[1])
+  virtualenv_install(venv_info$hash, venv_info$deps[-1])
+  virtualenv_install(venv_info$hash, "numpy==1.22.4")
+  
+  virtualenv_install(venv_info$hash,
+                     c("git+https://github.com/regreg/regreg.git"),
+                     pip_options = "--no-build-isolation")
+  
+  virtualenv_install(venv_info$hash, c("scikit-learn", "nose"))
+  
+  virtualenv_install(
+    venv_info$hash,
+    repo_dir,
+    options = c("-e"),
+    pip_options = "--no-build-isolation"
+  )
+  
+  # unlisted deps??? If any other unlisted deps, list here
+  virtualenv_install(venv_info$hash, c("pandas", "mpmath"))
+  
+  use_virtualenv(venv_info$hash, required = TRUE)
+  
+  return(venv_info)
+}
 
 hash_vec <- function(..., length = 8) {
     args <- list(...)
@@ -65,33 +102,4 @@ clone_selective_inference <- function(branch = "refactor_names") {
     }
     
     tmp
-}
-venv_config = function(salt = "") {
-    install_python("3.9:latest")
-    venv_info = get_venv_info(salt)
-    repo_dir <- clone_selective_inference()
-    
-    virtualenv_create(venv_info$hash, version = venv_info$deps[1])
-    virtualenv_install(venv_info$hash, venv_info$deps[-1])
-    virtualenv_install(venv_info$hash, "numpy==1.22.4")
-    
-    virtualenv_install(venv_info$hash,
-                       c("git+https://github.com/regreg/regreg.git"),
-                       pip_options = "--no-build-isolation")
-    
-    virtualenv_install(venv_info$hash, c("scikit-learn", "nose"))
-
-    virtualenv_install(
-        venv_info$hash,
-        repo_dir,
-        options = c("-e"),
-        pip_options = "--no-build-isolation"
-    )
-    
-    # unlisted deps??? If any other unlisted deps, list here
-    virtualenv_install(venv_info$hash, c("pandas", "mpmath"))
-    
-    use_virtualenv(venv_info$hash, required = TRUE)
-    
-    return(venv_info)
 }
