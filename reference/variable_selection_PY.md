@@ -13,7 +13,7 @@ variable_selection_PY(
   lam = NULL,
   noise_scale = NULL,
   splitrat = 0.8,
-  virtualenv_path = "",
+  venv,
   beta = NULL
 )
 ```
@@ -53,10 +53,6 @@ variable_selection_PY(
   read "Exact Selective Inference with Randomization" page 15 equation
   (10). This value will be used only when user doesn't provide the
   `noise_scale` or `lam`.
-
-- virtualenv_path:
-
-  Python virtual environment path
 
 - beta:
 
@@ -140,5 +136,5 @@ my_formula = as.formula(paste("yDR ~ ", paste(St, collapse = " + ")))
 var_selection_python = variable_selection_PY(data = pseudo_outcome_CVlasso, ID = "id",
   my_formula, lam = NULL, noise_scale = NULL, splitrat = 0.7,
   virtualenv_path = "fakepath/wcls", beta = matrix(c(-1, 1.7, 1.5, -1.3, -1, rep(0,21)), ncol = 1))
-#> Error: object 'pseudo_outcome_CVlasso' not found
+#> Error in variable_selection_PY(data = pseudo_outcome_CVlasso, ID = "id",     my_formula, lam = NULL, noise_scale = NULL, splitrat = 0.7,     virtualenv_path = "fakepath/wcls", beta = matrix(c(-1, 1.7,         1.5, -1.3, -1, rep(0, 21)), ncol = 1)): unused argument (virtualenv_path = "fakepath/wcls")
 ```

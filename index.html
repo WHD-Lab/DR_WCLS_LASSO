@@ -59,26 +59,60 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="dr_wcls_lasso">DR_WCLS_LASSO<a class="anchor" aria-label="anchor" href="#dr_wcls_lasso"></a>
 </h1></div>
-<p>The core function of this package <strong>DR_WCLS_LASSO</strong> allows users to perform variable selection, estimate time-varying causal effects and make valid inferences conditional on the selected variables.</p>
-</div>
-<div class="section level1">
-<h1 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
-</h1>
+<!-- badges: start -->
+<!-- badges: end -->
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
 <p>Micro-randomized trials (MRTs) are designed to evaluate the effectiveness of mobile health (mHealth) interventions delivered via smartphones. In practice, the assumptions required for MRTs are often difficult to satisfy: randomization probabilities can be uncertain, observations are frequently incomplete, and prespecifying features from high-dimensional contexts for linear working models is also challenging. To address these issues, the <strong>doubly robust weighted centered least squares (DR-WCLS)</strong> framework provides a flexible procedure for variable selection and inference. The methods incorporates supervised learning algorithms and enables valid inference on time-varying causal effects in longitudinal settings.</p>
 </div>
-<div class="section level1">
-<h1 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
-</h1>
-<p>You can install ‘MRTpostInfLASSO’ via github:</p>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p>You can install the development version of MRTpostInfLASSO via github:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">require</span>(<span class="st">"remotes"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"WHD-Lab/DR_WCLS_LASSO"</span>)</span></code></pre></div>
+<p>Then run:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://devtools.r-lib.org/" class="external-link">devtools</a></span><span class="op">)</span></span>
+<span><span class="fu">install</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="set-up">Set-up<a class="anchor" aria-label="anchor" href="#set-up"></a>
+</h2>
+<p>To configure a Python virtual environment in R, please run the following code:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://whd-lab.github.io/DR_WCLS_LASSO/">MRTpostInfLASSO</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Configure virtual environment</span></span>
+<span><span class="va">venv_info</span> <span class="op">=</span> <span class="fu"><a href="reference/venv_config.html">venv_config</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">venv</span> <span class="op">=</span> <span class="va">venv_info</span><span class="op">$</span><span class="va">hash</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">venv</span><span class="op">)</span></span>
+<span><span class="co"># [1] "a9c268bc"</span></span>
+<span></span>
+<span><span class="co"># Do the python deps load?</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/reticulate/" class="external-link">reticulate</a></span><span class="op">)</span></span>
+<span><span class="va">np</span> <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"numpy"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">lasso_mod</span> <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"selectinf.randomized.lasso"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">lasso</span></span>
+<span></span>
+<span><span class="co"># Simple test</span></span>
+<span><span class="fu">run_simple_lasso_test_snigdha_fixed</span><span class="op">(</span><span class="va">venv</span><span class="op">)</span></span></code></pre></div>
+<p>Or, if already configured, use</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/reticulate/" class="external-link">reticulate</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/use_python.html" class="external-link">use_virtualenv</a></span><span class="op">(</span><span class="st">"a9c268bc"</span>, required <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">np</span> <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"numpy"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">lassopy</span> <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"selectinf.randomized.lasso"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">lasso</span></span>
+<span><span class="va">selected_targets</span> <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"selectinf.base"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">selected_targets</span>  </span>
+<span><span class="va">const</span> <span class="op">=</span> <span class="va">lassopy</span><span class="op">$</span><span class="va">gaussian</span></span>
+<span><span class="va">exact_grid_inference</span> <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"selectinf.randomized.exact_reference"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">exact_grid_inference</span>  </span></code></pre></div>
+</div>
 <div class="section level2">
 <h2 id="detailed-tutorial">Detailed tutorial<a class="anchor" aria-label="anchor" href="#detailed-tutorial"></a>
 </h2>
-<p>A detailed tutorial and parameter explanation can be found here <a href="https://whd-lab.github.io/DR_WCLS_LASSO/index.html" target="_blank"></a>.</p>
+<p>A detailed tutorial and parameter explanation can be found here <a href="https://whd-lab.github.io/DR_WCLS_LASSO/index.html" target="_blank" rel="noopener noreferrer"> https://whd-lab.github.io/DR_WCLS_LASSO/index.html </a>.</p>
 </div>
 </div>
-
   </main><aside class="col-md-3"><div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">

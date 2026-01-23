@@ -57,7 +57,7 @@ The intercept is not penalized.</p>
 <span>  lam <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  noise_scale <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  splitrat <span class="op">=</span> <span class="fl">0.8</span>,</span>
-<span>  virtualenv_path <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  <span class="va">venv</span>,</span>
 <span>  beta <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -95,10 +95,6 @@ The random noises, \(\omega\), are iid drawn from normal distribution with stand
 <dt id="arg-splitrat">splitrat<a class="anchor" aria-label="anchor" href="#arg-splitrat"></a></dt>
 <dd><p>this value is corresponding to the data splitting rate. Details can read "Exact Selective Inference with Randomization" page 15 equation (10).
 This value will be used only when user doesn't provide the <code>noise_scale</code> or <code>lam</code>.</p></dd>
-
-
-<dt id="arg-virtualenv-path">virtualenv_path<a class="anchor" aria-label="anchor" href="#arg-virtualenv-path"></a></dt>
-<dd><p>Python virtual environment path</p></dd>
 
 
 <dt id="arg-beta">beta<a class="anchor" aria-label="anchor" href="#arg-beta"></a></dt>
@@ -170,7 +166,7 @@ This value will be used only when user doesn't provide the <code>noise_scale</co
 <span class="r-in"><span><span class="va">var_selection_python</span> <span class="op">=</span> <span class="fu">variable_selection_PY</span><span class="op">(</span>data <span class="op">=</span> <span class="va">pseudo_outcome_CVlasso</span>, ID <span class="op">=</span> <span class="st">"id"</span>,</span></span>
 <span class="r-in"><span>  <span class="va">my_formula</span>, lam <span class="op">=</span> <span class="cn">NULL</span>, noise_scale <span class="op">=</span> <span class="cn">NULL</span>, splitrat <span class="op">=</span> <span class="fl">0.7</span>,</span></span>
 <span class="r-in"><span>  virtualenv_path <span class="op">=</span> <span class="st">"fakepath/wcls"</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1.7</span>, <span class="fl">1.5</span>, <span class="op">-</span><span class="fl">1.3</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">21</span><span class="op">)</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'pseudo_outcome_CVlasso' not found</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in variable_selection_PY(data = pseudo_outcome_CVlasso, ID = "id",     my_formula, lam = NULL, noise_scale = NULL, splitrat = 0.7,     virtualenv_path = "fakepath/wcls", beta = matrix(c(-1, 1.7,         1.5, -1.3, -1, rep(0, 21)), ncol = 1)):</span> unused argument (virtualenv_path = "fakepath/wcls")</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

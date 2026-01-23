@@ -18,3 +18,5 @@
   : pesudo_outcome_generator_rf_v2
 - [`variable_selection_PY()`](https://whd-lab.github.io/DR_WCLS_LASSO/reference/variable_selection_PY.md)
   : variable_selection_PY
+- [`venv_config()`](https://whd-lab.github.io/DR_WCLS_LASSO/reference/venv_config.md)
+  : venv_config

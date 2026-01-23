@@ -193,6 +193,60 @@ corresponding confidence intervals.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://whd-lab.github.io/DR_WCLS_LASSO/">MRTpostInfLASSO</a></span><span class="op">)</span></span></code></pre></div>
 </div>
+<div class="section level3">
+<h3 id="set-up">Set-up<a class="anchor" aria-label="anchor" href="#set-up"></a>
+</h3>
+<p>To configure a Python virtual environment in R, please run the
+following code:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="co"># Configure virtual environment</span></span>
+<span><span class="va">venv_info</span> <span class="op">=</span> <span class="fu"><a href="../reference/venv_config.html">venv_config</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Installing pyenv ...</span></span>
+<span><span class="co">#&gt; Done! pyenv has been installed to '/home/runner/.local/share/r-reticulate/pyenv/bin/pyenv'.</span></span>
+<span><span class="co">#&gt; + /home/runner/.local/share/r-reticulate/pyenv/bin/pyenv update</span></span>
+<span><span class="co">#&gt; + /home/runner/.local/share/r-reticulate/pyenv/bin/pyenv install --skip-existing 3.9.25</span></span>
+<span><span class="co">#&gt; Using Python: /home/runner/.pyenv/versions/3.9.25/bin/python3.9</span></span>
+<span><span class="co">#&gt; Creating virtual environment 'a9c268bc' ...</span></span>
+<span><span class="co">#&gt; + /home/runner/.pyenv/versions/3.9.25/bin/python3.9 -m venv /home/runner/.virtualenvs/a9c268bc</span></span>
+<span><span class="co">#&gt; Done!</span></span>
+<span><span class="co">#&gt; Installing packages: pip, wheel, setuptools</span></span>
+<span><span class="co">#&gt; + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade pip wheel setuptools</span></span>
+<span><span class="co">#&gt; Installing packages: numpy</span></span>
+<span><span class="co">#&gt; + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user numpy</span></span>
+<span><span class="co">#&gt; Virtual environment 'a9c268bc' successfully created.</span></span>
+<span><span class="co">#&gt; Using virtual environment 'a9c268bc' ...</span></span>
+<span><span class="co">#&gt; + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user 'cython&gt;=0.18' 'numpy&gt;=1.7.1' 'scipy&gt;=0.16.0' 'joblib&gt;=0.15.1'</span></span>
+<span><span class="co">#&gt; Using virtual environment 'a9c268bc' ...</span></span>
+<span><span class="co">#&gt; + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user 'numpy==1.22.4'</span></span>
+<span><span class="co">#&gt; Using virtual environment 'a9c268bc' ...</span></span>
+<span><span class="co">#&gt; + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user --no-build-isolation 'git+https://github.com/regreg/regreg.git'</span></span>
+<span><span class="co">#&gt; Using virtual environment 'a9c268bc' ...</span></span>
+<span><span class="co">#&gt; + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user scikit-learn nose</span></span>
+<span><span class="co">#&gt; Using virtual environment 'a9c268bc' ...</span></span>
+<span><span class="co">#&gt; + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user --no-build-isolation /tmp/RtmpLZNqJZ/selective-inference-1f5a3433f66c</span></span>
+<span><span class="co">#&gt; Using virtual environment 'a9c268bc' ...</span></span>
+<span><span class="co">#&gt; + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user pandas mpmath</span></span>
+<span><span class="va">venv</span> <span class="op">=</span> <span class="va">venv_info</span><span class="op">$</span><span class="va">hash</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">venv</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "a9c268bc"</span></span>
+<span><span class="co"># [1] "a9c268bc"</span></span>
+<span></span>
+<span><span class="co"># Do the python deps load?</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/reticulate/" class="external-link">reticulate</a></span><span class="op">)</span></span>
+<span><span class="va">np</span> <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"numpy"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">lasso_mod</span> <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"selectinf.randomized.lasso"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">lasso</span></span></code></pre></div>
+<p>Or, if already configured, use</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/reticulate/" class="external-link">reticulate</a></span><span class="op">)</span></span>
+<span><span class="va">venv</span> <span class="op">=</span> <span class="st">"a9c268bc"</span></span>
+<span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/use_python.html" class="external-link">use_virtualenv</a></span><span class="op">(</span><span class="va">venv</span>, required <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">np</span> <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"numpy"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">lassopy</span> <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"selectinf.randomized.lasso"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">lasso</span></span>
+<span><span class="va">selected_targets</span> <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"selectinf.base"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">selected_targets</span>  </span>
+<span><span class="va">const</span> <span class="op">=</span> <span class="va">lassopy</span><span class="op">$</span><span class="va">gaussian</span></span>
+<span><span class="va">exact_grid_inference</span> <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"selectinf.randomized.exact_reference"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">exact_grid_inference</span>  </span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="real-data-example">Real Data Example<a class="anchor" aria-label="anchor" href="#real-data-example"></a>
@@ -216,7 +270,7 @@ decision point.</p>
 <p>To begin, we load the <code>HeartSteps</code> data using the
 following code. A summary of <code>data_mimicHeartSteps</code> is as
 follows:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load HeartSteps Data</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">MRTAnalysis</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">data_mimicHeartSteps</span><span class="op">)</span></span>
@@ -237,7 +291,7 @@ follows:</p>
 <span><span class="co">#&gt; 6        4.6658254                  1            0       0.6     0</span></span></code></pre></div>
 <p>We first specify the variable names for the participant ID,
 history<span class="math inline">\(H_t\)</span>, moderator<span class="math inline">\(S_t\)</span>, treatment<span class="math inline">\(A_t\)</span>, proximal outcome<span class="math inline">\(Y_t\)</span>, and randomization probability<span class="math inline">\(p_t\)</span>.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
 <span><span class="va">ID</span> <span class="op">=</span> <span class="st">'userid'</span></span>
 <span><span class="va">Ht</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'logstep_30min_lag1'</span>,<span class="st">'logstep_pre30min'</span>,<span class="st">'is_at_home_or_work'</span>, <span class="st">'day_in_study'</span><span class="op">)</span></span>
@@ -265,7 +319,7 @@ S_{t,j}))
 <code>pseudo_outcome_generator_CVlasso</code>,
 <code>pseudo_outcome_generator_rf_v2</code>, and
 <code>pseudo_outcome_generator_gbm</code>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pseudo_outcome_CVlasso</span> <span class="op">=</span> <span class="fu"><a href="../reference/pseudo_outcome_generator_CVlasso.html">pseudo_outcome_generator_CVlasso</a></span><span class="op">(</span>fold <span class="op">=</span> <span class="fl">5</span>,ID <span class="op">=</span> <span class="va">ID</span>,</span>
 <span>                                                     data <span class="op">=</span> <span class="va">data_mimicHeartSteps</span>, </span>
 <span>                                                     Ht <span class="op">=</span> <span class="va">Ht</span>, St <span class="op">=</span> <span class="va">St</span>, At <span class="op">=</span> <span class="va">At</span>, </span>
@@ -309,22 +363,23 @@ w^{\top}\beta
 <code>my_formula</code>, specifying the outcome and candidate variables.
 Below, we demonstrate the use of both functions.</p>
 <p>Python version</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_formula</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">as.formula</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"yDR ~"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"logstep_30min_lag1"</span>, <span class="st">"logstep_pre30min"</span>,</span>
 <span>                                      <span class="st">"is_at_home_or_work"</span>, <span class="st">"day_in_study"</span><span class="op">)</span>,</span>
 <span>                                       collapse <span class="op">=</span> <span class="st">" + "</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># set.seed(100)</span></span>
-<span><span class="co"># var_selection_python = variable_selection_PY_penal_int(data = pseudo_outcome_CVlasso,ID,</span></span>
-<span><span class="co">#                                                        my_formula,</span></span>
-<span><span class="co">#                                                        lam = NULL, noise_scale = NULL,</span></span>
-<span><span class="co">#                                                        splitrat = 0.8,</span></span>
-<span><span class="co">#                                                        # virtualenv_path = "fakepath/wcls",</span></span>
-<span><span class="co">#                                                        ridge_term = 0, beta = NULL)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># cat('The selected variable list:',var_selection_python$E)</span></span></code></pre></div>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
+<span><span class="va">var_selection_python</span> <span class="op">=</span> <span class="fu"><a href="../reference/variable_selection_PY.html">variable_selection_PY</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">pseudo_outcome_CVlasso</span>,<span class="va">ID</span>,</span>
+<span>                                             <span class="va">my_formula</span>,</span>
+<span>                                             lam <span class="op">=</span> <span class="cn">NULL</span>, noise_scale <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>                                             venv <span class="op">=</span> <span class="va">venv</span>,</span>
+<span>                                             splitrat <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>                                             beta <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">'The selected variable list:'</span>,<span class="va">var_selection_python</span><span class="op">$</span><span class="va">E</span><span class="op">)</span></span>
+<span><span class="co">#&gt; The selected variable list: (Intercept) day_in_study</span></span></code></pre></div>
 <p>R version</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
 <span><span class="va">var_selection_R</span> <span class="op">=</span> <span class="fu"><a href="../reference/FISTA_backtracking.html">FISTA_backtracking</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">pseudo_outcome_CVlasso</span>, <span class="va">ID</span>, <span class="va">my_formula</span>,</span>
 <span>                  lam <span class="op">=</span> <span class="cn">NULL</span>, noise_scale <span class="op">=</span> <span class="cn">NULL</span>,splitrat <span class="op">=</span> <span class="fl">0.8</span>,</span>
@@ -359,30 +414,55 @@ variable names for ID, time, <span class="math inline">\(H_t\)</span>,
 generation (e.g., “CVLASSO”, “RandomForest”, “GradientBoosting”).
 <code>varSelect_program</code> indicates the variable selection
 programming language.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># set.seed(123)</span></span>
 <span></span>
 <span><span class="co"># reticulate::py_run_string("</span></span>
-<span><span class="co"># import random</span></span>
-<span><span class="co"># import numpy as np</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># random.seed(123)</span></span>
-<span><span class="co"># np.random.seed(123)</span></span>
+<span><span class="co">#   import random</span></span>
+<span><span class="co">#   import numpy as np</span></span>
+<span><span class="co">#   random.seed(123)</span></span>
+<span><span class="co">#   np.random.seed(123)</span></span>
 <span><span class="co"># ")</span></span>
 <span></span>
-<span><span class="co"># UI_return_python = DR_WCLS_LASSO(data = data_mimicHeartSteps,</span></span>
-<span><span class="co">#                           fold = 5, ID = ID,</span></span>
-<span><span class="co">#                           time = "decision_point",</span></span>
-<span><span class="co">#                           Ht = Ht, St = St, At = At,</span></span>
-<span><span class="co">#                           prob = prob, outcome = outcome,</span></span>
-<span><span class="co">#                           # virtualenv_path = 'fakepath/wcls',</span></span>
-<span><span class="co">#                           method_pseu = "CVLASSO",</span></span>
-<span><span class="co">#                           varSelect_program = "Python",</span></span>
-<span><span class="co">#                           standardize_x = F, standardize_y = F)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># UI_return_python</span></span></code></pre></div>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
+<span><span class="va">UI_return_python</span> <span class="op">=</span> <span class="fu"><a href="../reference/DR_WCLS_LASSO.html">DR_WCLS_LASSO</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data_mimicHeartSteps</span>,</span>
+<span>                          fold <span class="op">=</span> <span class="fl">5</span>, ID <span class="op">=</span> <span class="va">ID</span>,</span>
+<span>                          time <span class="op">=</span> <span class="st">"decision_point"</span>,</span>
+<span>                          Ht <span class="op">=</span> <span class="va">Ht</span>, St <span class="op">=</span> <span class="va">St</span>, At <span class="op">=</span> <span class="va">At</span>,</span>
+<span>                          prob <span class="op">=</span> <span class="va">prob</span>, outcome <span class="op">=</span> <span class="va">outcome</span>,</span>
+<span>                          venv <span class="op">=</span> <span class="va">venv</span>,</span>
+<span>                          method_pseu <span class="op">=</span> <span class="st">"CVLASSO"</span>,</span>
+<span>                          varSelect_program <span class="op">=</span> <span class="st">"Python"</span>,</span>
+<span>                          standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "remove 0 lines of data due to NA produced for yDR"</span></span>
+<span><span class="co">#&gt; [1] "The current lambda value is: 185.075931263644"</span></span>
+<span><span class="co">#&gt; [1] "select predictors: (Intercept)"       </span></span>
+<span><span class="co">#&gt; [2] "select predictors: logstep_30min_lag1"</span></span>
+<span><span class="co">#&gt; [3] "select predictors: logstep_pre30min"  </span></span>
+<span><span class="co">#&gt; [4] "select predictors: day_in_study"      </span></span>
+<span><span class="co">#&gt; [1] FALSE</span></span>
+<span><span class="co">#&gt; [1] "is_at_home_or_work"</span></span>
+<span><span class="co">#&gt; Loading required package: dplyr</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     filter, lag</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
+<span><span class="va">UI_return_python</span></span>
+<span><span class="co">#&gt;                    E       GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
+<span><span class="co">#&gt; 1        (Intercept)  0.5708024959  0.33889936  0.81385795 0.04959088 0.9500275</span></span>
+<span><span class="co">#&gt; 2 logstep_30min_lag1 -0.0018185733 -0.04364098  0.03981320 0.05008837 0.9507713</span></span>
+<span><span class="co">#&gt; 3   logstep_pre30min  0.0003347885 -0.04281442  0.03394711 0.04964602 0.9499208</span></span>
+<span><span class="co">#&gt; 4       day_in_study -0.0208486824 -0.02947561 -0.01277935 0.04986123 0.9491411</span></span>
+<span><span class="co">#&gt;         pvalue</span></span>
+<span><span class="co">#&gt; 1 5.027927e-05</span></span>
+<span><span class="co">#&gt; 2 9.532547e-01</span></span>
+<span><span class="co">#&gt; 3 9.417171e-01</span></span>
+<span><span class="co">#&gt; 4 2.167085e-05</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">UI_return_R</span> <span class="op">=</span> <span class="fu"><a href="../reference/DR_WCLS_LASSO.html">DR_WCLS_LASSO</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data_mimicHeartSteps</span>,</span>
 <span>                          fold <span class="op">=</span> <span class="fl">5</span>, ID <span class="op">=</span> <span class="va">ID</span>,</span>
@@ -393,34 +473,30 @@ programming language.</p>
 <span>                          varSelect_program <span class="op">=</span> <span class="st">"R"</span>,</span>
 <span>                          standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "remove 0 lines of data due to NA produced for yDR"</span></span>
-<span><span class="co">#&gt; [1] "The current lambda value is: 130.875622692401"</span></span>
-<span><span class="co">#&gt; [1] "select predictors: (Intercept)"  "select predictors: day_in_study"</span></span>
+<span><span class="co">#&gt; [1] "The current lambda value is: 130.890748071636"</span></span>
+<span><span class="co">#&gt; [1] "select predictors: (Intercept)"       </span></span>
+<span><span class="co">#&gt; [2] "select predictors: logstep_30min_lag1"</span></span>
+<span><span class="co">#&gt; [3] "select predictors: day_in_study"      </span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span>
-<span><span class="co">#&gt; [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"</span></span>
-<span><span class="co">#&gt; Loading required package: dplyr</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     filter, lag</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
+<span><span class="co">#&gt; [1] "logstep_pre30min"   "is_at_home_or_work"</span></span>
 <span><span class="va">UI_return_R</span></span>
-<span><span class="co">#&gt;              E     GEE_est      lowCI     upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1  (Intercept)  0.56779396  0.3716397  0.72776335 0.05044121 0.9499924</span></span>
-<span><span class="co">#&gt; 2 day_in_study -0.02085767 -0.0286707 -0.01230142 0.04944023 0.9504154</span></span>
+<span><span class="co">#&gt;                    E     GEE_est      lowCI     upperCI   prop_low   prop_up</span></span>
+<span><span class="co">#&gt; 1        (Intercept)  0.56822858  0.4307585  1.29312966 0.04948184 0.9493800</span></span>
+<span><span class="co">#&gt; 2 logstep_30min_lag1 -0.00115191 -0.3080987 -0.02007353 0.05021225 0.9499908</span></span>
+<span><span class="co">#&gt; 3       day_in_study -0.02083829 -0.0471477 -0.01262934 0.05038607 0.9506433</span></span>
 <span><span class="co">#&gt;         pvalue</span></span>
-<span><span class="co">#&gt; 1 1.249038e-06</span></span>
-<span><span class="co">#&gt; 2 1.641057e-04</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 0.0003264524</span></span>
+<span><span class="co">#&gt; 2 0.0472959799</span></span>
+<span><span class="co">#&gt; 3 0.0008664515</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="a-comparison-of-using-randomized-lasso-and-weighted-centered-least-squares">A Comparison of Using Randomized LASSO and Weighted Centered Least
 Squares<a class="anchor" aria-label="anchor" href="#a-comparison-of-using-randomized-lasso-and-weighted-centered-least-squares"></a>
 </h4>
 <p>Select variables using randomized LASSO</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">selectiveInference</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">selectiveInference</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Loading required package: glmnet</span></span>
 <span><span class="co">#&gt; Loading required package: Matrix</span></span>
 <span><span class="co">#&gt; Loaded glmnet 4.1-10</span></span>
@@ -456,7 +532,7 @@ Squares<a class="anchor" aria-label="anchor" href="#a-comparison-of-using-random
 <span><span class="va">St</span><span class="op">[</span><span class="va">res_randomizedLASSO</span><span class="op">$</span><span class="va">active_set</span><span class="op">]</span></span>
 <span><span class="co">#&gt; [1] "day_in_study"</span></span></code></pre></div>
 <p>Make inference using weighted centered least squares</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span></span>
 <span><span class="va">wcls_fit</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/MRTAnalysis/man/wcls.html" class="external-link">wcls</a></span><span class="op">(</span></span>
@@ -465,8 +541,8 @@ Squares<a class="anchor" aria-label="anchor" href="#a-comparison-of-using-random
 <span>  outcome <span class="op">=</span> <span class="st">'logstep_30min'</span>, </span>
 <span>  treatment <span class="op">=</span> <span class="st">'intervention'</span>, </span>
 <span>  rand_prob <span class="op">=</span> <span class="fl">0.5</span>, </span>
-<span>  moderator_formula<span class="op">=</span> <span class="op">~</span> <span class="va">day_in_study</span>,</span>
-<span>  control_formula <span class="op">=</span> <span class="op">~</span><span class="va">logstep_30min_lag1</span> <span class="op">+</span> <span class="va">logstep_pre30min</span> <span class="op">+</span> <span class="va">day_in_study</span>,</span>
+<span>  moderator_formula <span class="op">=</span> <span class="op">~</span> <span class="va">day_in_study</span>,</span>
+<span>  control_formula <span class="op">=</span> <span class="op">~</span> <span class="va">logstep_30min_lag1</span> <span class="op">+</span> <span class="va">logstep_pre30min</span> <span class="op">+</span> <span class="va">day_in_study</span>,</span>
 <span>  availability <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  numerator_prob <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
@@ -486,13 +562,15 @@ Squares<a class="anchor" aria-label="anchor" href="#a-comparison-of-using-random
 <span></span>
 <span><span class="co"># UI_return_python</span></span>
 <span><span class="va">UI_return_R</span></span>
-<span><span class="co">#&gt;              E     GEE_est      lowCI     upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1  (Intercept)  0.56779396  0.3716397  0.72776335 0.05044121 0.9499924</span></span>
-<span><span class="co">#&gt; 2 day_in_study -0.02085767 -0.0286707 -0.01230142 0.04944023 0.9504154</span></span>
+<span><span class="co">#&gt;                    E     GEE_est      lowCI     upperCI   prop_low   prop_up</span></span>
+<span><span class="co">#&gt; 1        (Intercept)  0.56822858  0.4307585  1.29312966 0.04948184 0.9493800</span></span>
+<span><span class="co">#&gt; 2 logstep_30min_lag1 -0.00115191 -0.3080987 -0.02007353 0.05021225 0.9499908</span></span>
+<span><span class="co">#&gt; 3       day_in_study -0.02083829 -0.0471477 -0.01262934 0.05038607 0.9506433</span></span>
 <span><span class="co">#&gt;         pvalue</span></span>
-<span><span class="co">#&gt; 1 1.249038e-06</span></span>
-<span><span class="co">#&gt; 2 1.641057e-04</span></span></code></pre></div>
-<p><img src="tutorial_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" width="700"><img src="tutorial_files/figure-html/unnamed-chunk-13-2.png" class="r-plt" width="700"></p>
+<span><span class="co">#&gt; 1 0.0003264524</span></span>
+<span><span class="co">#&gt; 2 0.0472959799</span></span>
+<span><span class="co">#&gt; 3 0.0008664515</span></span></code></pre></div>
+<p><img src="tutorial_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="" width="700"><img src="tutorial_files/figure-html/unnamed-chunk-15-2.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level4">
 <h4 id="arguments-in-dr_wcls_lasso">Arguments in DR_WCLS_LASSO<a class="anchor" aria-label="anchor" href="#arguments-in-dr_wcls_lasso"></a>
@@ -501,7 +579,7 @@ Squares<a class="anchor" aria-label="anchor" href="#a-comparison-of-using-random
 <code>method_pseu</code> argument. Currently, three options are
 supported: CVLASSO, RandomForest, and GradientBoosting. The default is
 CVLASSO.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">UI_return_method_pseu</span> <span class="op">=</span> <span class="fu"><a href="../reference/DR_WCLS_LASSO.html">DR_WCLS_LASSO</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data_mimicHeartSteps</span>,</span>
@@ -509,26 +587,25 @@ CVLASSO.</p>
 <span>                                 time <span class="op">=</span> <span class="st">"decision_point"</span>,</span>
 <span>                                 Ht <span class="op">=</span> <span class="va">Ht</span>, St <span class="op">=</span> <span class="va">St</span>, At <span class="op">=</span> <span class="va">At</span>,</span>
 <span>                                 prob <span class="op">=</span> <span class="va">prob</span>, outcome <span class="op">=</span> <span class="va">outcome</span>,</span>
-<span>                                 <span class="co"># virtualenv_path = 'fakepath/wcls',</span></span>
 <span>                                 method_pseu <span class="op">=</span> <span class="st">"CVLASSO"</span>,</span>
 <span>                                 varSelect_program <span class="op">=</span> <span class="st">"R"</span>,</span>
 <span>                                 standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "remove 0 lines of data due to NA produced for yDR"</span></span>
-<span><span class="co">#&gt; [1] "The current lambda value is: 130.874430913628"</span></span>
+<span><span class="co">#&gt; [1] "The current lambda value is: 130.886184912034"</span></span>
 <span><span class="co">#&gt; [1] "select predictors: (Intercept)"  "select predictors: day_in_study"</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span>
 <span><span class="co">#&gt; [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"</span></span>
 <span></span>
 <span><span class="va">UI_return_method_pseu</span></span>
 <span><span class="co">#&gt;              E     GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1  (Intercept)  0.56844965  0.37212341  0.72853390 0.05039441 0.9500313</span></span>
-<span><span class="co">#&gt; 2 day_in_study -0.02089795 -0.02872757 -0.01232027 0.04913065 0.9506675</span></span>
+<span><span class="co">#&gt; 1  (Intercept)  0.56620156  0.36988485  0.72652674 0.05017394 0.9502887</span></span>
+<span><span class="co">#&gt; 2 day_in_study -0.02079154 -0.02862594 -0.01222344 0.04932580 0.9506574</span></span>
 <span><span class="co">#&gt;         pvalue</span></span>
-<span><span class="co">#&gt; 1 1.217928e-06</span></span>
-<span><span class="co">#&gt; 2 1.595093e-04</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 1.358824e-06</span></span>
+<span><span class="co">#&gt; 2 1.763467e-04</span></span></code></pre></div>
 <p>The LASSO penalty can be adjusted by setting ‘lam’ in the
 <code>DR_WCLS_LASSO</code> function.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">UI_return_lambda</span> <span class="op">=</span> <span class="fu"><a href="../reference/DR_WCLS_LASSO.html">DR_WCLS_LASSO</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data_mimicHeartSteps</span>,</span>
@@ -536,7 +613,6 @@ CVLASSO.</p>
 <span>                                 time <span class="op">=</span> <span class="st">"decision_point"</span>,</span>
 <span>                                 Ht <span class="op">=</span> <span class="va">Ht</span>, St <span class="op">=</span> <span class="va">St</span>, At <span class="op">=</span> <span class="va">At</span>,</span>
 <span>                                 prob <span class="op">=</span> <span class="va">prob</span>, outcome <span class="op">=</span> <span class="va">outcome</span>,</span>
-<span>                                 <span class="co"># virtualenv_path = 'fakepath/wcls',</span></span>
 <span>                                 method_pseu <span class="op">=</span> <span class="st">"CVLASSO"</span>,</span>
 <span>                                 varSelect_program <span class="op">=</span> <span class="st">"R"</span>,</span>
 <span>                                 lam <span class="op">=</span> <span class="fl">100</span>,</span>
@@ -548,15 +624,15 @@ CVLASSO.</p>
 <span><span class="co">#&gt; [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"</span></span>
 <span></span>
 <span><span class="va">UI_return_lambda</span></span>
-<span><span class="co">#&gt;              E     GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1  (Intercept)  0.56913165  0.37408863  0.72926844 0.05002324 0.9492241</span></span>
-<span><span class="co">#&gt; 2 day_in_study -0.02092669 -0.02871173 -0.01239679 0.04924098 0.9500773</span></span>
+<span><span class="co">#&gt;              E     GEE_est       lowCI    upperCI   prop_low   prop_up</span></span>
+<span><span class="co">#&gt; 1  (Intercept)  0.56640577  0.37111148  0.7266424 0.05057943 0.9498511</span></span>
+<span><span class="co">#&gt; 2 day_in_study -0.02080194 -0.02861168 -0.0122753 0.05003076 0.9501713</span></span>
 <span><span class="co">#&gt;         pvalue</span></span>
-<span><span class="co">#&gt; 1 9.928750e-07</span></span>
-<span><span class="co">#&gt; 2 1.354456e-04</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 1.377185e-06</span></span>
+<span><span class="co">#&gt; 2 1.813796e-04</span></span></code></pre></div>
 <p>The data split rate in Step 1 of the DR_WCLS algorithm can be set
 using ‘splitrat’ in the <code>DR_WCLS_LASSO</code> function.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
 <span><span class="va">UI_return_splitrat</span> <span class="op">=</span> <span class="fu"><a href="../reference/DR_WCLS_LASSO.html">DR_WCLS_LASSO</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data_mimicHeartSteps</span>, </span>
 <span>                                   fold <span class="op">=</span> <span class="fl">5</span>, ID <span class="op">=</span> <span class="va">ID</span>, </span>
@@ -568,17 +644,17 @@ using ‘splitrat’ in the <code>DR_WCLS_LASSO</code> function.</p>
 <span>                                   splitrat <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>                                   standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "remove 0 lines of data due to NA produced for yDR"</span></span>
-<span><span class="co">#&gt; [1] "The current lambda value is: 130.874723988392"</span></span>
+<span><span class="co">#&gt; [1] "The current lambda value is: 130.869018999851"</span></span>
 <span><span class="co">#&gt; [1] "select predictors: (Intercept)"  "select predictors: day_in_study"</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span>
 <span><span class="co">#&gt; [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"</span></span>
 <span><span class="va">UI_return_splitrat</span></span>
 <span><span class="co">#&gt;              E    GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1  (Intercept)  0.5681533  0.37196098  0.72816041 0.05043564 0.9499928</span></span>
-<span><span class="co">#&gt; 2 day_in_study -0.0208761 -0.02869056 -0.01231765 0.04939291 0.9504397</span></span>
+<span><span class="co">#&gt; 1  (Intercept)  0.5671095  0.37146161  0.72674328 0.05070522 0.9497343</span></span>
+<span><span class="co">#&gt; 2 day_in_study -0.0208280 -0.02863102 -0.01229018 0.04965108 0.9502266</span></span>
 <span><span class="co">#&gt;         pvalue</span></span>
-<span><span class="co">#&gt; 1 1.229547e-06</span></span>
-<span><span class="co">#&gt; 2 1.615734e-04</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 1.258304e-06</span></span>
+<span><span class="co">#&gt; 2 1.664803e-04</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="analysis-using-manually-created-interaction-terms">Analysis Using Manually Created Interaction Terms<a class="anchor" aria-label="anchor" href="#analysis-using-manually-created-interaction-terms"></a>
@@ -587,7 +663,7 @@ using ‘splitrat’ in the <code>DR_WCLS_LASSO</code> function.</p>
 create an indicator for whether the time in the study is over 14 days
 and include its interactions with <code>logstep_30min_lag1</code>,
 <code>logstep_pre30min</code>, and <code>is_at_home_or_work</code>.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">timeover14</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">decision_point</span><span class="op">&gt;</span><span class="fl">14</span><span class="op">)</span></span>
 <span><span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">int_lag1_timeover14</span> <span class="op">=</span> <span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">logstep_30min_lag1</span> <span class="op">*</span> <span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">timeover14</span></span>
 <span></span>
@@ -596,7 +672,7 @@ and include its interactions with <code>logstep_30min_lag1</code>,
 <span><span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">int_home_timeover14</span> <span class="op">=</span> <span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">is_at_home_or_work</span> <span class="op">*</span> <span class="va">data_mimicHeartSteps</span><span class="op">$</span><span class="va">timeover14</span></span></code></pre></div>
 <p>We add the interaction terms in the <span class="math inline">\(H_t\)</span> and <span class="math inline">\(S_t\)</span> variable lists and rerun the
 procedure.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">200</span><span class="op">)</span></span>
 <span><span class="va">ID</span> <span class="op">=</span> <span class="st">'userid'</span></span>
 <span><span class="va">Ht_int</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'logstep_30min_lag1'</span>,<span class="st">'logstep_pre30min'</span>,<span class="st">'is_at_home_or_work'</span>, <span class="st">'timeover14'</span>,</span>
@@ -608,46 +684,52 @@ procedure.</p>
 <span><span class="va">prob</span> <span class="op">=</span> <span class="st">'rand_prob'</span></span>
 <span></span>
 <span></span>
-<span><span class="co"># UI_return_int_python = DR_WCLS_LASSO(data = data_mimicHeartSteps, </span></span>
-<span><span class="co">#                           fold = 5, ID = ID, </span></span>
-<span><span class="co">#                           time = "decision_point", Ht = Ht_int, St = St_int, </span></span>
-<span><span class="co">#                           At = At, prob = prob, outcome = outcome,</span></span>
-<span><span class="co">#                           # virtualenv_path = 'fakepath/wcls',</span></span>
-<span><span class="co">#                           method_pseu = "CVLASSO", </span></span>
-<span><span class="co">#                           varSelect_program = "Python",</span></span>
-<span><span class="co">#                           standardize_x = F, standardize_y = F)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># UI_return_int_python</span></span></code></pre></div>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<span><span class="va">UI_return_int_python</span> <span class="op">=</span> <span class="fu"><a href="../reference/DR_WCLS_LASSO.html">DR_WCLS_LASSO</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data_mimicHeartSteps</span>,</span>
+<span>                          fold <span class="op">=</span> <span class="fl">5</span>, ID <span class="op">=</span> <span class="va">ID</span>,</span>
+<span>                          time <span class="op">=</span> <span class="st">"decision_point"</span>, Ht <span class="op">=</span> <span class="va">Ht_int</span>, St <span class="op">=</span> <span class="va">St_int</span>,</span>
+<span>                          At <span class="op">=</span> <span class="va">At</span>, prob <span class="op">=</span> <span class="va">prob</span>, outcome <span class="op">=</span> <span class="va">outcome</span>,</span>
+<span>                          venv <span class="op">=</span> <span class="va">venv</span>,</span>
+<span>                          method_pseu <span class="op">=</span> <span class="st">"CVLASSO"</span>,</span>
+<span>                          varSelect_program <span class="op">=</span> <span class="st">"Python"</span>,</span>
+<span>                          standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "remove 0 lines of data due to NA produced for yDR"</span></span>
+<span><span class="co">#&gt; [1] "The current lambda value is: 216.212480160782"</span></span>
+<span><span class="co">#&gt; [1] "select predictors: (Intercept)"  "select predictors: day_in_study"</span></span>
+<span><span class="co">#&gt; [1] FALSE</span></span>
+<span><span class="co">#&gt; [1] "logstep_30min_lag1"   "logstep_pre30min"     "is_at_home_or_work"  </span></span>
+<span><span class="co">#&gt; [4] "timeover14"           "int_lag1_timeover14"  "int_pre30_timeover14"</span></span>
+<span><span class="co">#&gt; [7] "int_home_timeover14"</span></span>
+<span></span>
+<span><span class="va">UI_return_int_python</span></span>
+<span><span class="co">#&gt;              E     GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
+<span><span class="co">#&gt; 1  (Intercept)  0.55405797  0.35490316  0.70605612 0.05088807 0.9500937</span></span>
+<span><span class="co">#&gt; 2 day_in_study -0.02024918 -0.02820173 -0.01190789 0.05016113 0.9498596</span></span>
+<span><span class="co">#&gt;         pvalue</span></span>
+<span><span class="co">#&gt; 1 6.946351e-07</span></span>
+<span><span class="co">#&gt; 2 5.306104e-05</span></span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">UI_return_int_R</span> <span class="op">=</span> <span class="fu"><a href="../reference/DR_WCLS_LASSO.html">DR_WCLS_LASSO</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data_mimicHeartSteps</span>, </span>
 <span>                          fold <span class="op">=</span> <span class="fl">5</span>, ID <span class="op">=</span> <span class="va">ID</span>, </span>
 <span>                          time <span class="op">=</span> <span class="st">"decision_point"</span>, Ht <span class="op">=</span> <span class="va">Ht_int</span>, St <span class="op">=</span> <span class="va">St_int</span>, </span>
 <span>                          At <span class="op">=</span> <span class="va">At</span>, prob <span class="op">=</span> <span class="va">prob</span>, outcome <span class="op">=</span> <span class="va">outcome</span>,</span>
-<span>                          <span class="co"># virtualenv_path = 'fakepath/wcls',</span></span>
 <span>                          method_pseu <span class="op">=</span> <span class="st">"CVLASSO"</span>, </span>
 <span>                          varSelect_program <span class="op">=</span> <span class="st">"R"</span>,</span>
 <span>                          standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "remove 0 lines of data due to NA produced for yDR"</span></span>
-<span><span class="co">#&gt; [1] "The current lambda value is: 152.858404333928"</span></span>
-<span><span class="co">#&gt; [1] "select predictors: (Intercept)"       </span></span>
-<span><span class="co">#&gt; [2] "select predictors: logstep_30min_lag1"</span></span>
-<span><span class="co">#&gt; [3] "select predictors: logstep_pre30min"  </span></span>
-<span><span class="co">#&gt; [4] "select predictors: day_in_study"      </span></span>
+<span><span class="co">#&gt; [1] "The current lambda value is: 152.979710253884"</span></span>
+<span><span class="co">#&gt; [1] "select predictors: (Intercept)"  "select predictors: day_in_study"</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span>
-<span><span class="co">#&gt; [1] "is_at_home_or_work"   "timeover14"           "int_lag1_timeover14" </span></span>
-<span><span class="co">#&gt; [4] "int_pre30_timeover14" "int_home_timeover14"</span></span>
+<span><span class="co">#&gt; [1] "logstep_30min_lag1"   "logstep_pre30min"     "is_at_home_or_work"  </span></span>
+<span><span class="co">#&gt; [4] "timeover14"           "int_lag1_timeover14"  "int_pre30_timeover14"</span></span>
+<span><span class="co">#&gt; [7] "int_home_timeover14"</span></span>
 <span></span>
 <span><span class="va">UI_return_int_R</span></span>
-<span><span class="co">#&gt;                    E      GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1        (Intercept)  0.567524285 -0.47444120  0.66217094 0.04924123 0.9504657</span></span>
-<span><span class="co">#&gt; 2 logstep_30min_lag1 -0.002280636 -0.04139731  0.12778499 0.05028444 0.9498846</span></span>
-<span><span class="co">#&gt; 3   logstep_pre30min -0.001329584 -0.01784046  0.14310874 0.04958894 0.9492032</span></span>
-<span><span class="co">#&gt; 4       day_in_study -0.020471589 -0.02903725 -0.01115698 0.04997574 0.9491035</span></span>
-<span><span class="co">#&gt;       pvalue</span></span>
-<span><span class="co">#&gt; 1 0.66162061</span></span>
-<span><span class="co">#&gt; 2 0.62371553</span></span>
-<span><span class="co">#&gt; 3 0.25826528</span></span>
-<span><span class="co">#&gt; 4 0.00215414</span></span></code></pre></div>
+<span><span class="co">#&gt;              E     GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
+<span><span class="co">#&gt; 1  (Intercept)  0.55728359  0.42712564  0.79807468 0.04958858 0.9506382</span></span>
+<span><span class="co">#&gt; 2 day_in_study -0.02039956 -0.02877858 -0.01253776 0.05039323 0.9496842</span></span>
+<span><span class="co">#&gt;         pvalue</span></span>
+<span><span class="co">#&gt; 1 5.396385e-08</span></span>
+<span><span class="co">#&gt; 2 4.226746e-05</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -659,7 +741,7 @@ participants’ weekly mood, physical activity, and sleep. Each day,
 participants had a 0.5 probability of receiving a tailored message. The
 dataset includes a range of variables collected from wearable
 devices.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_IHS</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">'~/Desktop/25Winter/IHS Design/Hyperparameter/dfEventsThreeMonthsTimezones.csv'</span><span class="op">)</span></span>
 <span><span class="va">df_IHS</span><span class="op">$</span><span class="va">prob</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">df_IHS</span><span class="op">$</span><span class="va">PARTICIPANTIDENTIFIER</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">df_IHS</span><span class="op">$</span><span class="va">less27</span> <span class="op">=</span> <span class="op">(</span><span class="va">df_IHS</span><span class="op">$</span><span class="va">Age</span> <span class="op">&lt;</span> <span class="fl">27</span><span class="op">)</span></span>
@@ -678,41 +760,43 @@ devices.</p>
 <span></span>
 <span><span class="va">df_IHS_cleaned</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html" class="external-link">na.omit</a></span><span class="op">(</span><span class="va">df_IHS</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># UI_return_IHS_python = DR_WCLS_LASSO(data = df_IHS_cleaned,</span></span>
-<span><span class="co">#                           fold = 5, ID = ID,</span></span>
-<span><span class="co">#                           time = "time", Ht = Ht, St = St, At = At,</span></span>
-<span><span class="co">#                           prob = prob, outcome = outcome,</span></span>
-<span><span class="co">#                           # virtualenv_path = 'fakepath/wcls',</span></span>
-<span><span class="co">#                           method_pseu = "CVLASSO", lam = 55,</span></span>
-<span><span class="co">#                           noise_scale = NULL, splitrat = 0.8,</span></span>
-<span><span class="co">#                           level = 0.9, core_num=3, CI_algorithm = 'lapply',</span></span>
-<span><span class="co">#                           max_iterate = 10^{6}, max_tol = 10^{-3}, varSelect_program = "Python",</span></span>
-<span><span class="co">#                           standardize_x =  T, standardize_y = T)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># UI_return_IHS_python</span></span></code></pre></div>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<span><span class="va">UI_return_IHS_python</span> <span class="op">=</span> <span class="fu"><a href="../reference/DR_WCLS_LASSO.html">DR_WCLS_LASSO</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">df_IHS_cleaned</span>,</span>
+<span>                          fold <span class="op">=</span> <span class="fl">5</span>, ID <span class="op">=</span> <span class="va">ID</span>,</span>
+<span>                          time <span class="op">=</span> <span class="st">"time"</span>, Ht <span class="op">=</span> <span class="va">Ht</span>, St <span class="op">=</span> <span class="va">St</span>, At <span class="op">=</span> <span class="va">At</span>,</span>
+<span>                          prob <span class="op">=</span> <span class="va">prob</span>, outcome <span class="op">=</span> <span class="va">outcome</span>,</span>
+<span>                          venv <span class="op">=</span> <span class="va">venv</span>,</span>
+<span>                          method_pseu <span class="op">=</span> <span class="st">"CVLASSO"</span>, lam <span class="op">=</span> <span class="fl">55</span>,</span>
+<span>                          noise_scale <span class="op">=</span> <span class="cn">NULL</span>, splitrat <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>                          level <span class="op">=</span> <span class="fl">0.9</span>, core_num<span class="op">=</span><span class="fl">3</span>,</span>
+<span>                          varSelect_program <span class="op">=</span> <span class="st">"Python"</span>,</span>
+<span>                          standardize_x <span class="op">=</span>  <span class="cn">T</span>, standardize_y <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">UI_return_IHS_python</span></span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
 <span><span class="va">UI_return_IHS_R</span> <span class="op">=</span> <span class="fu"><a href="../reference/DR_WCLS_LASSO.html">DR_WCLS_LASSO</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">df_IHS_cleaned</span>,</span>
 <span>                          fold <span class="op">=</span> <span class="fl">5</span>, ID <span class="op">=</span> <span class="va">ID</span>,</span>
 <span>                          time <span class="op">=</span> <span class="st">"time"</span>, Ht <span class="op">=</span> <span class="va">Ht</span>, St <span class="op">=</span> <span class="va">St</span>, At <span class="op">=</span> <span class="va">At</span>,</span>
 <span>                          prob <span class="op">=</span> <span class="va">prob</span>, outcome <span class="op">=</span> <span class="va">outcome</span>,</span>
-<span>                          <span class="co"># virtualenv_path = 'fakepath/wcls',</span></span>
+<span>                          venv <span class="op">=</span> <span class="va">venv</span>,</span>
 <span>                          method_pseu <span class="op">=</span> <span class="st">"CVLASSO"</span>, lam <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>                          noise_scale <span class="op">=</span> <span class="cn">NULL</span>, splitrat <span class="op">=</span> <span class="fl">0.8</span>,</span>
-<span>                          level <span class="op">=</span> <span class="fl">0.9</span>, core_num<span class="op">=</span><span class="fl">3</span>, CI_algorithm <span class="op">=</span> <span class="st">'lapply'</span>,</span>
-<span>                          max_iterate <span class="op">=</span> <span class="fl">10</span><span class="op">^</span><span class="op">{</span><span class="fl">6</span><span class="op">}</span>, max_tol <span class="op">=</span> <span class="fl">10</span><span class="op">^</span><span class="op">{</span><span class="op">-</span><span class="fl">3</span><span class="op">}</span>, varSelect_program <span class="op">=</span> <span class="st">"R"</span>,</span>
+<span>                          level <span class="op">=</span> <span class="fl">0.9</span>, core_num<span class="op">=</span><span class="fl">3</span>, </span>
+<span>                          varSelect_program <span class="op">=</span> <span class="st">"R"</span>,</span>
 <span>                          standardize_x <span class="op">=</span>  <span class="cn">T</span>, standardize_y <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">UI_return_IHS_R</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="simulated-data">Simulated Data<a class="anchor" aria-label="anchor" href="#simulated-data"></a>
-</h3>
+</div>
+<div class="section level2">
+<h2 id="simulated-data">Simulated Data<a class="anchor" aria-label="anchor" href="#simulated-data"></a>
+</h2>
 <p>We also illustrate the use of the package with a simulated dataset
 and demonstrate why DR_WCLS is needed, rather than using randomized
 LASSO for selection and WCLS for inference.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sim_data</span> <span class="op">=</span> <span class="fu"><a href="../reference/generate_dataset.html">generate_dataset</a></span><span class="op">(</span>N <span class="op">=</span> <span class="fl">1000</span>, T <span class="op">=</span> <span class="fl">40</span>, P <span class="op">=</span> <span class="fl">50</span>, </span>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
+<span><span class="va">sim_data</span> <span class="op">=</span> <span class="fu"><a href="../reference/generate_dataset.html">generate_dataset</a></span><span class="op">(</span>N <span class="op">=</span> <span class="fl">1000</span>, T <span class="op">=</span> <span class="fl">40</span>, P <span class="op">=</span> <span class="fl">50</span>, </span>
 <span>                            sigma_residual <span class="op">=</span> <span class="fl">1.5</span>, sigma_randint <span class="op">=</span> <span class="fl">1.5</span>, </span>
 <span>                            main_rand <span class="op">=</span> <span class="fl">3</span>, rho <span class="op">=</span> <span class="fl">0.7</span>,</span>
 <span>                            beta_logit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1.6</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">50</span>, <span class="fl">50</span><span class="op">)</span><span class="op">)</span>, </span>
@@ -723,18 +807,19 @@ LASSO for selection and WCLS for inference.</p>
 <span><span class="va">Ht</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">50</span>, FUN <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"state"</span>,<span class="va">X</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">St</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">25</span>, FUN <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"state"</span>,<span class="va">X</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
+<span><span class="va">sim_data</span><span class="op">$</span><span class="va">prob_false</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">$</span><span class="va">id</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">UI_return_sim_R</span> <span class="op">=</span> <span class="fu"><a href="../reference/DR_WCLS_LASSO.html">DR_WCLS_LASSO</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">sim_data</span>,</span>
 <span>                                fold <span class="op">=</span> <span class="fl">5</span>, ID <span class="op">=</span> <span class="st">"id"</span>,</span>
 <span>                                time <span class="op">=</span> <span class="st">"decision_point"</span>,</span>
 <span>                                Ht <span class="op">=</span> <span class="va">Ht</span>, St <span class="op">=</span> <span class="va">St</span>, At <span class="op">=</span> <span class="st">"action"</span>,</span>
-<span>                                prob <span class="op">=</span> <span class="st">"prob"</span>, outcome <span class="op">=</span> <span class="st">"outcome"</span>,</span>
+<span>                                prob <span class="op">=</span> <span class="st">"prob_false"</span>, outcome <span class="op">=</span> <span class="st">"outcome"</span>,</span>
 <span>                                method_pseu <span class="op">=</span> <span class="st">"CVLASSO"</span>,</span>
 <span>                                varSelect_program <span class="op">=</span> <span class="st">"R"</span>,</span>
 <span>                                standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span>,</span>
 <span>                                beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1.7</span>, <span class="fl">1.5</span>, <span class="op">-</span><span class="fl">1.3</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">21</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "remove 0 lines of data due to NA produced for yDR"</span></span>
-<span><span class="co">#&gt; [1] "The current lambda value is: 442.789879628912"</span></span>
+<span><span class="co">#&gt; [1] "The current lambda value is: 389.567345284479"</span></span>
 <span><span class="co">#&gt; [1] "select predictors: (Intercept)" "select predictors: state1"     </span></span>
 <span><span class="co">#&gt; [3] "select predictors: state2"      "select predictors: state3"     </span></span>
 <span><span class="co">#&gt; [5] "select predictors: state4"     </span></span>
@@ -742,25 +827,40 @@ LASSO for selection and WCLS for inference.</p>
 <span><span class="co">#&gt;  [1] "state5"  "state6"  "state7"  "state8"  "state9"  "state10" "state11"</span></span>
 <span><span class="co">#&gt;  [8] "state12" "state13" "state14" "state15" "state16" "state17" "state18"</span></span>
 <span><span class="co">#&gt; [15] "state19" "state20" "state21" "state22" "state23" "state24" "state25"</span></span></code></pre></div>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sim_randomizedLASSO</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/selectiveInference/man/randomizedLasso.html" class="external-link">randomizedLasso</a></span><span class="op">(</span>X <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/intervals/man/as.matrix.Intervals.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">[</span>,<span class="va">St</span><span class="op">]</span><span class="op">)</span>, </span>
-<span>                y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/intervals/man/as.matrix.Intervals.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">[</span>,<span class="st">'outcome'</span><span class="op">]</span><span class="op">)</span>, </span>
-<span>                lam <span class="op">=</span> <span class="fl">225000</span>, </span>
-<span>                family<span class="op">=</span><span class="st">"gaussian"</span>,</span>
-<span>                noise_scale<span class="op">=</span><span class="cn">NULL</span>, </span>
-<span>                ridge_term<span class="op">=</span><span class="cn">NULL</span>, </span>
-<span>                max_iter<span class="op">=</span><span class="fl">100</span>,       </span>
-<span>                kkt_tol<span class="op">=</span><span class="fl">1.e-4</span>,      </span>
-<span>                parameter_tol<span class="op">=</span><span class="fl">1.e-8</span>,</span>
-<span>                objective_tol<span class="op">=</span><span class="fl">1.e-8</span>,</span>
-<span>                objective_stop<span class="op">=</span><span class="cn">FALSE</span>,</span>
-<span>                kkt_stop<span class="op">=</span><span class="cn">TRUE</span>,</span>
-<span>                parameter_stop<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">my_formula</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">as.formula</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"yDR ~ "</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"state"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">50</span>, collapse <span class="op">=</span> <span class="st">" + "</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1001</span><span class="op">)</span></span>
+<span><span class="va">pseudo_outcome_CVlasso</span> <span class="op">=</span> <span class="fu"><a href="../reference/pseudo_outcome_generator_CVlasso.html">pseudo_outcome_generator_CVlasso</a></span><span class="op">(</span>fold <span class="op">=</span> <span class="fl">5</span>,ID <span class="op">=</span> <span class="st">'id'</span>,</span>
+<span>                                                     data <span class="op">=</span> <span class="va">sim_data</span>, </span>
+<span>                                                     Ht <span class="op">=</span> <span class="va">Ht</span>, St <span class="op">=</span> <span class="va">St</span>, At <span class="op">=</span> <span class="st">'action'</span>, </span>
+<span>                                                     prob <span class="op">=</span> <span class="st">'prob'</span>, outcome <span class="op">=</span> <span class="st">'outcome'</span>,</span>
+<span>                                                     core_num <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">St</span><span class="op">[</span><span class="va">sim_randomizedLASSO</span><span class="op">$</span><span class="va">active_set</span><span class="op">]</span></span>
-<span><span class="co">#&gt; [1] "state1"  "state4"  "state21"</span></span></code></pre></div>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mod_formula</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">as.formula</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"~"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"state"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">25</span>, collapse <span class="op">=</span> <span class="st">" + "</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># randomized LASSO (FISTA_backtracking in our package and set noise_scale as 0)</span></span>
+<span><span class="va">sim_variable_sel</span> <span class="op">=</span> <span class="fu"><a href="../reference/FISTA_backtracking.html">FISTA_backtracking</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">pseudo_outcome_CVlasso</span>, ID <span class="op">=</span> <span class="st">'id'</span>, <span class="va">my_formula</span>,</span>
+<span>                  lam <span class="op">=</span> <span class="cn">NULL</span>, noise_scale <span class="op">=</span> <span class="fl">0</span>, splitrat <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>                  max_ite <span class="op">=</span> <span class="fl">10</span><span class="op">^</span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>, tol <span class="op">=</span> <span class="fl">10</span><span class="op">^</span><span class="op">(</span><span class="op">-</span><span class="fl">4</span><span class="op">)</span>, beta <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># sim_randomizedLASSO = randomizedLasso(X = as.matrix(sim_data[,St]), </span></span>
+<span><span class="co">#                 y = as.matrix(sim_data[,'outcome']), </span></span>
+<span><span class="co">#                 lam = 225000, </span></span>
+<span><span class="co">#                 family="gaussian",</span></span>
+<span><span class="co">#                 noise_scale=NULL, </span></span>
+<span><span class="co">#                 ridge_term=NULL, </span></span>
+<span><span class="co">#                 max_iter=100,       </span></span>
+<span><span class="co">#                 kkt_tol=1.e-4,      </span></span>
+<span><span class="co">#                 parameter_tol=1.e-8,</span></span>
+<span><span class="co">#                 objective_tol=1.e-8,</span></span>
+<span><span class="co">#                 objective_stop=FALSE,</span></span>
+<span><span class="co">#                 kkt_stop=TRUE,</span></span>
+<span><span class="co">#                 parameter_stop=TRUE)</span></span>
+<span></span>
+<span><span class="va">sim_variable_sel</span><span class="op">$</span><span class="va">E</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span></span>
+<span><span class="co">#&gt; [1] "state1" "state2" "state3" "state4"</span></span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mod_formula</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">as.formula</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"~"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"state"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, collapse <span class="op">=</span> <span class="st">" + "</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ctrl_formula</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">as.formula</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"~"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"state"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">50</span>, collapse <span class="op">=</span> <span class="st">" + "</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -769,7 +869,7 @@ LASSO for selection and WCLS for inference.</p>
 <span>  id        <span class="op">=</span> <span class="st">"id"</span>,</span>
 <span>  outcome   <span class="op">=</span> <span class="st">"outcome"</span>,</span>
 <span>  treatment <span class="op">=</span> <span class="st">"action"</span>,</span>
-<span>  rand_prob <span class="op">=</span> <span class="st">"prob"</span>,</span>
+<span>  rand_prob <span class="op">=</span> <span class="st">"prob_false"</span>,</span>
 <span>  moderator_formula <span class="op">=</span> <span class="va">mod_formula</span>,</span>
 <span>  control_formula   <span class="op">=</span> <span class="va">ctrl_formula</span>,</span>
 <span>  availability      <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -783,62 +883,19 @@ LASSO for selection and WCLS for inference.</p>
 <span></span>
 <span><span class="va">wcls_sim_res</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">wcls_sim_fit</span><span class="op">)</span></span>
 <span><span class="va">wcls_sim_res</span><span class="op">$</span><span class="va">causal_excursion_effect</span></span>
-<span><span class="co">#&gt;                  Estimate      95% LCL      95% UCL     StdErr         Wald df1</span></span>
-<span><span class="co">#&gt; (Intercept) -0.9408247779 -1.082945386 -0.798704169 0.07241676 1.687871e+02   1</span></span>
-<span><span class="co">#&gt; state1       1.6829978826  1.641992789  1.724002977 0.02089392 6.488248e+03   1</span></span>
-<span><span class="co">#&gt; state2       1.4843603066  1.440355738  1.528364875 0.02242228 4.382471e+03   1</span></span>
-<span><span class="co">#&gt; state3      -1.3154198626 -1.356797086 -1.274042639 0.02108353 3.892620e+03   1</span></span>
-<span><span class="co">#&gt; state4      -1.0109323970 -1.052759556 -0.969105238 0.02131279 2.249901e+03   1</span></span>
-<span><span class="co">#&gt; state5       0.0305012642 -0.010904231  0.071906760 0.02109794 2.090045e+00   1</span></span>
-<span><span class="co">#&gt; state6      -0.0025985423 -0.045321684  0.040124599 0.02176934 1.424850e-02   1</span></span>
-<span><span class="co">#&gt; state7      -0.0415874398 -0.084648318  0.001473438 0.02194143 3.592481e+00   1</span></span>
-<span><span class="co">#&gt; state8      -0.0223120651 -0.064569614  0.019945484 0.02153210 1.073759e+00   1</span></span>
-<span><span class="co">#&gt; state9       0.0173490645 -0.025645530  0.060343659 0.02190766 6.271340e-01   1</span></span>
-<span><span class="co">#&gt; state10     -0.0115301052 -0.054094818  0.031034607 0.02168861 2.826201e-01   1</span></span>
-<span><span class="co">#&gt; state11     -0.0147671843 -0.056895612  0.027361243 0.02146630 4.732393e-01   1</span></span>
-<span><span class="co">#&gt; state12     -0.0169723743 -0.057589554  0.023644806 0.02069626 6.725144e-01   1</span></span>
-<span><span class="co">#&gt; state13      0.0005474569 -0.042535311  0.043630224 0.02195258 6.219114e-04   1</span></span>
-<span><span class="co">#&gt; state14      0.0196327944 -0.022303754  0.061569343 0.02136853 8.441406e-01   1</span></span>
-<span><span class="co">#&gt; state15      0.0191755020 -0.023003753  0.061354757 0.02149220 7.960340e-01   1</span></span>
-<span><span class="co">#&gt; state16      0.0103907303 -0.031395382  0.052176842 0.02129188 2.381574e-01   1</span></span>
-<span><span class="co">#&gt; state17      0.0095253458 -0.031466473  0.050517165 0.02088715 2.079711e-01   1</span></span>
-<span><span class="co">#&gt; state18     -0.0289704803 -0.069679416  0.011738456 0.02074301 1.950598e+00   1</span></span>
-<span><span class="co">#&gt; state19     -0.0017142918 -0.043412598  0.039984014 0.02124714 6.509814e-03   1</span></span>
-<span><span class="co">#&gt; state20     -0.0313087192 -0.074311184  0.011693745 0.02191167 2.041643e+00   1</span></span>
-<span><span class="co">#&gt; state21     -0.0501772980 -0.091727229 -0.008627367 0.02117153 5.617070e+00   1</span></span>
-<span><span class="co">#&gt; state22      0.0383980022 -0.001557773  0.078353777 0.02035924 3.557083e+00   1</span></span>
-<span><span class="co">#&gt; state23     -0.0132016082 -0.056211974  0.029808758 0.02191569 3.628635e-01   1</span></span>
-<span><span class="co">#&gt; state24      0.0144528696 -0.027110810  0.056016550 0.02117854 4.657106e-01   1</span></span>
-<span><span class="co">#&gt; state25      0.0231727510 -0.020279437  0.066624939 0.02214082 1.095388e+00   1</span></span>
-<span><span class="co">#&gt;             df2    p-value</span></span>
-<span><span class="co">#&gt; (Intercept) 923 0.00000000</span></span>
-<span><span class="co">#&gt; state1      923 0.00000000</span></span>
-<span><span class="co">#&gt; state2      923 0.00000000</span></span>
-<span><span class="co">#&gt; state3      923 0.00000000</span></span>
-<span><span class="co">#&gt; state4      923 0.00000000</span></span>
-<span><span class="co">#&gt; state5      923 0.14860115</span></span>
-<span><span class="co">#&gt; state6      923 0.90501051</span></span>
-<span><span class="co">#&gt; state7      923 0.05835372</span></span>
-<span><span class="co">#&gt; state8      923 0.30036930</span></span>
-<span><span class="co">#&gt; state9      923 0.42861202</span></span>
-<span><span class="co">#&gt; state10     923 0.59511695</span></span>
-<span><span class="co">#&gt; state11     923 0.49167354</span></span>
-<span><span class="co">#&gt; state12     923 0.41238807</span></span>
-<span><span class="co">#&gt; state13     923 0.98010969</span></span>
-<span><span class="co">#&gt; state14     923 0.35845527</span></span>
-<span><span class="co">#&gt; state15     923 0.37251434</span></span>
-<span><span class="co">#&gt; state16     923 0.62565600</span></span>
-<span><span class="co">#&gt; state17     923 0.64846956</span></span>
-<span><span class="co">#&gt; state18     923 0.16285814</span></span>
-<span><span class="co">#&gt; state19     923 0.93571121</span></span>
-<span><span class="co">#&gt; state20     923 0.15338257</span></span>
-<span><span class="co">#&gt; state21     923 0.01799109</span></span>
-<span><span class="co">#&gt; state22     923 0.05960560</span></span>
-<span><span class="co">#&gt; state23     923 0.54706814</span></span>
-<span><span class="co">#&gt; state24     923 0.49513838</span></span>
-<span><span class="co">#&gt; state25     923 0.29555457</span></span></code></pre></div>
-<p><img src="tutorial_files/figure-html/unnamed-chunk-25-1.png" class="r-plt" width="700"><img src="tutorial_files/figure-html/unnamed-chunk-25-2.png" class="r-plt" width="700"><img src="tutorial_files/figure-html/unnamed-chunk-25-3.png" class="r-plt" width="700"><img src="tutorial_files/figure-html/unnamed-chunk-25-4.png" class="r-plt" width="700"><img src="tutorial_files/figure-html/unnamed-chunk-25-5.png" class="r-plt" width="700"></p>
-</div>
+<span><span class="co">#&gt;               Estimate    95% LCL    95% UCL     StdErr      Wald df1 df2</span></span>
+<span><span class="co">#&gt; (Intercept) -0.9820426 -1.1030580 -0.8610272 0.06166454  253.6236   1 944</span></span>
+<span><span class="co">#&gt; state1       1.5256178  1.4910531  1.5601825 0.01761277 7503.0243   1 944</span></span>
+<span><span class="co">#&gt; state2       1.3653543  1.3293183  1.4013903 0.01836246 5528.7762   1 944</span></span>
+<span><span class="co">#&gt; state3      -1.1537897 -1.1910261 -1.1165533 0.01897415 3697.6752   1 944</span></span>
+<span><span class="co">#&gt; state4      -0.9319551 -0.9656989 -0.8982113 0.01719447 2937.7321   1 944</span></span>
+<span><span class="co">#&gt;             p-value</span></span>
+<span><span class="co">#&gt; (Intercept)       0</span></span>
+<span><span class="co">#&gt; state1            0</span></span>
+<span><span class="co">#&gt; state2            0</span></span>
+<span><span class="co">#&gt; state3            0</span></span>
+<span><span class="co">#&gt; state4            0</span></span></code></pre></div>
+<p><img src="tutorial_files/figure-html/unnamed-chunk-27-1.png" class="r-plt" alt="" width="700"><img src="tutorial_files/figure-html/unnamed-chunk-27-2.png" class="r-plt" alt="" width="700"><img src="tutorial_files/figure-html/unnamed-chunk-27-3.png" class="r-plt" alt="" width="700"><img src="tutorial_files/figure-html/unnamed-chunk-27-4.png" class="r-plt" alt="" width="700"><img src="tutorial_files/figure-html/unnamed-chunk-27-5.png" class="r-plt" alt="" width="700"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -20,7 +20,7 @@ DR_WCLS_LASSO(
   lam = NULL,
   noise_scale = NULL,
   splitrat = 0.8,
-  virtualenv_path = "",
+  venv,
   beta = NULL,
   level = 0.9,
   core_num = NULL,
@@ -95,11 +95,6 @@ DR_WCLS_LASSO(
   Data splitting rate \\\rho\\; used only if `noise_scale` or `lam` is
   `NULL`.
 
-- virtualenv_path:
-
-  Path to a Python virtual environment (for `reticulate`) when
-  `varSelect_program = "Python"`.
-
 - beta:
 
   True coefficients (for simulation use only).
@@ -130,6 +125,11 @@ DR_WCLS_LASSO(
 
   Logical flag for outcome standardization, prior to the model
   selection.
+
+- virtualenv_path:
+
+  Path to a Python virtual environment (for `reticulate`) when
+  `varSelect_program = "Python"`.
 
 ## Value
 
@@ -198,7 +198,7 @@ intervals adjusted for data dependent model selection.
   varSelect_program = "R", standardize_x = F, standardize_y = F)
 #> Loading required package: parallel
 #> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 386.491206918538"
+#> [1] "The current lambda value is: 386.496810859784"
 #> [1] "select predictors: (Intercept)" "select predictors: state1"     
 #> [3] "select predictors: state2"      "select predictors: state3"     
 #> [5] "select predictors: state4"     

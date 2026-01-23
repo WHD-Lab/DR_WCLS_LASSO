@@ -64,7 +64,7 @@ model with variable selection.</p>
 <span>  lam <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  noise_scale <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  splitrat <span class="op">=</span> <span class="fl">0.8</span>,</span>
-<span>  virtualenv_path <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  <span class="va">venv</span>,</span>
 <span>  beta <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  level <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  core_num <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -138,11 +138,6 @@ is the split rate and \(n\) is the number of rows.</p></dd>
 <dd><p>Data splitting rate \(\rho\); used only if <code>noise_scale</code> or <code>lam</code> is <code>NULL</code>.</p></dd>
 
 
-<dt id="arg-virtualenv-path">virtualenv_path<a class="anchor" aria-label="anchor" href="#arg-virtualenv-path"></a></dt>
-<dd><p>Path to a Python virtual environment (for <code>reticulate</code>)
-when <code>varSelect_program = "Python"</code>.</p></dd>
-
-
 <dt id="arg-beta">beta<a class="anchor" aria-label="anchor" href="#arg-beta"></a></dt>
 <dd><p>True coefficients (for simulation use only).</p></dd>
 
@@ -169,6 +164,11 @@ when <code>varSelect_program = "Python"</code>.</p></dd>
 
 <dt id="arg-standardize-y">standardize_y<a class="anchor" aria-label="anchor" href="#arg-standardize-y"></a></dt>
 <dd><p>Logical flag for outcome standardization, prior to the model selection.</p></dd>
+
+
+<dt id="arg-virtualenv-path">virtualenv_path<a class="anchor" aria-label="anchor" href="#arg-virtualenv-path"></a></dt>
+<dd><p>Path to a Python virtual environment (for <code>reticulate</code>)
+when <code>varSelect_program = "Python"</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -232,7 +232,7 @@ valid confidence intervals adjusted for data dependent model selection.</p>
 <span class="r-in"><span>  varSelect_program <span class="op">=</span> <span class="st">"R"</span>, standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: parallel</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "remove 0 lines of data due to NA produced for yDR"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The current lambda value is: 386.491206918538"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The current lambda value is: 386.496810859784"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "select predictors: (Intercept)" "select predictors: state1"     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [3] "select predictors: state2"      "select predictors: state3"     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [5] "select predictors: state4"     </span>
