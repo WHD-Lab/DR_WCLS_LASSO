@@ -69,16 +69,16 @@ variable_selection_PY = function(data,ID, moderator_formula, lam = NULL, noise_s
   # splitrat: the corresponding to the data splitting rate. Details can read "Exact Selective Inference with Randomization" page 15 equation (10).
   #           This value will be used only when user doesn't provide the noise_scale.
   # virtualenv_path: Python virtual environment path
-    
+
   use_virtualenv(venv, required = TRUE)
-    
+
   np = import("numpy", convert = FALSE)
   lassopy = import("selectinf.randomized.lasso", convert = FALSE)$lasso
-  # selected_targets = import("selectinf.base", convert = FALSE)$selected_targets  
+  # selected_targets = import("selectinf.base", convert = FALSE)$selected_targets
   const = lassopy$gaussian
-  exact_grid_inference = import("selectinf.randomized.exact_reference", convert = FALSE)$exact_grid_inference  
- 
-  
+  exact_grid_inference = import("selectinf.randomized.exact_reference", convert = FALSE)$exact_grid_inference
+
+
   ptSt = data[,"ptSt"]
   n = dplyr::n_distinct(data[,ID])
   wssqrt = c(sqrt(ptSt*(1-ptSt)*2/n^(1/2)))
@@ -112,7 +112,7 @@ variable_selection_PY = function(data,ID, moderator_formula, lam = NULL, noise_s
   # convert data to Python array
   X1 = array_reshape(Xw, c(dim(Xw)[1], dim(Xw)[2]))
   Y1 = np_array(yw, dtype = "float64")
-  # penalize the intercept
+  # not penalize the intercept
   wt = np_array(c(0,rep(lam,dim(Xw)[2]-1)))
 
 
@@ -126,7 +126,7 @@ variable_selection_PY = function(data,ID, moderator_formula, lam = NULL, noise_s
   perturb = py_get_attr(conv, "_initial_omega")
   soln = as.numeric(reticulate::py_to_r(conv$observed_soln))
   subgrad = reticulate::py_to_r(conv$observed_subgrad)
-  subgrad = as.numeric(subgrad) / lam 
+  subgrad = as.numeric(subgrad) / lam
   perturb = c(perturb$T)
   perturb_vector = as.numeric(reticulate::py_to_r(perturb[[1]])) / (-2)
 
@@ -140,7 +140,7 @@ variable_selection_PY = function(data,ID, moderator_formula, lam = NULL, noise_s
     postbeta = np$dot(np$linalg$pinv(Xw[, nonzero_r]), np$dot(Xw, beta))
   } else if(!is.null(beta) & sum(nonzero_r) == 1) {
     postbeta = solve(t(Xw[, nonzero_r]) %*% Xw[, nonzero_r]) %*% t(Xw[, nonzero_r]) %*% Xw %*% beta
-  } else {postbeta = rep(NA, sum(nonzero_r))}
+  } else {postbeta = rep(NA, max(sum(nonzero_r), 1))}
   # below calculation matched with the above
   # But be careful if you change the weights, have to double check two calculation
   #wt = ptSt * (1-ptSt)

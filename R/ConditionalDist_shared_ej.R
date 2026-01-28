@@ -124,8 +124,12 @@ conditional_dist = function(PQR_shared, PQR_ej, joint_distcal_shared, joint_dist
 
 # below function calculate support for truncated normal distribution
 support = function(se, eta, LAMBDA, Aeta, Qn) {
-  
-  diagSe = diag(se)
+
+  if(length(se) == 1) {
+    diagSe = matrix(se, 1,1)
+  } else {
+    diagSe = diag(se)
+  }
 
   lowerbond = -Inf
   upperbond = Inf

@@ -141,7 +141,7 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
   ps = ps[!is.na(ps$yDR),]
 
   if(is.null(lam) & is.null(noise_scale)) {
-    if(varSelect_program == "Python") {select = variable_selection_PY(ps, ID, my_formula, splitrat=splitrat, 
+    if(varSelect_program == "Python") {select = variable_selection_PY(ps, ID, my_formula, splitrat=splitrat,
                                                                       venv = venv, beta = beta)}
 
     if(varSelect_program == "R") {select = FISTA_backtracking(ps, ID, my_formula, splitrat=splitrat, beta = beta)}
@@ -172,6 +172,18 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
                                                               splitrat = splitrat, beta = beta)}
 
   }
+
+  if(length(select$E) == 1) {
+    warning("No predictors were selected by the algorithm besides the unpenalized intercept.\n",
+            "Proceeding with an intercept-only model.\n",
+            "This usually happens when:\n",
+            "  - the default/provided penalty is too strong\n",
+            "  - the sample size is small\n",
+            "  - predictors have near-zero variance\n",
+            call. = FALSE)
+  }
+
+
   # print lambda
   print(paste("The current lambda value is:", select$ori_lam))
   # print selection
