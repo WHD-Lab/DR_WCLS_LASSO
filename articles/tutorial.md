@@ -136,7 +136,7 @@ venv_info = venv_config()
 #> Using virtual environment 'a9c268bc' ...
 #> + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user scikit-learn nose
 #> Using virtual environment 'a9c268bc' ...
-#> + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user --no-build-isolation /tmp/RtmpLZNqJZ/selective-inference-1f5a3433f66c
+#> + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user --no-build-isolation /tmp/RtmpsmGkbS/selective-inference-1f6764d7fdc9
 #> Using virtual environment 'a9c268bc' ...
 #> + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user pandas mpmath
 venv = venv_info$hash
@@ -346,7 +346,7 @@ UI_return_python = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           varSelect_program = "Python",
                           standardize_x = F, standardize_y = F)
 #> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 185.075931263644"
+#> [1] "The current lambda value is: 185.069342865802"
 #> [1] "select predictors: (Intercept)"       
 #> [2] "select predictors: logstep_30min_lag1"
 #> [3] "select predictors: logstep_pre30min"  
@@ -364,15 +364,15 @@ UI_return_python = DR_WCLS_LASSO(data = data_mimicHeartSteps,
 #>     intersect, setdiff, setequal, union
 UI_return_python
 #>                    E       GEE_est       lowCI     upperCI   prop_low   prop_up
-#> 1        (Intercept)  0.5708024959  0.33889936  0.81385795 0.04959088 0.9500275
-#> 2 logstep_30min_lag1 -0.0018185733 -0.04364098  0.03981320 0.05008837 0.9507713
-#> 3   logstep_pre30min  0.0003347885 -0.04281442  0.03394711 0.04964602 0.9499208
-#> 4       day_in_study -0.0208486824 -0.02947561 -0.01277935 0.04986123 0.9491411
+#> 1        (Intercept)  0.5747917431  0.10259388  0.78614896 0.05047199 0.9503430
+#> 2 logstep_30min_lag1 -0.0022691063 -0.01377672  0.19911482 0.04951346 0.9490727
+#> 3   logstep_pre30min -0.0002400566 -0.02585613  0.07814673 0.05013810 0.9506445
+#> 4       day_in_study -0.0209307824 -0.02866558 -0.01258708 0.05095290 0.9490689
 #>         pvalue
-#> 1 5.027927e-05
-#> 2 9.532547e-01
-#> 3 9.417171e-01
-#> 4 2.167085e-05
+#> 1 4.121402e-02
+#> 2 1.747878e-01
+#> 3 5.074356e-01
+#> 4 2.800647e-05
 ```
 
 ``` r
@@ -387,21 +387,17 @@ UI_return_R = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           varSelect_program = "R",
                           standardize_x = F, standardize_y = F)
 #> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 130.890748071636"
-#> [1] "select predictors: (Intercept)"       
-#> [2] "select predictors: logstep_30min_lag1"
-#> [3] "select predictors: day_in_study"      
+#> [1] "The current lambda value is: 130.893227366416"
+#> [1] "select predictors: (Intercept)"  "select predictors: day_in_study"
 #> [1] FALSE
-#> [1] "logstep_pre30min"   "is_at_home_or_work"
+#> [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"
 UI_return_R
-#>                    E     GEE_est      lowCI     upperCI   prop_low   prop_up
-#> 1        (Intercept)  0.56822858  0.4307585  1.29312966 0.04948184 0.9493800
-#> 2 logstep_30min_lag1 -0.00115191 -0.3080987 -0.02007353 0.05021225 0.9499908
-#> 3       day_in_study -0.02083829 -0.0471477 -0.01262934 0.05038607 0.9506433
+#>              E     GEE_est       lowCI     upperCI   prop_low   prop_up
+#> 1  (Intercept)  0.56895903  0.42404577  0.78279001 0.05078101 0.9501467
+#> 2 day_in_study -0.02099797 -0.02930659 -0.01254505 0.04965077 0.9497762
 #>         pvalue
-#> 1 0.0003264524
-#> 2 0.0472959799
-#> 3 0.0008664515
+#> 1 1.199443e-06
+#> 2 4.046657e-04
 ```
 
 #### A Comparison of Using Randomized LASSO and Weighted Centered Least Squares
@@ -479,14 +475,12 @@ wcls_res$causal_excursion_effect
 
 # UI_return_python
 UI_return_R
-#>                    E     GEE_est      lowCI     upperCI   prop_low   prop_up
-#> 1        (Intercept)  0.56822858  0.4307585  1.29312966 0.04948184 0.9493800
-#> 2 logstep_30min_lag1 -0.00115191 -0.3080987 -0.02007353 0.05021225 0.9499908
-#> 3       day_in_study -0.02083829 -0.0471477 -0.01262934 0.05038607 0.9506433
+#>              E     GEE_est       lowCI     upperCI   prop_low   prop_up
+#> 1  (Intercept)  0.56895903  0.42404577  0.78279001 0.05078101 0.9501467
+#> 2 day_in_study -0.02099797 -0.02930659 -0.01254505 0.04965077 0.9497762
 #>         pvalue
-#> 1 0.0003264524
-#> 2 0.0472959799
-#> 3 0.0008664515
+#> 1 1.199443e-06
+#> 2 4.046657e-04
 ```
 
 ![](tutorial_files/figure-html/unnamed-chunk-15-1.png)![](tutorial_files/figure-html/unnamed-chunk-15-2.png)
@@ -509,18 +503,18 @@ UI_return_method_pseu = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                                  varSelect_program = "R",
                                  standardize_x = F, standardize_y = F)
 #> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 130.886184912034"
+#> [1] "The current lambda value is: 130.891805671868"
 #> [1] "select predictors: (Intercept)"  "select predictors: day_in_study"
 #> [1] FALSE
 #> [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"
 
 UI_return_method_pseu
 #>              E     GEE_est       lowCI     upperCI   prop_low   prop_up
-#> 1  (Intercept)  0.56620156  0.36988485  0.72652674 0.05017394 0.9502887
-#> 2 day_in_study -0.02079154 -0.02862594 -0.01222344 0.04932580 0.9506574
+#> 1  (Intercept)  0.56720981  0.37132123  0.72705356 0.05052703 0.9499132
+#> 2 day_in_study -0.02083434 -0.02865018 -0.01228184 0.04947502 0.9504192
 #>         pvalue
-#> 1 1.358824e-06
-#> 2 1.763467e-04
+#> 1 1.269305e-06
+#> 2 1.674487e-04
 ```
 
 The LASSO penalty can be adjusted by setting ‘lam’ in the
@@ -545,12 +539,12 @@ UI_return_lambda = DR_WCLS_LASSO(data = data_mimicHeartSteps,
 #> [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"
 
 UI_return_lambda
-#>              E     GEE_est       lowCI    upperCI   prop_low   prop_up
-#> 1  (Intercept)  0.56640577  0.37111148  0.7266424 0.05057943 0.9498511
-#> 2 day_in_study -0.02080194 -0.02861168 -0.0122753 0.05003076 0.9501713
+#>              E     GEE_est      lowCI     upperCI   prop_low   prop_up
+#> 1  (Intercept)  0.56853375  0.3720986  0.72805147 0.05048118 0.9499927
+#> 2 day_in_study -0.02089336 -0.0287158 -0.01238816 0.04972873 0.9507253
 #>         pvalue
-#> 1 1.377185e-06
-#> 2 1.813796e-04
+#> 1 9.549228e-07
+#> 2 1.268236e-04
 ```
 
 The data split rate in Step 1 of the DR_WCLS algorithm can be set using
@@ -568,17 +562,17 @@ UI_return_splitrat = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                                    splitrat = 0.8,
                                    standardize_x = F, standardize_y = F)
 #> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 130.869018999851"
+#> [1] "The current lambda value is: 130.87155609556"
 #> [1] "select predictors: (Intercept)"  "select predictors: day_in_study"
 #> [1] FALSE
 #> [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"
 UI_return_splitrat
-#>              E    GEE_est       lowCI     upperCI   prop_low   prop_up
-#> 1  (Intercept)  0.5671095  0.37146161  0.72674328 0.05070522 0.9497343
-#> 2 day_in_study -0.0208280 -0.02863102 -0.01229018 0.04965108 0.9502266
+#>              E     GEE_est       lowCI     upperCI   prop_low   prop_up
+#> 1  (Intercept)  0.56767467  0.37142648  0.72775226 0.05040373 0.9500335
+#> 2 day_in_study -0.02085329 -0.02867361 -0.01229106 0.04935518 0.9505047
 #>         pvalue
-#> 1 1.258304e-06
-#> 2 1.664803e-04
+#> 1 1.262323e-06
+#> 2 1.650905e-04
 ```
 
 #### Analysis Using Manually Created Interaction Terms
@@ -622,7 +616,7 @@ UI_return_int_python = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           varSelect_program = "Python",
                           standardize_x = F, standardize_y = F)
 #> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 216.212480160782"
+#> [1] "The current lambda value is: 216.201990703244"
 #> [1] "select predictors: (Intercept)"  "select predictors: day_in_study"
 #> [1] FALSE
 #> [1] "logstep_30min_lag1"   "logstep_pre30min"     "is_at_home_or_work"  
@@ -631,11 +625,11 @@ UI_return_int_python = DR_WCLS_LASSO(data = data_mimicHeartSteps,
 
 UI_return_int_python
 #>              E     GEE_est       lowCI     upperCI   prop_low   prop_up
-#> 1  (Intercept)  0.55405797  0.35490316  0.70605612 0.05088807 0.9500937
-#> 2 day_in_study -0.02024918 -0.02820173 -0.01190789 0.05016113 0.9498596
+#> 1  (Intercept)  0.55561765  0.36576830  0.71773800 0.04990829 0.9498281
+#> 2 day_in_study -0.02033115 -0.02850464 -0.01232414 0.05097708 0.9490751
 #>         pvalue
-#> 1 6.946351e-07
-#> 2 5.306104e-05
+#> 1 4.409604e-07
+#> 2 4.728827e-05
 ```
 
 ``` r
@@ -647,7 +641,7 @@ UI_return_int_R = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           varSelect_program = "R",
                           standardize_x = F, standardize_y = F)
 #> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 152.979710253884"
+#> [1] "The current lambda value is: 152.946737388191"
 #> [1] "select predictors: (Intercept)"  "select predictors: day_in_study"
 #> [1] FALSE
 #> [1] "logstep_30min_lag1"   "logstep_pre30min"     "is_at_home_or_work"  
@@ -655,12 +649,12 @@ UI_return_int_R = DR_WCLS_LASSO(data = data_mimicHeartSteps,
 #> [7] "int_home_timeover14"
 
 UI_return_int_R
-#>              E     GEE_est       lowCI     upperCI   prop_low   prop_up
-#> 1  (Intercept)  0.55728359  0.42712564  0.79807468 0.04958858 0.9506382
-#> 2 day_in_study -0.02039956 -0.02877858 -0.01253776 0.05039323 0.9496842
+#>              E    GEE_est       lowCI     upperCI   prop_low   prop_up
+#> 1  (Intercept)  0.5570239  0.42712127  0.79812414 0.04991351 0.9503088
+#> 2 day_in_study -0.0204034 -0.02881271 -0.01256129 0.05036965 0.9496990
 #>         pvalue
-#> 1 5.396385e-08
-#> 2 4.226746e-05
+#> 1 5.680953e-08
+#> 2 4.069712e-05
 ```
 
 ### Intern Health Study
