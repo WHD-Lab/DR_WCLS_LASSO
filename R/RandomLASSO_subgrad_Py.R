@@ -160,7 +160,7 @@ variable_selection_PY = function(data,ID, moderator_formula, lam = NULL, noise_s
 
   return(list(formula = moderator_formula, E = E, NE = NE, n = n,
               perturb = perturb_vector, ori_lam = lam, lam = lam/(-2), Z = Z, OMEGA = (noise_scale)^2/4,
-              sign_soln = reticulate::py_to_r(signs[nonzero_r]), soln = soln, postbeta = postbeta, nonzero = nonzero_r
+              sign_soln = reticulate::py_to_r(signs[nonzero_r]), soln = soln, postbeta = reticulate::py_to_r(postbeta), nonzero = nonzero_r
               #Python_Output = list(conv = conv,
               #                     target_spec = target_spec,
               #                     result = result,
