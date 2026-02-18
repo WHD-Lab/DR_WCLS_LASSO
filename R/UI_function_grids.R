@@ -141,7 +141,7 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
   ps = ps[!is.na(ps$yDR),]
 
   if(is.null(lam) & is.null(noise_scale)) {
-    if(varSelect_program == "Python") {select = variable_selection_PY(ps, ID, my_formula, splitrat=splitrat, 
+    if(varSelect_program == "Python") {select = variable_selection_PY(ps, ID, my_formula, splitrat=splitrat,
                                                                       venv = venv, beta = beta)}
 
     if(varSelect_program == "R") {select = FISTA_backtracking(ps, ID, my_formula, splitrat=splitrat, beta = beta)}
@@ -172,6 +172,26 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
                                                               splitrat = splitrat, beta = beta)}
 
   }
+
+  if(length(select$E) == 1) {
+    warning("No predictors were selected by the algorithm besides the unpenalized intercept.\n",
+            "Proceeding with an intercept-only model.\n",
+            "This usually happens when:\n",
+            "  - the default/provided penalty is too strong\n",
+            "  - the sample size is small\n",
+            "  - predictors have near-zero variance\n",
+            call. = FALSE)
+  }
+
+  if(length(setdiff(St, select$E[select$E != "(Intercept)"])) == 0) {
+    warning("All predictors were selected by the algorithm.\n",
+            "Proceeding with the full model.\n",
+            "This usually happens when:\n",
+            "  - the default/provided penalty is too small\n",
+            call. = FALSE)
+  }
+
+
   # print lambda
   print(paste("The current lambda value is:", select$ori_lam))
   # print selection
@@ -179,35 +199,67 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
   print(length(setdiff(St, select$E[select$E != "(Intercept)"])) == 0)
   print(setdiff(St, select$E[select$E != "(Intercept)"]))
 
-  AsyNormbeta_shared = joint_dist_Penal_Int_shared(E = select$E, NE = select$NE, pes_outcome = "yDR", data = ps, id = ID, time = time,
-                                                   moderator_formula = my_formula)
-  PQR_shared = PQR_Pint_shared(AsyNormbeta_shared, select)
+  if(length(setdiff(St, select$E[select$E != "(Intercept)"])) == 0) {
+    AsyNormbeta_shared = joint_dist_selectAll(E = select$E, pes_outcome = "yDR", data = ps, id = ID, time = time)
+    PQR_shared = PQR_shared_selectALL(AsyNormbeta_shared, select)
 
-  CI_per_select_var = function(ej) {
-    AsyNormbeta_ej = joint_dist_Penal_Int_ej(AsyNormbeta_shared, ej)
-    PQR_ej = PQR_Pint_ej(PQR_shared, AsyNormbeta_ej, AsyNormbeta_shared)
-    condition = conditional_dist(PQR_shared, PQR_ej, AsyNormbeta_shared, AsyNormbeta_ej, select)
+    CI_per_select_var = function(ej) {
+      AsyNormbeta_ej = joint_dist_Penal_Int_ej(AsyNormbeta_shared, ej)
+      PQR_ej = PQR_ej_selectALL(PQR_shared, AsyNormbeta_ej, AsyNormbeta_shared)
+      condition = conditional_dist_selectALL(PQR_shared, PQR_ej, AsyNormbeta_shared, AsyNormbeta_ej, select)
 
-    i = which(ej != 0)
-    # use naive range instead of Python grids
-    n_total = AsyNormbeta_shared[["n"]]
-    point_est = AsyNormbeta_ej[["betaEj_cal"]][["betaEj"]]
-    sigmasq1 = AsyNormbeta_ej[["betaEj_cal"]][["sigmasq1"]]
+      i = which(ej != 0)
+      # use naive range instead of Python grids
+      n_total = AsyNormbeta_shared[["n"]]
+      point_est = AsyNormbeta_ej[["betaEj_cal"]][["betaEj"]]
+      sigmasq1 = AsyNormbeta_ej[["betaEj_cal"]][["sigmasq1"]]
 
-    lowgrids = point_est - 10 * sqrt(sigmasq1/n_total)
-    upgrids = point_est + 10 * sqrt(sigmasq1/n_total)
-    grids = seq(from = c(lowgrids), to = c(upgrids), length.out = 1000)
+      lowgrids = point_est - 10 * sqrt(sigmasq1/n_total)
+      upgrids = point_est + 10 * sqrt(sigmasq1/n_total)
+      grids = seq(from = c(lowgrids), to = c(upgrids), length.out = 1000)
 
-    logW = truncate_normal_weights(PQR_shared, PQR_ej, AsyNormbeta_shared, AsyNormbeta_ej, select,
-                                   condition, #grid_values = select[["Python_Output"]][["grids"]][i,]
-                                   grid_values = grids)
+      logW = truncate_normal_weights_selectALL(PQR_shared, PQR_ej, AsyNormbeta_shared, AsyNormbeta_ej, select,
+                                     condition,
+                                     grid_values = grids)
 
 
-    CI = CI_grids(logW = logW, betaEjhat = AsyNormbeta_ej[["betaEj_cal"]][["betaEj"]],
-                  var_name = select$E[i],
-                  condition = condition, tol = max_tol, level = level)
+      CI = CI_grids(logW = logW, betaEjhat = AsyNormbeta_ej[["betaEj_cal"]][["betaEj"]],
+                    var_name = select$E[i],
+                    condition = condition, tol = max_tol, level = level)
 
-    return(CI)
+      return(CI)
+    }
+  } else {
+    AsyNormbeta_shared = joint_dist_Penal_Int_shared(E = select$E, NE = select$NE, pes_outcome = "yDR", data = ps, id = ID, time = time,
+                                                     moderator_formula = my_formula)
+    PQR_shared = PQR_Pint_shared(AsyNormbeta_shared, select)
+
+    CI_per_select_var = function(ej) {
+      AsyNormbeta_ej = joint_dist_Penal_Int_ej(AsyNormbeta_shared, ej)
+      PQR_ej = PQR_Pint_ej(PQR_shared, AsyNormbeta_ej, AsyNormbeta_shared)
+      condition = conditional_dist(PQR_shared, PQR_ej, AsyNormbeta_shared, AsyNormbeta_ej, select)
+
+      i = which(ej != 0)
+      # use naive range instead of Python grids
+      n_total = AsyNormbeta_shared[["n"]]
+      point_est = AsyNormbeta_ej[["betaEj_cal"]][["betaEj"]]
+      sigmasq1 = AsyNormbeta_ej[["betaEj_cal"]][["sigmasq1"]]
+
+      lowgrids = point_est - 10 * sqrt(sigmasq1/n_total)
+      upgrids = point_est + 10 * sqrt(sigmasq1/n_total)
+      grids = seq(from = c(lowgrids), to = c(upgrids), length.out = 1000)
+
+      logW = truncate_normal_weights(PQR_shared, PQR_ej, AsyNormbeta_shared, AsyNormbeta_ej, select,
+                                     condition, #grid_values = select[["Python_Output"]][["grids"]][i,]
+                                     grid_values = grids)
+
+
+      CI = CI_grids(logW = logW, betaEjhat = AsyNormbeta_ej[["betaEj_cal"]][["betaEj"]],
+                    var_name = select$E[i],
+                    condition = condition, tol = max_tol, level = level)
+
+      return(CI)
+    }
   }
 
   final_results = data.frame(

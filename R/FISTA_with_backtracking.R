@@ -64,7 +64,7 @@
 #'   splitrat = 0.7, beta = matrix(c(-1, 1.7, 1.5, -1.3, -1, rep(0,21)), ncol = 1))
 #'
 #' @export
-#' 
+#'
 
 FISTA_backtracking = function(data,ID, moderator_formula, lam = NULL, noise_scale = NULL,
                               splitrat = 0.8, max_ite = 10^(5), tol = 10^(-4), beta = NULL){
@@ -145,9 +145,9 @@ FISTA_backtracking = function(data,ID, moderator_formula, lam = NULL, noise_scal
   sign_soln = sign(x_k)
   nonzero = (sign_soln != 0)
 
-  if(!is.null(beta)) {
+  if(!is.null(beta) & sum(nonzero) != 0) {
     postbeta = solve(t(Xw[, nonzero]) %*% Xw[, nonzero]) %*% t(Xw[, nonzero]) %*% Xw %*% beta
-  } else {postbeta = rep(NA, sum(nonzero))}
+  } else {postbeta = rep(NA, max(sum(nonzero), 1))}
 
   return(list(formula = moderator_formula,
               E = colnames(X)[nonzero], NE = colnames(X)[!nonzero],
@@ -244,14 +244,14 @@ i_finder = function(L_kmins1, y_k, design_matrix, outcome, wt, n, perturb, lam_v
   loss_F = F_loss_function(p_L_return)
   QL_x_y = Q_loss_function(p_L_return)
 
-  while(loss_F > QL_x_y){
+  while((loss_F > QL_x_y) & (i_k < 50) & (loss_F - QL_x_y > 5)){
     i_k = i_k + 1
     L_bar = eta^(i_k) * L_kmins1
     p_L_return = p_L(y_k, L_bar, design_matrix, outcome, wt, n, perturb, lam_vec)
     loss_F = F_loss_function(p_L_return)
     QL_x_y = Q_loss_function(p_L_return)
   }
-  
+
   return(L_bar)
 }
 
