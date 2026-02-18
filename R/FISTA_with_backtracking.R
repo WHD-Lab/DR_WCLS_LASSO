@@ -244,7 +244,7 @@ i_finder = function(L_kmins1, y_k, design_matrix, outcome, wt, n, perturb, lam_v
   loss_F = F_loss_function(p_L_return)
   QL_x_y = Q_loss_function(p_L_return)
 
-  while(loss_F > QL_x_y){
+  while((loss_F > QL_x_y) & (i_k < 50) & (loss_F - QL_x_y > 5)){
     i_k = i_k + 1
     L_bar = eta^(i_k) * L_kmins1
     p_L_return = p_L(y_k, L_bar, design_matrix, outcome, wt, n, perturb, lam_vec)
