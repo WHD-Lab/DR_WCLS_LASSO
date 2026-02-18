@@ -38,7 +38,7 @@
 #' @import parallel
 #' @import modelr
 #' @import dplyr
-#' 
+#'
 #' @export
 
 
