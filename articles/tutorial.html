@@ -224,7 +224,7 @@ following code:</p>
 <span><span class="co">#&gt; Using virtual environment 'a9c268bc' ...</span></span>
 <span><span class="co">#&gt; + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user scikit-learn nose</span></span>
 <span><span class="co">#&gt; Using virtual environment 'a9c268bc' ...</span></span>
-<span><span class="co">#&gt; + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user --no-build-isolation /tmp/Rtmp8lnT28/selective-inference-1f1914c9caa3</span></span>
+<span><span class="co">#&gt; + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user --no-build-isolation /tmp/Rtmpr0rjta/selective-inference-1d121b6d3f44</span></span>
 <span><span class="co">#&gt; Using virtual environment 'a9c268bc' ...</span></span>
 <span><span class="co">#&gt; + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user pandas mpmath</span></span>
 <span><span class="va">venv</span> <span class="op">=</span> <span class="va">venv_info</span><span class="op">$</span><span class="va">hash</span></span>
@@ -377,7 +377,7 @@ Below, we demonstrate the use of both functions.</p>
 <span>                                             beta <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">'The selected variable list:'</span>,<span class="va">var_selection_python</span><span class="op">$</span><span class="va">E</span><span class="op">)</span></span>
-<span><span class="co">#&gt; The selected variable list: (Intercept) day_in_study</span></span></code></pre></div>
+<span><span class="co">#&gt; The selected variable list: (Intercept) logstep_30min_lag1 logstep_pre30min day_in_study</span></span></code></pre></div>
 <p>R version</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
@@ -434,7 +434,7 @@ programming language.</p>
 <span>                          varSelect_program <span class="op">=</span> <span class="st">"Python"</span>,</span>
 <span>                          standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "remove 0 lines of data due to NA produced for yDR"</span></span>
-<span><span class="co">#&gt; [1] "The current lambda value is: 185.091170163126"</span></span>
+<span><span class="co">#&gt; [1] "The current lambda value is: 185.058083832883"</span></span>
 <span><span class="co">#&gt; [1] "select predictors: (Intercept)"  "select predictors: day_in_study"</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span>
 <span><span class="co">#&gt; [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"</span></span>
@@ -449,11 +449,11 @@ programming language.</p>
 <span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
 <span><span class="va">UI_return_python</span></span>
 <span><span class="co">#&gt;              E     GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1  (Intercept)  0.56476046  0.38154042  0.72283264 0.04958542 0.9500926</span></span>
-<span><span class="co">#&gt; 2 day_in_study -0.02076977 -0.02897573 -0.01278656 0.04978153 0.9502414</span></span>
+<span><span class="co">#&gt; 1  (Intercept)  0.56668644  0.39566446  0.73823433 0.04984983 0.9509958</span></span>
+<span><span class="co">#&gt; 2 day_in_study -0.02086492 -0.02868403 -0.01254679 0.05017331 0.9498500</span></span>
 <span><span class="co">#&gt;         pvalue</span></span>
-<span><span class="co">#&gt; 1 1.002404e-07</span></span>
-<span><span class="co">#&gt; 2 2.354607e-05</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 4.664741e-08</span></span>
+<span><span class="co">#&gt; 2 2.930700e-05</span></span></code></pre></div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
@@ -466,7 +466,7 @@ programming language.</p>
 <span>                          varSelect_program <span class="op">=</span> <span class="st">"R"</span>,</span>
 <span>                          standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "remove 0 lines of data due to NA produced for yDR"</span></span>
-<span><span class="co">#&gt; [1] "The current lambda value is: 130.891090988302"</span></span>
+<span><span class="co">#&gt; [1] "The current lambda value is: 130.895606297324"</span></span>
 <span><span class="co">#&gt; [1] "select predictors: (Intercept)"       </span></span>
 <span><span class="co">#&gt; [2] "select predictors: logstep_30min_lag1"</span></span>
 <span><span class="co">#&gt; [3] "select predictors: day_in_study"      </span></span>
@@ -474,13 +474,13 @@ programming language.</p>
 <span><span class="co">#&gt; [1] "logstep_pre30min"   "is_at_home_or_work"</span></span>
 <span><span class="va">UI_return_R</span></span>
 <span><span class="co">#&gt;                    E      GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1        (Intercept)  0.572775623  0.41024544  1.25153208 0.04989527 0.9507335</span></span>
-<span><span class="co">#&gt; 2 logstep_30min_lag1 -0.001588042 -0.28737320 -0.01003999 0.04969706 0.9506844</span></span>
-<span><span class="co">#&gt; 3       day_in_study -0.020974451 -0.03390479 -0.01172600 0.05006952 0.9505269</span></span>
+<span><span class="co">#&gt; 1        (Intercept)  0.569438789  0.43259783  1.29480604 0.05018725 0.9500847</span></span>
+<span><span class="co">#&gt; 2 logstep_30min_lag1 -0.001381913 -0.31154459 -0.02100408 0.04939962 0.9502495</span></span>
+<span><span class="co">#&gt; 3       day_in_study -0.020859398 -0.04920736 -0.01275014 0.04960353 0.9509835</span></span>
 <span><span class="co">#&gt;         pvalue</span></span>
-<span><span class="co">#&gt; 1 0.0004570285</span></span>
-<span><span class="co">#&gt; 2 0.0670201330</span></span>
-<span><span class="co">#&gt; 3 0.0011395107</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 0.0003047709</span></span>
+<span><span class="co">#&gt; 2 0.0449124574</span></span>
+<span><span class="co">#&gt; 3 0.0008307096</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="a-comparison-of-using-randomized-lasso-and-weighted-centered-least-squares">A Comparison of Using Randomized LASSO and Weighted Centered Least
@@ -556,13 +556,13 @@ Squares<a class="anchor" aria-label="anchor" href="#a-comparison-of-using-random
 <span><span class="co"># UI_return_python</span></span>
 <span><span class="va">UI_return_R</span></span>
 <span><span class="co">#&gt;                    E      GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1        (Intercept)  0.572775623  0.41024544  1.25153208 0.04989527 0.9507335</span></span>
-<span><span class="co">#&gt; 2 logstep_30min_lag1 -0.001588042 -0.28737320 -0.01003999 0.04969706 0.9506844</span></span>
-<span><span class="co">#&gt; 3       day_in_study -0.020974451 -0.03390479 -0.01172600 0.05006952 0.9505269</span></span>
+<span><span class="co">#&gt; 1        (Intercept)  0.569438789  0.43259783  1.29480604 0.05018725 0.9500847</span></span>
+<span><span class="co">#&gt; 2 logstep_30min_lag1 -0.001381913 -0.31154459 -0.02100408 0.04939962 0.9502495</span></span>
+<span><span class="co">#&gt; 3       day_in_study -0.020859398 -0.04920736 -0.01275014 0.04960353 0.9509835</span></span>
 <span><span class="co">#&gt;         pvalue</span></span>
-<span><span class="co">#&gt; 1 0.0004570285</span></span>
-<span><span class="co">#&gt; 2 0.0670201330</span></span>
-<span><span class="co">#&gt; 3 0.0011395107</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 0.0003047709</span></span>
+<span><span class="co">#&gt; 2 0.0449124574</span></span>
+<span><span class="co">#&gt; 3 0.0008307096</span></span></code></pre></div>
 <p><img src="tutorial_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="" width="700"><img src="tutorial_files/figure-html/unnamed-chunk-15-2.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level4">
@@ -584,18 +584,18 @@ CVLASSO.</p>
 <span>                                 varSelect_program <span class="op">=</span> <span class="st">"R"</span>,</span>
 <span>                                 standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "remove 0 lines of data due to NA produced for yDR"</span></span>
-<span><span class="co">#&gt; [1] "The current lambda value is: 130.889160452755"</span></span>
+<span><span class="co">#&gt; [1] "The current lambda value is: 130.888063224492"</span></span>
 <span><span class="co">#&gt; [1] "select predictors: (Intercept)"  "select predictors: day_in_study"</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span>
 <span><span class="co">#&gt; [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"</span></span>
 <span></span>
 <span><span class="va">UI_return_method_pseu</span></span>
 <span><span class="co">#&gt;              E     GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1  (Intercept)  0.56803301  0.37230455  0.72761173 0.05074894 0.9496748</span></span>
-<span><span class="co">#&gt; 2 day_in_study -0.02087174 -0.02868059 -0.01232063 0.04947281 0.9503521</span></span>
+<span><span class="co">#&gt; 1  (Intercept)  0.56767806  0.37220877  0.72702404 0.05089907 0.9495277</span></span>
+<span><span class="co">#&gt; 2 day_in_study -0.02084786 -0.02863998 -0.01231511 0.04972696 0.9501098</span></span>
 <span><span class="co">#&gt;         pvalue</span></span>
-<span><span class="co">#&gt; 1 1.212253e-06</span></span>
-<span><span class="co">#&gt; 2 1.611889e-04</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 1.214414e-06</span></span>
+<span><span class="co">#&gt; 2 1.627790e-04</span></span></code></pre></div>
 <p>The LASSO penalty can be adjusted by setting ‘lam’ in the
 <code>DR_WCLS_LASSO</code> function.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
@@ -618,11 +618,11 @@ CVLASSO.</p>
 <span></span>
 <span><span class="va">UI_return_lambda</span></span>
 <span><span class="co">#&gt;              E     GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1  (Intercept)  0.56668008  0.37067074  0.72666905 0.05044085 0.9500404</span></span>
-<span><span class="co">#&gt; 2 day_in_study -0.02081878 -0.02863788 -0.01233874 0.05049172 0.9504933</span></span>
+<span><span class="co">#&gt; 1  (Intercept)  0.56878274  0.37306427  0.72769529 0.05094222 0.9495158</span></span>
+<span><span class="co">#&gt; 2 day_in_study -0.02090343 -0.02869941 -0.01242998 0.05009776 0.9503284</span></span>
 <span><span class="co">#&gt;         pvalue</span></span>
-<span><span class="co">#&gt; 1 1.169286e-06</span></span>
-<span><span class="co">#&gt; 2 1.523664e-04</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 9.130182e-07</span></span>
+<span><span class="co">#&gt; 2 1.231064e-04</span></span></code></pre></div>
 <p>The data split rate in Step 1 of the DR_WCLS algorithm can be set
 using ‘splitrat’ in the <code>DR_WCLS_LASSO</code> function.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
@@ -637,17 +637,17 @@ using ‘splitrat’ in the <code>DR_WCLS_LASSO</code> function.</p>
 <span>                                   splitrat <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>                                   standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "remove 0 lines of data due to NA produced for yDR"</span></span>
-<span><span class="co">#&gt; [1] "The current lambda value is: 130.886747086036"</span></span>
+<span><span class="co">#&gt; [1] "The current lambda value is: 130.895674500916"</span></span>
 <span><span class="co">#&gt; [1] "select predictors: (Intercept)"  "select predictors: day_in_study"</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span>
 <span><span class="co">#&gt; [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"</span></span>
 <span><span class="va">UI_return_splitrat</span></span>
-<span><span class="co">#&gt;              E     GEE_est       lowCI    upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1  (Intercept)  0.56709116  0.37092980  0.7271972 0.05036013 0.9500870</span></span>
-<span><span class="co">#&gt; 2 day_in_study -0.02083638 -0.02867046 -0.0122637 0.04921878 0.9506784</span></span>
+<span><span class="co">#&gt;              E     GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
+<span><span class="co">#&gt; 1  (Intercept)  0.56751319  0.37135248  0.72747685 0.05046145 0.9499761</span></span>
+<span><span class="co">#&gt; 2 day_in_study -0.02084652 -0.02866932 -0.01228069 0.04933043 0.9505481</span></span>
 <span><span class="co">#&gt;         pvalue</span></span>
-<span><span class="co">#&gt; 1 1.288763e-06</span></span>
-<span><span class="co">#&gt; 2 1.687758e-04</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 1.270797e-06</span></span>
+<span><span class="co">#&gt; 2 1.667287e-04</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="analysis-using-manually-created-interaction-terms">Analysis Using Manually Created Interaction Terms<a class="anchor" aria-label="anchor" href="#analysis-using-manually-created-interaction-terms"></a>
@@ -686,20 +686,23 @@ procedure.</p>
 <span>                          varSelect_program <span class="op">=</span> <span class="st">"Python"</span>,</span>
 <span>                          standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "remove 0 lines of data due to NA produced for yDR"</span></span>
-<span><span class="co">#&gt; [1] "The current lambda value is: 216.218745213193"</span></span>
-<span><span class="co">#&gt; [1] "select predictors: (Intercept)"  "select predictors: day_in_study"</span></span>
+<span><span class="co">#&gt; [1] "The current lambda value is: 216.189431943769"</span></span>
+<span><span class="co">#&gt; [1] "select predictors: (Intercept)"        </span></span>
+<span><span class="co">#&gt; [2] "select predictors: int_lag1_timeover14"</span></span>
+<span><span class="co">#&gt; [3] "select predictors: day_in_study"       </span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span>
 <span><span class="co">#&gt; [1] "logstep_30min_lag1"   "logstep_pre30min"     "is_at_home_or_work"  </span></span>
-<span><span class="co">#&gt; [4] "timeover14"           "int_lag1_timeover14"  "int_pre30_timeover14"</span></span>
-<span><span class="co">#&gt; [7] "int_home_timeover14"</span></span>
+<span><span class="co">#&gt; [4] "timeover14"           "int_pre30_timeover14" "int_home_timeover14"</span></span>
 <span></span>
 <span><span class="va">UI_return_int_python</span></span>
-<span><span class="co">#&gt;              E     GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1  (Intercept)  0.55417443  0.38873226  0.74143526 0.05081944 0.9500472</span></span>
-<span><span class="co">#&gt; 2 day_in_study -0.02025279 -0.02811048 -0.01124627 0.05018820 0.9494940</span></span>
+<span><span class="co">#&gt;                     E     GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
+<span><span class="co">#&gt; 1         (Intercept)  0.58181847  0.14536369  0.75005691 0.05035912 0.9505906</span></span>
+<span><span class="co">#&gt; 2 int_lag1_timeover14 -0.01202330 -0.04017748  0.12137659 0.04939063 0.9498408</span></span>
+<span><span class="co">#&gt; 3        day_in_study -0.02012154 -0.02802626 -0.01179246 0.04995601 0.9500645</span></span>
 <span><span class="co">#&gt;         pvalue</span></span>
-<span><span class="co">#&gt; 1 2.090850e-06</span></span>
-<span><span class="co">#&gt; 2 8.151984e-04</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 2.319065e-02</span></span>
+<span><span class="co">#&gt; 2 5.823491e-01</span></span>
+<span><span class="co">#&gt; 3 5.542408e-05</span></span></code></pre></div>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">UI_return_int_R</span> <span class="op">=</span> <span class="fu"><a href="../reference/DR_WCLS_LASSO.html">DR_WCLS_LASSO</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data_mimicHeartSteps</span>, </span>
 <span>                          fold <span class="op">=</span> <span class="fl">5</span>, ID <span class="op">=</span> <span class="va">ID</span>, </span>
@@ -709,7 +712,7 @@ procedure.</p>
 <span>                          varSelect_program <span class="op">=</span> <span class="st">"R"</span>,</span>
 <span>                          standardize_x <span class="op">=</span> <span class="cn">F</span>, standardize_y <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "remove 0 lines of data due to NA produced for yDR"</span></span>
-<span><span class="co">#&gt; [1] "The current lambda value is: 152.939665354366"</span></span>
+<span><span class="co">#&gt; [1] "The current lambda value is: 152.949979047868"</span></span>
 <span><span class="co">#&gt; [1] "select predictors: (Intercept)"  "select predictors: day_in_study"</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span>
 <span><span class="co">#&gt; [1] "logstep_30min_lag1"   "logstep_pre30min"     "is_at_home_or_work"  </span></span>
@@ -717,12 +720,12 @@ procedure.</p>
 <span><span class="co">#&gt; [7] "int_home_timeover14"</span></span>
 <span></span>
 <span><span class="va">UI_return_int_R</span></span>
-<span><span class="co">#&gt;              E     GEE_est       lowCI    upperCI   prop_low   prop_up</span></span>
-<span><span class="co">#&gt; 1  (Intercept)  0.55767213  0.42761157  0.7981352 0.04996457 0.9502440</span></span>
-<span><span class="co">#&gt; 2 day_in_study -0.02043136 -0.02880587 -0.0125848 0.05053033 0.9495318</span></span>
+<span><span class="co">#&gt;              E     GEE_est       lowCI     upperCI   prop_low   prop_up</span></span>
+<span><span class="co">#&gt; 1  (Intercept)  0.55797816  0.42761057  0.79939913 0.04973004 0.9504795</span></span>
+<span><span class="co">#&gt; 2 day_in_study -0.02044635 -0.02884213 -0.01259835 0.05039395 0.9496680</span></span>
 <span><span class="co">#&gt;         pvalue</span></span>
-<span><span class="co">#&gt; 1 5.409163e-08</span></span>
-<span><span class="co">#&gt; 2 3.906438e-05</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 5.566639e-08</span></span>
+<span><span class="co">#&gt; 2 3.864824e-05</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
