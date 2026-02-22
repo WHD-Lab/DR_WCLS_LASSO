@@ -7,7 +7,7 @@
 #' @param data A data frame with one row per decision time (raw data; no pseudo-outcomes).
 #' @param fold Number of folds used when estimating nuisance functions for the pseudo-outcome.
 #' @param ID Column name of the participant identifier.
-#' @param time Column name of the time-in-study (decision point).
+#' @param decision_point Column name of the decision points for each participants.
 #' @param Ht A vector specifying history features.
 #' @param St A vector specifying moderator features.
 #' @param At Column name of the treatment indicator.
@@ -31,6 +31,7 @@
 #' @param varSelect_program `"Python"` (requires a valid `virtualenv_path`) or `"R"`.
 #' @param standardize_x Logical flag for design matrix standardization, prior to the model selection.
 #' @param standardize_y Logical flag for outcome standardization, prior to the model selection.
+#' @param availability The column name of availability variable. Use the default value (`NULL`) if your MRT doesn't have availability considerations.
 #'
 #' @return
 #' \describe{
@@ -59,16 +60,20 @@
 #'   beta_logit = c(-1, 1.6 * rep(1/50, 50)), model = ~ state1 + state2 + state3 + state4,
 #'   beta = matrix(c(-1, 1.7, 1.5, -1.3, -1),ncol = 1),
 #'   theta1 = 0.8)
+#'   
 #'   Ht = unlist(lapply(1:50, FUN = function(X) paste0("state",X)))
 #'   St = unlist(lapply(1:25, FUN = function(X) paste0("state",X)))
+#'   
+#'   sim_data$avail = rbinom(40000, size = 1, prob = 0.8)
 #'
 #'   UI_return = DR_WCLS_LASSO(data = sim_data,
 #'   fold = 5, ID = "id",
-#'   time = "decision_point",
+#'   decision_point = "decision_point",
 #'   Ht = Ht, St = St, At = "action",
 #'   prob = "prob", outcome = "outcome",
 #'   method_pseu = "CVLASSO", lam = NULL, noise_scale = NULL, splitrat = 0.7,
-#'   varSelect_program = "R", standardize_x = F, standardize_y = F)
+#'   varSelect_program = "R", standardize_x = F, standardize_y = F,
+#'   availability = "avail")
 #'
 #'
 #'
@@ -80,15 +85,16 @@
 #'
 #' @export
 
-DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method_pseu,
+DR_WCLS_LASSO = function(data, fold, ID, decision_point, Ht, St, At, prob, outcome, method_pseu,
                                  lam = NULL, noise_scale = NULL, splitrat = 0.8, venv,
                                  beta = NULL, level = 0.9, core_num = NULL,
                          max_tol = 10^{-3}, varSelect_program = "Python",
-                         standardize_x = TRUE, standardize_y = TRUE){
+                         standardize_x = TRUE, standardize_y = TRUE,
+                         availability = NULL){
   # data: raw data without pesudo-outcome, ptSt.
   # fold: # of folds hope to split when generating pesudo outcome
   # ID: the name of column where participants' ID are stored
-  # time: the name of column where time in study are stored
+  # decision_point: the name of column where decision points in study are stored
   # Ht: a vector that contains column names of control variables
   # St: a vector that contains column names of moderator variables; St should be a subset of Ht
   # At: column names of treatment (At)
@@ -110,6 +116,11 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
   # standardize_x: Logical flag for x variable standardization, prior to the model selection.
   #               Don't expect intercept is provided. The final CI will convert back to original scale
   # standardize_y: Logical flag for x variable standardization, prior to the model selection
+  # availability The column name of availability variable. Use the default value (`NULL`) if your MRT doesn't have availability considerations.
+  
+  if(!is.null(availability)) {
+    data = data[data[,availability] == 1, ]
+  }
 
   if(standardize_x == TRUE) {
     x_scale = apply(data[,Ht], 2, sd)
@@ -200,7 +211,7 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
   print(setdiff(St, select$E[select$E != "(Intercept)"]))
 
   if(length(setdiff(St, select$E[select$E != "(Intercept)"])) == 0) {
-    AsyNormbeta_shared = joint_dist_selectAll(E = select$E, pes_outcome = "yDR", data = ps, id = ID, time = time)
+    AsyNormbeta_shared = joint_dist_selectAll(E = select$E, pes_outcome = "yDR", data = ps, id = ID, decision_point = decision_point)
     PQR_shared = PQR_shared_selectALL(AsyNormbeta_shared, select)
 
     CI_per_select_var = function(ej) {
@@ -230,7 +241,8 @@ DR_WCLS_LASSO = function(data, fold, ID, time, Ht, St, At, prob, outcome, method
       return(CI)
     }
   } else {
-    AsyNormbeta_shared = joint_dist_Penal_Int_shared(E = select$E, NE = select$NE, pes_outcome = "yDR", data = ps, id = ID, time = time,
+    AsyNormbeta_shared = joint_dist_Penal_Int_shared(E = select$E, NE = select$NE, pes_outcome = "yDR", data = ps, id = ID, 
+                                                     decision_point = decision_point,
                                                      moderator_formula = my_formula)
     PQR_shared = PQR_Pint_shared(AsyNormbeta_shared, select)
 

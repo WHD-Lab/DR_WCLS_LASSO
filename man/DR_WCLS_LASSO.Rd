@@ -8,7 +8,7 @@ DR_WCLS_LASSO(
   data,
   fold,
   ID,
-  time,
+  decision_point,
   Ht,
   St,
   At,
@@ -27,7 +27,8 @@ DR_WCLS_LASSO(
  },
   varSelect_program = "Python",
   standardize_x = TRUE,
-  standardize_y = TRUE
+  standardize_y = TRUE,
+  availability = NULL
 )
 }
 \arguments{
@@ -37,7 +38,7 @@ DR_WCLS_LASSO(
 
 \item{ID}{Column name of the participant identifier.}
 
-\item{time}{Column name of the time-in-study (decision point).}
+\item{decision_point}{Column name of the decision points for each participants.}
 
 \item{Ht}{A vector specifying history features.}
 
@@ -76,6 +77,8 @@ is the split rate and \eqn{n} is the number of rows.}
 
 \item{standardize_y}{Logical flag for outcome standardization, prior to the model selection.}
 
+\item{availability}{The column name of availability variable. Use the default value (\code{NULL}) if your MRT doesn't have availability considerations.}
+
 \item{virtualenv_path}{Path to a Python virtual environment (for \code{reticulate})
 when \code{varSelect_program = "Python"}.}
 }
@@ -110,16 +113,20 @@ valid confidence intervals adjusted for data dependent model selection.
   beta_logit = c(-1, 1.6 * rep(1/50, 50)), model = ~ state1 + state2 + state3 + state4,
   beta = matrix(c(-1, 1.7, 1.5, -1.3, -1),ncol = 1),
   theta1 = 0.8)
+  
   Ht = unlist(lapply(1:50, FUN = function(X) paste0("state",X)))
   St = unlist(lapply(1:25, FUN = function(X) paste0("state",X)))
+  
+  sim_data$avail = rbinom(40000, size = 1, prob = 0.8)
 
   UI_return = DR_WCLS_LASSO(data = sim_data,
   fold = 5, ID = "id",
-  time = "decision_point",
+  decision_point = "decision_point",
   Ht = Ht, St = St, At = "action",
   prob = "prob", outcome = "outcome",
   method_pseu = "CVLASSO", lam = NULL, noise_scale = NULL, splitrat = 0.7,
-  varSelect_program = "R", standardize_x = F, standardize_y = F)
+  varSelect_program = "R", standardize_x = F, standardize_y = F,
+  availability = "avail")
 
 
 

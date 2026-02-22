@@ -1,10 +1,10 @@
-joint_dist_Penal_Int_shared = function(E, NE, pes_outcome, data, id, time, moderator_formula) {
+joint_dist_Penal_Int_shared = function(E, NE, pes_outcome, data, id, decision_point, moderator_formula) {
   # E: vector of selected predictors (don't include intercept)
   # NE: vector of unselected predictors
   # pes_outcome: column name for pesudo-outcome
   # data: the output of pesudo_outcomecal function
   # id: column name, a vector which identifies individuals
-  # time: column name, a vector that records the decision points for each individual
+  # decision_point: column name, a vector that records the decision points for each individual
 
   require(dplyr)
   X = data.matrix(modelr::model_matrix(data, moderator_formula))
@@ -20,7 +20,7 @@ joint_dist_Penal_Int_shared = function(E, NE, pes_outcome, data, id, time, moder
   # get betaE point estiamtes
   wt = data$ptSt * (1-data$ptSt)
   idf = as.factor(id)
-  time = data[,time]
+  decision_point = data[,decision_point]
 
   if("(Intercept)" %in% E & length(E) > 1) {
     formula = as.formula(paste(pes_outcome, "~", paste(E[which(E != "(Intercept)")], collapse = "+")))
@@ -31,7 +31,7 @@ joint_dist_Penal_Int_shared = function(E, NE, pes_outcome, data, id, time, moder
   }
 
   betaEM = geepack::geeglm(formula, data = as.data.frame(cbind(y,X)), weights = wt/sqrt(n), corstr = "independence", id = idf,
-                           waves = time)
+                           waves = decision_point)
 
   # S
   res = betaEM[["residuals"]] # this is unweighted residuals
