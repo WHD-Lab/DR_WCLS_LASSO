@@ -24,15 +24,11 @@ Micro-randomized trials (MRTs) are designed to evaluate the effectiveness of mob
 
 You can install the development version of MRTpostInfLASSO via github:
 
-    require("remotes")
-    remotes::install_github("WHD-Lab/DR_WCLS_LASSO")
-
-Then run:
-
-``` r
-library(devtools)
-install()
+```{r}
+require("remotes")
+remotes::install_github("WHD-Lab/DR_WCLS_LASSO")
 ```
+
 
 ## Set-up
 
@@ -46,14 +42,6 @@ venv_info = venv_config()
 venv = venv_info$hash
 print(venv)
 # [1] "a9c268bc"
-
-# Do the python deps load?
-library(reticulate)
-np = import("numpy", convert = FALSE)
-lasso_mod = import("selectinf.randomized.lasso", convert = FALSE)$lasso
-
-# Simple test
-run_simple_lasso_test_snigdha_fixed(venv)
 ```
 
 Or, if already configured, use 
@@ -62,12 +50,19 @@ Or, if already configured, use
 library(MRTpostInfLASSO)
 library(reticulate)
 use_virtualenv("a9c268bc", required = TRUE)
-np = import("numpy", convert = FALSE)
-lassopy = import("selectinf.randomized.lasso", convert = FALSE)$lasso
-selected_targets = import("selectinf.base", convert = FALSE)$selected_targets  
-const = lassopy$gaussian
-exact_grid_inference = import("selectinf.randomized.exact_reference", convert = FALSE)$exact_grid_inference  
+```
 
+
+## Virtual Environment Testing
+
+```{r}
+# Do the python deps load?
+library(reticulate)
+np = import("numpy", convert = FALSE)
+lasso_mod = import("selectinf.randomized.lasso", convert = FALSE)$lasso
+
+# Simple test
+run_simple_lasso_test_snigdha_fixed(venv)
 ```
 
 ## Detailed tutorial
