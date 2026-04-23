@@ -55,7 +55,7 @@ use_virtualenv("a9c268bc", required = TRUE)
 
 ## Virtual Environment Testing
 
-```{r}
+```{r eval = FALSE}
 # Do the python deps load?
 library(reticulate)
 np = import("numpy", convert = FALSE)
