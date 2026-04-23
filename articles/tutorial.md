@@ -95,8 +95,7 @@ corresponding confidence intervals.
 The package can be installed from our GitHub repository.
 
 ``` r
-# Install From GitHub
-# remotes::install_github("WHD-Lab/DR_WCLS_LASSO")
+remotes::install_github("WHD-Lab/DR_WCLS_LASSO")
 ```
 
 ### Loading the Package
@@ -111,43 +110,11 @@ To configure a Python virtual environment in R, please run the following
 code:
 
 ``` r
-
 # Configure virtual environment
 venv_info = venv_config()
-#> Installing pyenv ...
-#> Done! pyenv has been installed to '/home/runner/.local/share/r-reticulate/pyenv/bin/pyenv'.
-#> + /home/runner/.local/share/r-reticulate/pyenv/bin/pyenv update
-#> + /home/runner/.local/share/r-reticulate/pyenv/bin/pyenv install --skip-existing 3.9.25
-#> Using Python: /home/runner/.pyenv/versions/3.9.25/bin/python3.9
-#> Creating virtual environment 'a9c268bc' ...
-#> + /home/runner/.pyenv/versions/3.9.25/bin/python3.9 -m venv /home/runner/.virtualenvs/a9c268bc
-#> Done!
-#> Installing packages: pip, wheel, setuptools
-#> + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade pip wheel setuptools
-#> Installing packages: numpy
-#> + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user numpy
-#> Virtual environment 'a9c268bc' successfully created.
-#> Using virtual environment 'a9c268bc' ...
-#> + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user 'cython>=0.18' 'numpy>=1.7.1' 'scipy>=0.16.0' 'joblib>=0.15.1'
-#> Using virtual environment 'a9c268bc' ...
-#> + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user 'numpy==1.22.4'
-#> Using virtual environment 'a9c268bc' ...
-#> + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user --no-build-isolation 'git+https://github.com/regreg/regreg.git'
-#> Using virtual environment 'a9c268bc' ...
-#> + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user scikit-learn nose
-#> Using virtual environment 'a9c268bc' ...
-#> + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user --no-build-isolation /tmp/Rtmpr0rjta/selective-inference-1d121b6d3f44
-#> Using virtual environment 'a9c268bc' ...
-#> + /home/runner/.virtualenvs/a9c268bc/bin/python -m pip install --upgrade --no-user pandas mpmath
 venv = venv_info$hash
 print(venv)
-#> [1] "a9c268bc"
 # [1] "a9c268bc"
-
-# Do the python deps load?
-library(reticulate)
-np = import("numpy", convert = FALSE)
-lasso_mod = import("selectinf.randomized.lasso", convert = FALSE)$lasso
 ```
 
 Or, if already configured, use
@@ -156,11 +123,18 @@ Or, if already configured, use
 library(reticulate)
 venv = "a9c268bc"
 use_virtualenv(venv, required = TRUE)
+```
+
+### Virtual Environment Testing
+
+``` r
+# Do the python deps load?
+library(reticulate)
 np = import("numpy", convert = FALSE)
-lassopy = import("selectinf.randomized.lasso", convert = FALSE)$lasso
-selected_targets = import("selectinf.base", convert = FALSE)$selected_targets  
-const = lassopy$gaussian
-exact_grid_inference = import("selectinf.randomized.exact_reference", convert = FALSE)$exact_grid_inference  
+lasso_mod = import("selectinf.randomized.lasso", convert = FALSE)$lasso
+
+# Simple test
+run_simple_lasso_test(venv)
 ```
 
 ## Real Data Example
@@ -242,7 +216,6 @@ pseudo_outcome_CVlasso = pseudo_outcome_generator_CVlasso(fold = 5,ID = ID,
                                                      Ht = Ht, St = St, At = At, 
                                                      prob = prob, outcome = outcome,
                                                      core_num = 1)
-#> Loading required package: parallel
 
 pseudo_outcome_RF = pseudo_outcome_generator_rf_v2(fold = 5,ID = ID,
                                                    data = data_mimicHeartSteps, 
@@ -273,7 +246,7 @@ Variable selection is performed using the
 first define `my_formula`, specifying the outcome and candidate
 variables. Below, we demonstrate the use of both functions.
 
-Python version
+**Python version**
 
 ``` r
 my_formula = as.formula(paste("yDR ~", paste(c("logstep_30min_lag1", "logstep_pre30min",
@@ -281,7 +254,8 @@ my_formula = as.formula(paste("yDR ~", paste(c("logstep_30min_lag1", "logstep_pr
                                        collapse = " + ")))
 
 set.seed(100)
-var_selection_python = variable_selection_PY(data = pseudo_outcome_CVlasso,ID,
+var_selection_python = variable_selection_PY(data = pseudo_outcome_CVlasso,
+                                             ID,
                                              my_formula,
                                              lam = NULL, noise_scale = NULL,
                                              venv = venv,
@@ -289,10 +263,10 @@ var_selection_python = variable_selection_PY(data = pseudo_outcome_CVlasso,ID,
                                              beta = NULL)
 
 cat('The selected variable list:',var_selection_python$E)
-#> The selected variable list: (Intercept) logstep_30min_lag1 logstep_pre30min day_in_study
+#> The selected variable list: (Intercept) day_in_study
 ```
 
-R version
+**R version**
 
 ``` r
 set.seed(100)
@@ -338,7 +312,7 @@ language.
 
 UI_return_python = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           fold = 5, ID = ID,
-                          time = "decision_point",
+                          decision_point = "decision_point",
                           Ht = Ht, St = St, At = At,
                           prob = prob, outcome = outcome,
                           venv = venv,
@@ -346,26 +320,20 @@ UI_return_python = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           varSelect_program = "Python",
                           standardize_x = F, standardize_y = F)
 #> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 185.058083832883"
+#> [1] "The current lambda value is: 185.093553964292"
 #> [1] "select predictors: (Intercept)"  "select predictors: day_in_study"
 #> [1] FALSE
 #> [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"
-#> Loading required package: dplyr
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
+```
+
+``` r
 UI_return_python
 #>              E     GEE_est       lowCI     upperCI   prop_low   prop_up
-#> 1  (Intercept)  0.56668644  0.39566446  0.73823433 0.04984983 0.9509958
-#> 2 day_in_study -0.02086492 -0.02868403 -0.01254679 0.05017331 0.9498500
+#> 1  (Intercept)  0.56448186  0.40779645  0.74885370 0.04957133 0.9500914
+#> 2 day_in_study -0.02075688 -0.02897661 -0.01277145 0.05024370 0.9503440
 #>         pvalue
-#> 1 4.664741e-08
-#> 2 2.930700e-05
+#> 1 7.418146e-08
+#> 2 5.717145e-05
 ```
 
 ``` r
@@ -373,28 +341,31 @@ set.seed(123)
 
 UI_return_R = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           fold = 5, ID = ID,
-                          time = "decision_point",
+                          decision_point = "decision_point",
                           Ht = Ht, St = St, At = At,
                           prob = prob, outcome = outcome,
                           method_pseu = "CVLASSO", 
                           varSelect_program = "R",
                           standardize_x = F, standardize_y = F)
 #> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 130.895606297324"
+#> [1] "The current lambda value is: 130.891863127248"
 #> [1] "select predictors: (Intercept)"       
 #> [2] "select predictors: logstep_30min_lag1"
 #> [3] "select predictors: day_in_study"      
 #> [1] FALSE
 #> [1] "logstep_pre30min"   "is_at_home_or_work"
+```
+
+``` r
 UI_return_R
 #>                    E      GEE_est       lowCI     upperCI   prop_low   prop_up
-#> 1        (Intercept)  0.569438789  0.43259783  1.29480604 0.05018725 0.9500847
-#> 2 logstep_30min_lag1 -0.001381913 -0.31154459 -0.02100408 0.04939962 0.9502495
-#> 3       day_in_study -0.020859398 -0.04920736 -0.01275014 0.04960353 0.9509835
+#> 1        (Intercept)  0.573415487  0.44977702  1.31836222 0.04907255 0.9494409
+#> 2 logstep_30min_lag1 -0.001794775 -0.32360061 -0.02799519 0.04996622 0.9497852
+#> 3       day_in_study -0.020976451 -0.09332195 -0.01638943 0.05009193 0.9501718
 #>         pvalue
-#> 1 0.0003047709
-#> 2 0.0449124574
-#> 3 0.0008307096
+#> 1 0.0002242410
+#> 2 0.0355861878
+#> 3 0.0003799229
 ```
 
 #### A Comparison of Using Randomized LASSO and Weighted Centered Least Squares
@@ -402,26 +373,7 @@ UI_return_R
 Select variables using randomized LASSO
 
 ``` r
-
 library(selectiveInference)
-#> Loading required package: glmnet
-#> Loading required package: Matrix
-#> Loaded glmnet 4.1-10
-#> Loading required package: intervals
-#> 
-#> Attaching package: 'intervals'
-#> The following object is masked from 'package:Matrix':
-#> 
-#>     expand
-#> Loading required package: survival
-#> Loading required package: adaptMCMC
-#> Loading required package: coda
-#> Loading required package: MASS
-#> 
-#> Attaching package: 'MASS'
-#> The following object is masked from 'package:dplyr':
-#> 
-#>     select
 res_randomizedLASSO = randomizedLasso(X = as.matrix(data_mimicHeartSteps[,St]), 
                 y = as.matrix(data_mimicHeartSteps[,outcome]), 
                 lam = 100000, 
@@ -435,7 +387,9 @@ res_randomizedLASSO = randomizedLasso(X = as.matrix(data_mimicHeartSteps[,St]),
                 objective_stop=FALSE,
                 kkt_stop=TRUE,
                 parameter_stop=TRUE)
+```
 
+``` r
 St[res_randomizedLASSO$active_set]
 #> [1] "day_in_study"
 ```
@@ -443,8 +397,6 @@ St[res_randomizedLASSO$active_set]
 Make inference using weighted centered least squares
 
 ``` r
-
-
 wcls_fit = wcls(
   data = data_mimicHeartSteps,
   id = 'userid', 
@@ -457,11 +409,13 @@ wcls_fit = wcls(
   numerator_prob = NULL,
   verbose = TRUE
 )
-#> availability = NULL: defaulting availability to always available.
-#> Constant randomization probability 0.5 is used.
-#> Constant numerator probability 0.5 is used.
 
 wcls_res = summary(wcls_fit)
+```
+
+Compare the output with our method:
+
+``` r
 wcls_res$causal_excursion_effect
 #>                Estimate     95% LCL    95% UCL      StdErr Hotelling df1 df2
 #> (Intercept)   0.5722731  0.37187918  0.7726669 0.098255727  33.92273   1  31
@@ -470,61 +424,98 @@ wcls_res$causal_excursion_effect
 #> (Intercept)  2.024579e-06
 #> day_in_study 4.698739e-05
 
-# UI_return_python
 UI_return_R
 #>                    E      GEE_est       lowCI     upperCI   prop_low   prop_up
-#> 1        (Intercept)  0.569438789  0.43259783  1.29480604 0.05018725 0.9500847
-#> 2 logstep_30min_lag1 -0.001381913 -0.31154459 -0.02100408 0.04939962 0.9502495
-#> 3       day_in_study -0.020859398 -0.04920736 -0.01275014 0.04960353 0.9509835
+#> 1        (Intercept)  0.573415487  0.44977702  1.31836222 0.04907255 0.9494409
+#> 2 logstep_30min_lag1 -0.001794775 -0.32360061 -0.02799519 0.04996622 0.9497852
+#> 3       day_in_study -0.020976451 -0.09332195 -0.01638943 0.05009193 0.9501718
 #>         pvalue
-#> 1 0.0003047709
-#> 2 0.0449124574
-#> 3 0.0008307096
+#> 1 0.0002242410
+#> 2 0.0355861878
+#> 3 0.0003799229
 ```
 
-![](tutorial_files/figure-html/unnamed-chunk-15-1.png)![](tutorial_files/figure-html/unnamed-chunk-15-2.png)
+![](tutorial_files/figure-html/unnamed-chunk-18-1.png)![](tutorial_files/figure-html/unnamed-chunk-18-2.png)
 
 #### Arguments in DR_WCLS_LASSO
 
-The pseudo outcome generation method can be specified using the
-`method_pseu` argument. Currently, three options are supported: CVLASSO,
-RandomForest, and GradientBoosting. The default is CVLASSO.
+**Methods of generating the pseudo outcome** The pseudo outcome
+generation method can be specified using the `method_pseu` argument.
+Currently, three options are supported: CVLASSO, RandomForest, and
+GradientBoosting. The default is CVLASSO.
 
 ``` r
 set.seed(100)
 
 UI_return_method_pseu = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                                  fold = 5, ID = ID,
-                                 time = "decision_point",
+                                 decision_point = "decision_point",
                                  Ht = Ht, St = St, At = At,
                                  prob = prob, outcome = outcome,
                                  method_pseu = "CVLASSO",
                                  varSelect_program = "R",
                                  standardize_x = F, standardize_y = F)
 #> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 130.888063224492"
+#> [1] "The current lambda value is: 130.87707329623"
 #> [1] "select predictors: (Intercept)"  "select predictors: day_in_study"
 #> [1] FALSE
 #> [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"
-
-UI_return_method_pseu
-#>              E     GEE_est       lowCI     upperCI   prop_low   prop_up
-#> 1  (Intercept)  0.56767806  0.37220877  0.72702404 0.05089907 0.9495277
-#> 2 day_in_study -0.02084786 -0.02863998 -0.01231511 0.04972696 0.9501098
-#>         pvalue
-#> 1 1.214414e-06
-#> 2 1.627790e-04
 ```
 
-The LASSO penalty can be adjusted by setting ‘lam’ in the
-`DR_WCLS_LASSO` function.
+``` r
+UI_return_method_pseu
+#>              E     GEE_est       lowCI     upperCI   prop_low   prop_up
+#> 1  (Intercept)  0.56683303  0.37017581  0.72745366 0.05000599 0.9504514
+#> 2 day_in_study -0.02082593 -0.02867321 -0.01224225 0.04909158 0.9508474
+#>         pvalue
+#> 1 1.338259e-06
+#> 2 1.721501e-04
+```
+
+**Availability** We also allow users to specify an availability
+indicator through the `availability` argument. Users can set this
+argument to the name of the availability column in the dataset. When
+provided, treatment is only considered at decision points when a
+participant is available.
+
+``` r
+set.seed(100)
+
+UI_return_availability = DR_WCLS_LASSO(data = data_mimicHeartSteps,
+                                 fold = 5, ID = ID,
+                                 decision_point = "decision_point",
+                                 Ht = Ht, St = St, At = At,
+                                 prob = prob, outcome = outcome,
+                                 method_pseu = "CVLASSO",
+                                 varSelect_program = "R",
+                                 standardize_x = F, standardize_y = F,
+                                 availability = 'avail')
+#> [1] "remove 0 lines of data due to NA produced for yDR"
+#> [1] "The current lambda value is: 108.935691670952"
+#> [1] "select predictors: (Intercept)"  "select predictors: day_in_study"
+#> [1] FALSE
+#> [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"
+```
+
+``` r
+UI_return_availability
+#>              E    GEE_est       lowCI     upperCI   prop_low   prop_up
+#> 1  (Intercept)  0.6415027  0.45654022  0.82192613 0.05018415 0.9506081
+#> 2 day_in_study -0.0234022 -0.03173732 -0.01683846 0.04957100 0.9505037
+#>         pvalue
+#> 1 8.392614e-09
+#> 2 2.888988e-07
+```
+
+**LASSO penalty term** The LASSO penalty can be adjusted by setting
+‘lam’ in the `DR_WCLS_LASSO` function.
 
 ``` r
 set.seed(100)
 
 UI_return_lambda = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                                  fold = 5, ID = ID,
-                                 time = "decision_point",
+                                 decision_point = "decision_point",
                                  Ht = Ht, St = St, At = At,
                                  prob = prob, outcome = outcome,
                                  method_pseu = "CVLASSO",
@@ -536,24 +527,26 @@ UI_return_lambda = DR_WCLS_LASSO(data = data_mimicHeartSteps,
 #> [1] "select predictors: (Intercept)"  "select predictors: day_in_study"
 #> [1] FALSE
 #> [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"
-
-UI_return_lambda
-#>              E     GEE_est       lowCI     upperCI   prop_low   prop_up
-#> 1  (Intercept)  0.56878274  0.37306427  0.72769529 0.05094222 0.9495158
-#> 2 day_in_study -0.02090343 -0.02869941 -0.01242998 0.05009776 0.9503284
-#>         pvalue
-#> 1 9.130182e-07
-#> 2 1.231064e-04
 ```
 
-The data split rate in Step 1 of the DR_WCLS algorithm can be set using
-‘splitrat’ in the `DR_WCLS_LASSO` function.
+``` r
+UI_return_lambda
+#>              E     GEE_est       lowCI     upperCI   prop_low   prop_up
+#> 1  (Intercept)  0.56679780  0.37046674  0.72708783 0.05020631 0.9502774
+#> 2 day_in_study -0.02082669 -0.02866724 -0.01232392 0.05019932 0.9508019
+#>         pvalue
+#> 1 1.180805e-06
+#> 2 1.537768e-04
+```
+
+**Data split rate** The data split rate in Step 1 of the DR_WCLS
+algorithm can be set using ‘splitrat’ in the `DR_WCLS_LASSO` function.
 
 ``` r
 set.seed(100)
 UI_return_splitrat = DR_WCLS_LASSO(data = data_mimicHeartSteps, 
                                    fold = 5, ID = ID, 
-                                   time = "decision_point", 
+                                   decision_point = "decision_point", 
                                    Ht = Ht, St = St, At = At, 
                                    prob = prob, outcome = outcome,
                                    method_pseu = "CVLASSO", 
@@ -561,17 +554,17 @@ UI_return_splitrat = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                                    splitrat = 0.8,
                                    standardize_x = F, standardize_y = F)
 #> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 130.895674500916"
+#> [1] "The current lambda value is: 130.878060031093"
 #> [1] "select predictors: (Intercept)"  "select predictors: day_in_study"
 #> [1] FALSE
 #> [1] "logstep_30min_lag1" "logstep_pre30min"   "is_at_home_or_work"
 UI_return_splitrat
 #>              E     GEE_est       lowCI     upperCI   prop_low   prop_up
-#> 1  (Intercept)  0.56751319  0.37135248  0.72747685 0.05046145 0.9499761
-#> 2 day_in_study -0.02084652 -0.02866932 -0.01228069 0.04933043 0.9505481
+#> 1  (Intercept)  0.56871496  0.37315324  0.72816504 0.05082942 0.9495812
+#> 2 day_in_study -0.02090517 -0.02870558 -0.01236263 0.04954091 0.9502404
 #>         pvalue
-#> 1 1.270797e-06
-#> 2 1.667287e-04
+#> 1 1.160886e-06
+#> 2 1.557369e-04
 ```
 
 #### Analysis Using Manually Created Interaction Terms
@@ -608,55 +601,58 @@ prob = 'rand_prob'
 
 UI_return_int_python = DR_WCLS_LASSO(data = data_mimicHeartSteps,
                           fold = 5, ID = ID,
-                          time = "decision_point", Ht = Ht_int, St = St_int,
+                          decision_point = "decision_point", 
+                          Ht = Ht_int, St = St_int,
                           At = At, prob = prob, outcome = outcome,
                           venv = venv,
                           method_pseu = "CVLASSO",
                           varSelect_program = "Python",
                           standardize_x = F, standardize_y = F)
 #> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 216.189431943769"
-#> [1] "select predictors: (Intercept)"        
-#> [2] "select predictors: int_lag1_timeover14"
-#> [3] "select predictors: day_in_study"       
-#> [1] FALSE
-#> [1] "logstep_30min_lag1"   "logstep_pre30min"     "is_at_home_or_work"  
-#> [4] "timeover14"           "int_pre30_timeover14" "int_home_timeover14"
-
-UI_return_int_python
-#>                     E     GEE_est       lowCI     upperCI   prop_low   prop_up
-#> 1         (Intercept)  0.58181847  0.14536369  0.75005691 0.05035912 0.9505906
-#> 2 int_lag1_timeover14 -0.01202330 -0.04017748  0.12137659 0.04939063 0.9498408
-#> 3        day_in_study -0.02012154 -0.02802626 -0.01179246 0.04995601 0.9500645
-#>         pvalue
-#> 1 2.319065e-02
-#> 2 5.823491e-01
-#> 3 5.542408e-05
-```
-
-``` r
-UI_return_int_R = DR_WCLS_LASSO(data = data_mimicHeartSteps, 
-                          fold = 5, ID = ID, 
-                          time = "decision_point", Ht = Ht_int, St = St_int, 
-                          At = At, prob = prob, outcome = outcome,
-                          method_pseu = "CVLASSO", 
-                          varSelect_program = "R",
-                          standardize_x = F, standardize_y = F)
-#> [1] "remove 0 lines of data due to NA produced for yDR"
-#> [1] "The current lambda value is: 152.949979047868"
+#> [1] "The current lambda value is: 216.176042474107"
 #> [1] "select predictors: (Intercept)"  "select predictors: day_in_study"
 #> [1] FALSE
 #> [1] "logstep_30min_lag1"   "logstep_pre30min"     "is_at_home_or_work"  
 #> [4] "timeover14"           "int_lag1_timeover14"  "int_pre30_timeover14"
 #> [7] "int_home_timeover14"
+```
 
+``` r
+UI_return_int_python
+#>              E     GEE_est       lowCI    upperCI   prop_low   prop_up
+#> 1  (Intercept)  0.55570272  0.37825406  0.7306789 0.04905513 0.9494780
+#> 2 day_in_study -0.02033413 -0.02870542 -0.0123899 0.04947490 0.9505489
+#>         pvalue
+#> 1 2.296988e-07
+#> 2 3.570186e-05
+```
+
+``` r
+UI_return_int_R = DR_WCLS_LASSO(data = data_mimicHeartSteps, 
+                          fold = 5, ID = ID, 
+                          decision_point = "decision_point", 
+                          Ht = Ht_int, St = St_int, 
+                          At = At, prob = prob, outcome = outcome,
+                          method_pseu = "CVLASSO", 
+                          varSelect_program = "R",
+                          standardize_x = F, standardize_y = F)
+#> [1] "remove 0 lines of data due to NA produced for yDR"
+#> [1] "The current lambda value is: 152.949477236397"
+#> [1] "select predictors: (Intercept)"  "select predictors: day_in_study"
+#> [1] FALSE
+#> [1] "logstep_30min_lag1"   "logstep_pre30min"     "is_at_home_or_work"  
+#> [4] "timeover14"           "int_lag1_timeover14"  "int_pre30_timeover14"
+#> [7] "int_home_timeover14"
+```
+
+``` r
 UI_return_int_R
 #>              E     GEE_est       lowCI     upperCI   prop_low   prop_up
-#> 1  (Intercept)  0.55797816  0.42761057  0.79939913 0.04973004 0.9504795
-#> 2 day_in_study -0.02044635 -0.02884213 -0.01259835 0.05039395 0.9496680
-#>         pvalue
-#> 1 5.566639e-08
-#> 2 3.864824e-05
+#> 1  (Intercept)  0.55830219  0.42860945  0.79938625 0.04990743 0.9502908
+#> 2 day_in_study -0.02045693 -0.02884782 -0.01261614 0.05047533 0.9495988
+#>        pvalue
+#> 1 5.24871e-08
+#> 2 3.94737e-05
 ```
 
 ### Intern Health Study
@@ -688,7 +684,7 @@ df_IHS_cleaned = na.omit(df_IHS)
 
 UI_return_IHS_python = DR_WCLS_LASSO(data = df_IHS_cleaned,
                           fold = 5, ID = ID,
-                          time = "time", Ht = Ht, St = St, At = At,
+                          decision_point = "time", Ht = Ht, St = St, At = At,
                           prob = prob, outcome = outcome,
                           venv = venv,
                           method_pseu = "CVLASSO", lam = 55,
@@ -704,7 +700,7 @@ UI_return_IHS_python
 set.seed(100)
 UI_return_IHS_R = DR_WCLS_LASSO(data = df_IHS_cleaned,
                           fold = 5, ID = ID,
-                          time = "time", Ht = Ht, St = St, At = At,
+                          decision_point = "time", Ht = Ht, St = St, At = At,
                           prob = prob, outcome = outcome,
                           venv = venv,
                           method_pseu = "CVLASSO", lam = 30,
@@ -739,7 +735,7 @@ sim_data$prob_false = rep(0.5, length(sim_data$id))
 
 UI_return_sim_R = DR_WCLS_LASSO(data = sim_data,
                                 fold = 5, ID = "id",
-                                time = "decision_point",
+                                decision_point = "decision_point",
                                 Ht = Ht, St = St, At = "action",
                                 prob = "prob_false", outcome = "outcome",
                                 method_pseu = "CVLASSO",
@@ -755,6 +751,22 @@ UI_return_sim_R = DR_WCLS_LASSO(data = sim_data,
 #>  [1] "state5"  "state6"  "state7"  "state8"  "state9"  "state10" "state11"
 #>  [8] "state12" "state13" "state14" "state15" "state16" "state17" "state18"
 #> [15] "state19" "state20" "state21" "state22" "state23" "state24" "state25"
+```
+
+``` r
+UI_return_sim_R
+#>             E    GEE_est      lowCI    upperCI   prop_low   prop_up
+#> 1 (Intercept) -0.9542862 -1.0533437 -0.8480374 0.04935492 0.9492295
+#> 2      state1  1.5283746  1.4973162  1.5575872 0.05058399 0.9491015
+#> 3      state2  1.3670570  1.3361772  1.3982834 0.04977513 0.9491865
+#> 4      state3 -1.1576618 -1.1906565 -1.1268020 0.04982533 0.9502616
+#> 5      state4 -0.9354364 -0.9640984 -0.9057872 0.04932666 0.9490258
+#>          pvalue post_true true_signal
+#> 1  1.251667e-45      -1.0        TRUE
+#> 2  0.000000e+00       1.7        TRUE
+#> 3  0.000000e+00       1.5        TRUE
+#> 4 3.103312e-241      -1.3        TRUE
+#> 5 1.217659e-209      -1.0        TRUE
 ```
 
 ``` r
@@ -829,4 +841,4 @@ wcls_sim_res$causal_excursion_effect
 #> state4            0
 ```
 
-![](tutorial_files/figure-html/unnamed-chunk-27-1.png)![](tutorial_files/figure-html/unnamed-chunk-27-2.png)![](tutorial_files/figure-html/unnamed-chunk-27-3.png)![](tutorial_files/figure-html/unnamed-chunk-27-4.png)![](tutorial_files/figure-html/unnamed-chunk-27-5.png)
+![](tutorial_files/figure-html/unnamed-chunk-37-1.png)![](tutorial_files/figure-html/unnamed-chunk-37-2.png)![](tutorial_files/figure-html/unnamed-chunk-37-3.png)![](tutorial_files/figure-html/unnamed-chunk-37-4.png)![](tutorial_files/figure-html/unnamed-chunk-37-5.png)
