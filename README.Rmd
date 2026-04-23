@@ -24,7 +24,7 @@ Micro-randomized trials (MRTs) are designed to evaluate the effectiveness of mob
 
 You can install the development version of MRTpostInfLASSO via github:
 
-```{r}
+```{r, eval = FALSE}
 require("remotes")
 remotes::install_github("WHD-Lab/DR_WCLS_LASSO")
 ```
@@ -34,7 +34,7 @@ remotes::install_github("WHD-Lab/DR_WCLS_LASSO")
 
 To configure a Python virtual environment in R, please run the following code:
 
-```{r setup, eval = FALSE}
+```{r, eval = FALSE}
 library(MRTpostInfLASSO)
 
 # Configure virtual environment
@@ -46,7 +46,7 @@ print(venv)
 
 Or, if already configured, use 
 
-```{r}
+```{r, eval = FALSE}
 library(MRTpostInfLASSO)
 library(reticulate)
 use_virtualenv("a9c268bc", required = TRUE)
@@ -55,7 +55,7 @@ use_virtualenv("a9c268bc", required = TRUE)
 
 ## Virtual Environment Testing
 
-```{r eval = FALSE}
+```{r, eval = FALSE}
 # Do the python deps load?
 library(reticulate)
 np = import("numpy", convert = FALSE)
