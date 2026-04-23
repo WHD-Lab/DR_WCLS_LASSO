@@ -70,42 +70,118 @@
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <p>You can install the development version of MRTpostInfLASSO via github:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">require</span>(<span class="st">"remotes"</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"WHD-Lab/DR_WCLS_LASSO"</span>)</span></code></pre></div>
-<p>Then run:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://devtools.r-lib.org/" class="external-link">devtools</a></span><span class="op">)</span></span>
-<span><span class="fu">install</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://remotes.r-lib.org" class="external-link">"remotes"</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Loading required package: remotes</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"WHD-Lab/DR_WCLS_LASSO"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Using github PAT from envvar GITHUB_PAT. Use `gitcreds::gitcreds_set()` and unset GITHUB_PAT in .Renviron (or elsewhere) if you want to use the more secure git credential store instead.</span></span>
+<span><span class="co">#&gt; Downloading GitHub repo WHD-Lab/DR_WCLS_LASSO@HEAD</span></span>
+<span><span class="co">#&gt; cli         (3.6.5    -&gt; 3.6.6   ) [CRAN]</span></span>
+<span><span class="co">#&gt; cpp11       (0.5.2    -&gt; 0.5.4   ) [CRAN]</span></span>
+<span><span class="co">#&gt; vctrs       (0.6.5    -&gt; 0.7.3   ) [CRAN]</span></span>
+<span><span class="co">#&gt; tibble      (3.3.0    -&gt; 3.3.1   ) [CRAN]</span></span>
+<span><span class="co">#&gt; purrr       (1.2.0    -&gt; 1.2.2   ) [CRAN]</span></span>
+<span><span class="co">#&gt; magrittr    (2.0.4    -&gt; 2.0.5   ) [CRAN]</span></span>
+<span><span class="co">#&gt; lifecycle   (1.0.4    -&gt; 1.0.5   ) [CRAN]</span></span>
+<span><span class="co">#&gt; glue        (1.8.0    -&gt; 1.8.1   ) [CRAN]</span></span>
+<span><span class="co">#&gt; dplyr       (1.1.4    -&gt; 1.2.1   ) [CRAN]</span></span>
+<span><span class="co">#&gt; openssl     (2.3.4    -&gt; 2.4.0   ) [CRAN]</span></span>
+<span><span class="co">#&gt; curl        (7.0.0    -&gt; 7.1.0   ) [CRAN]</span></span>
+<span><span class="co">#&gt; xml2        (1.5.0    -&gt; 1.5.2   ) [CRAN]</span></span>
+<span><span class="co">#&gt; selectr     (0.4-2    -&gt; 0.5-1   ) [CRAN]</span></span>
+<span><span class="co">#&gt; httr        (1.4.7    -&gt; 1.4.8   ) [CRAN]</span></span>
+<span><span class="co">#&gt; rappdirs    (0.3.3    -&gt; 0.3.4   ) [CRAN]</span></span>
+<span><span class="co">#&gt; ps          (1.9.1    -&gt; 1.9.3   ) [CRAN]</span></span>
+<span><span class="co">#&gt; base64enc   (0.1-3    -&gt; 0.1-6   ) [CRAN]</span></span>
+<span><span class="co">#&gt; tinytex     (0.57     -&gt; 0.59    ) [CRAN]</span></span>
+<span><span class="co">#&gt; htmltools   (0.5.8.1  -&gt; 0.5.9   ) [CRAN]</span></span>
+<span><span class="co">#&gt; bslib       (0.9.0    -&gt; 0.10.0  ) [CRAN]</span></span>
+<span><span class="co">#&gt; yaml        (2.3.10   -&gt; 2.3.12  ) [CRAN]</span></span>
+<span><span class="co">#&gt; xfun        (0.54     -&gt; 0.57    ) [CRAN]</span></span>
+<span><span class="co">#&gt; highr       (0.11     -&gt; 0.12    ) [CRAN]</span></span>
+<span><span class="co">#&gt; processx    (3.8.6    -&gt; 3.9.0   ) [CRAN]</span></span>
+<span><span class="co">#&gt; rstudioapi  (0.17.1   -&gt; 0.18.0  ) [CRAN]</span></span>
+<span><span class="co">#&gt; rmarkdown   (2.30     -&gt; 2.31    ) [CRAN]</span></span>
+<span><span class="co">#&gt; knitr       (1.50     -&gt; 1.51    ) [CRAN]</span></span>
+<span><span class="co">#&gt; fs          (1.6.6    -&gt; 2.1.0   ) [CRAN]</span></span>
+<span><span class="co">#&gt; bit64       (4.6.0-1  -&gt; 4.8.0   ) [CRAN]</span></span>
+<span><span class="co">#&gt; vroom       (1.6.6    -&gt; 1.7.1   ) [CRAN]</span></span>
+<span><span class="co">#&gt; textshaping (1.0.4    -&gt; 1.0.5   ) [CRAN]</span></span>
+<span><span class="co">#&gt; systemfonts (1.3.1    -&gt; 1.3.2   ) [CRAN]</span></span>
+<span><span class="co">#&gt; backports   (1.5.0    -&gt; 1.5.1   ) [CRAN]</span></span>
+<span><span class="co">#&gt; tidyr       (1.3.1    -&gt; 1.3.2   ) [CRAN]</span></span>
+<span><span class="co">#&gt; broom       (1.0.10   -&gt; 1.0.12  ) [CRAN]</span></span>
+<span><span class="co">#&gt; timechange  (0.3.0    -&gt; 0.4.0   ) [CRAN]</span></span>
+<span><span class="co">#&gt; readr       (2.1.6    -&gt; 2.2.0   ) [CRAN]</span></span>
+<span><span class="co">#&gt; uuid        (1.2-1    -&gt; 1.2-2   ) [CRAN]</span></span>
+<span><span class="co">#&gt; gargle      (1.6.0    -&gt; 1.6.1   ) [CRAN]</span></span>
+<span><span class="co">#&gt; viridisLite (0.4.2    -&gt; 0.4.3   ) [CRAN]</span></span>
+<span><span class="co">#&gt; S7          (0.2.1    -&gt; 0.2.2   ) [CRAN]</span></span>
+<span><span class="co">#&gt; isoband     (0.2.7    -&gt; 0.3.0   ) [CRAN]</span></span>
+<span><span class="co">#&gt; data.table  (1.17.8   -&gt; 1.18.2.1) [CRAN]</span></span>
+<span><span class="co">#&gt; DBI         (1.2.3    -&gt; 1.3.0   ) [CRAN]</span></span>
+<span><span class="co">#&gt; blob        (1.2.4    -&gt; 1.3.0   ) [CRAN]</span></span>
+<span><span class="co">#&gt; Rcpp        (1.1.0    -&gt; 1.1.1-1 ) [CRAN]</span></span>
+<span><span class="co">#&gt; ragg        (1.5.0    -&gt; 1.5.2   ) [CRAN]</span></span>
+<span><span class="co">#&gt; lubridate   (1.9.4    -&gt; 1.9.5   ) [CRAN]</span></span>
+<span><span class="co">#&gt; ggplot2     (4.0.2    -&gt; 4.0.3   ) [CRAN]</span></span>
+<span><span class="co">#&gt; dtplyr      (1.3.2    -&gt; 1.3.3   ) [CRAN]</span></span>
+<span><span class="co">#&gt; dbplyr      (2.5.1    -&gt; 2.5.2   ) [CRAN]</span></span>
+<span><span class="co">#&gt; png         (0.1-8    -&gt; 0.1-9   ) [CRAN]</span></span>
+<span><span class="co">#&gt; zoo         (1.8-14   -&gt; 1.8-15  ) [CRAN]</span></span>
+<span><span class="co">#&gt; xgboost     (1.7.11.1 -&gt; 3.2.1.1 ) [CRAN]</span></span>
+<span><span class="co">#&gt; ranger      (0.17.0   -&gt; 0.18.0  ) [CRAN]</span></span>
+<span><span class="co">#&gt; reticulate  (1.44.1   -&gt; 1.46.0  ) [CRAN]</span></span>
+<span><span class="co">#&gt; Installing 56 packages: cli, cpp11, vctrs, tibble, purrr, magrittr, lifecycle, glue, dplyr, openssl, curl, xml2, selectr, httr, rappdirs, ps, base64enc, tinytex, htmltools, bslib, yaml, xfun, highr, processx, rstudioapi, rmarkdown, knitr, fs, bit64, vroom, textshaping, systemfonts, backports, tidyr, broom, timechange, readr, uuid, gargle, viridisLite, S7, isoband, data.table, DBI, blob, Rcpp, ragg, lubridate, ggplot2, dtplyr, dbplyr, png, zoo, xgboost, ranger, reticulate</span></span>
+<span><span class="co">#&gt; Installing packages into '/private/var/folders/06/fdt8md_s73l4lbmj_4r6ydzm0000gn/T/RtmpmVn654/temp_libpathb085611eb9e8'</span></span>
+<span><span class="co">#&gt; (as 'lib' is unspecified)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; The downloaded binary packages are in</span></span>
+<span><span class="co">#&gt;  /var/folders/06/fdt8md_s73l4lbmj_4r6ydzm0000gn/T//Rtmpxqmrtf/downloaded_packages</span></span>
+<span><span class="co">#&gt; ── R CMD build ─────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; * checking for file ‘/private/var/folders/06/fdt8md_s73l4lbmj_4r6ydzm0000gn/T/Rtmpxqmrtf/remotes135985d0961e3/WHD-Lab-DR_WCLS_LASSO-b42e4ba/DESCRIPTION’ ... OK</span></span>
+<span><span class="co">#&gt; * preparing ‘MRTpostInfLASSO’:</span></span>
+<span><span class="co">#&gt; * checking DESCRIPTION meta-information ... OK</span></span>
+<span><span class="co">#&gt; * checking for LF line-endings in source and make files and shell scripts</span></span>
+<span><span class="co">#&gt; * checking for empty or unneeded directories</span></span>
+<span><span class="co">#&gt; Omitted ‘LazyData’ from DESCRIPTION</span></span>
+<span><span class="co">#&gt; * building ‘MRTpostInfLASSO_1.0.0.tar.gz’</span></span>
+<span><span class="co">#&gt; Installing package into '/private/var/folders/06/fdt8md_s73l4lbmj_4r6ydzm0000gn/T/RtmpmVn654/temp_libpathb085611eb9e8'</span></span>
+<span><span class="co">#&gt; (as 'lib' is unspecified)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="set-up">Set-up<a class="anchor" aria-label="anchor" href="#set-up"></a>
 </h2>
 <p>To configure a Python virtual environment in R, please run the following code:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://whd-lab.github.io/DR_WCLS_LASSO/">MRTpostInfLASSO</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Configure virtual environment</span></span>
 <span><span class="va">venv_info</span> <span class="op">=</span> <span class="fu"><a href="reference/venv_config.html">venv_config</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">venv</span> <span class="op">=</span> <span class="va">venv_info</span><span class="op">$</span><span class="va">hash</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">venv</span><span class="op">)</span></span>
-<span><span class="co"># [1] "a9c268bc"</span></span>
-<span></span>
-<span><span class="co"># Do the python deps load?</span></span>
+<span><span class="co"># [1] "a9c268bc"</span></span></code></pre></div>
+<p>Or, if already configured, use</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://whd-lab.github.io/DR_WCLS_LASSO/">MRTpostInfLASSO</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: replacing previous import 'dplyr::lag' by 'stats::lag' when loading</span></span>
+<span><span class="co">#&gt; 'MRTpostInfLASSO'</span></span>
+<span><span class="co">#&gt; Warning: replacing previous import 'dplyr::filter' by 'stats::filter' when</span></span>
+<span><span class="co">#&gt; loading 'MRTpostInfLASSO'</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/reticulate/" class="external-link">reticulate</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/use_python.html" class="external-link">use_virtualenv</a></span><span class="op">(</span><span class="st">"a9c268bc"</span>, required <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="virtual-environment-testing">Virtual Environment Testing<a class="anchor" aria-label="anchor" href="#virtual-environment-testing"></a>
+</h2>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Do the python deps load?</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/reticulate/" class="external-link">reticulate</a></span><span class="op">)</span></span>
 <span><span class="va">np</span> <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"numpy"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">lasso_mod</span> <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"selectinf.randomized.lasso"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">lasso</span></span>
 <span></span>
 <span><span class="co"># Simple test</span></span>
 <span><span class="fu">run_simple_lasso_test_snigdha_fixed</span><span class="op">(</span><span class="va">venv</span><span class="op">)</span></span></code></pre></div>
-<p>Or, if already configured, use</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/reticulate/" class="external-link">reticulate</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/use_python.html" class="external-link">use_virtualenv</a></span><span class="op">(</span><span class="st">"a9c268bc"</span>, required <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">np</span> <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"numpy"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="va">lassopy</span> <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"selectinf.randomized.lasso"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">lasso</span></span>
-<span><span class="va">selected_targets</span> <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"selectinf.base"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">selected_targets</span>  </span>
-<span><span class="va">const</span> <span class="op">=</span> <span class="va">lassopy</span><span class="op">$</span><span class="va">gaussian</span></span>
-<span><span class="va">exact_grid_inference</span> <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"selectinf.randomized.exact_reference"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">exact_grid_inference</span>  </span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="detailed-tutorial">Detailed tutorial<a class="anchor" aria-label="anchor" href="#detailed-tutorial"></a>
