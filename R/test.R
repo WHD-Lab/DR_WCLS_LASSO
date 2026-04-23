@@ -1,4 +1,11 @@
-run_simple_lasso_test_snigdha_fixed <- function(
+#' run_simple_lasso_test
+#' 
+#' @description
+#' Test if the virtual environment has been successfully loaded
+#' 
+#' @export
+
+run_simple_lasso_test <- function(
         venv,
         n = 200L,
         p = 20L,

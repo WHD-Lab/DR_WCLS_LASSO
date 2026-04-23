@@ -131,14 +131,14 @@ use_virtualenv(venv, required = TRUE)
 
 ## Virtual Environment Testing
 
-```{r}
+```{r, eval = FALSE}
 # Do the python deps load?
 library(reticulate)
 np = import("numpy", convert = FALSE)
 lasso_mod = import("selectinf.randomized.lasso", convert = FALSE)$lasso
 
 # Simple test
-run_simple_lasso_test_snigdha_fixed(venv)
+run_simple_lasso_test(venv)
 ```
 
 # Real Data Example
