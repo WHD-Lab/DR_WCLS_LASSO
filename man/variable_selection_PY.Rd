@@ -12,7 +12,8 @@ variable_selection_PY(
   noise_scale = NULL,
   splitrat = 0.8,
   venv,
-  beta = NULL
+  beta = NULL,
+  seed
 )
 }
 \arguments{
@@ -36,6 +37,8 @@ The random noises, \eqn{\omega}, are iid drawn from normal distribution with sta
 This value will be used only when user doesn't provide the \code{noise_scale} or \code{lam}.}
 
 \item{beta}{True coefficients (for simulation use only).}
+
+\item{seed}{seed for randomization variable}
 }
 \value{
 \describe{
