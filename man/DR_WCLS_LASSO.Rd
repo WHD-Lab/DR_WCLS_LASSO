@@ -28,7 +28,8 @@ DR_WCLS_LASSO(
   varSelect_program = "Python",
   standardize_x = TRUE,
   standardize_y = TRUE,
-  availability = NULL
+  availability = NULL,
+  seed = 1
 )
 }
 \arguments{
@@ -79,6 +80,8 @@ is the split rate and \eqn{n} is the number of rows.}
 
 \item{availability}{The column name of availability variable. Use the default value (\code{NULL}) if your MRT doesn't have availability considerations.}
 
+\item{seed}{the seed used to calculate pseudo-outcome and randomization variables}
+
 \item{virtualenv_path}{Path to a Python virtual environment (for \code{reticulate})
 when \code{varSelect_program = "Python"}.}
 }
@@ -113,10 +116,10 @@ valid confidence intervals adjusted for data dependent model selection.
   beta_logit = c(-1, 1.6 * rep(1/50, 50)), model = ~ state1 + state2 + state3 + state4,
   beta = matrix(c(-1, 1.7, 1.5, -1.3, -1),ncol = 1),
   theta1 = 0.8)
-  
+
   Ht = unlist(lapply(1:50, FUN = function(X) paste0("state",X)))
   St = unlist(lapply(1:25, FUN = function(X) paste0("state",X)))
-  
+
   sim_data$avail = rbinom(40000, size = 1, prob = 0.8)
 
   UI_return = DR_WCLS_LASSO(data = sim_data,

@@ -13,7 +13,8 @@ FISTA_backtracking(
   splitrat = 0.8,
   max_ite = 10^(5),
   tol = 10^(-4),
-  beta = NULL
+  beta = NULL,
+  seed
 )
 }
 \arguments{
@@ -41,6 +42,8 @@ This value will be used only when user doesn't provide the \code{noise_scale} or
 \item{tol}{when the improvement of residual sum of square less than this number, stop searching}
 
 \item{beta}{the true coefficient value (if simulation is conducted)}
+
+\item{seed}{the seed controls the randomization variable}
 }
 \value{
 \describe{

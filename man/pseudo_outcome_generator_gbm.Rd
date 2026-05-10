@@ -13,7 +13,8 @@ pseudo_outcome_generator_gbm(
   At,
   prob,
   outcome,
-  core_num = NULL
+  core_num = NULL,
+  master_seed
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ pseudo_outcome_generator_gbm(
 \item{outcome}{column names of outcome variable}
 
 \item{core_num}{number of cores will be used for calculation}
+
+\item{master_seed}{the master seed will generate seeds for each parallel calculations}
 }
 \value{
 This function returns a dataset with pseudo outcome. It learns appropriate working models with Gradient Boosting and
