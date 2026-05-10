@@ -13,6 +13,7 @@
 #' @param prob column names of \eqn{p_t(A_t = 1|H_t)}, the experiment design treatment probability
 #' @param outcome column names of outcome variable
 #' @param core_num number of cores will be used for calculation
+#' @param master_seed the master seed will generate seeds for each parallel calculations
 #'
 #' @return This function returns a dataset with pseudo outcome. It learns appropriate working models with Gradient Boosting and
 #' generates pseudo outcome using the DR-WCLS.
@@ -39,16 +40,18 @@
 
 
 
-pseudo_outcome_generator_gbm = function(fold, ID, data, Ht, St, At, prob, outcome, core_num = NULL) {
+pseudo_outcome_generator_gbm = function(fold, ID, data, Ht, St, At, prob, outcome, core_num = NULL, master_seed) {
+  set.seed(master_seed)
+
   fold_ind = split_data(data[[ID]], fold = fold)
   MRT_gbm = ps_gradient_boosting(fold_indices = fold_ind, fold = fold, ID = ID,
-                                 data = data, Ht = Ht, St = St, At = At, outcome = outcome, core_num)
+                                 data = data, Ht = Ht, St = St, At = At, outcome = outcome, core_num, master_seed)
   pseudo = pseudo_outcome_cal_gbm(MRT_gbm, At, prob, outcome)
   return(pseudo)
 }
 
 
-ps_gradient_boosting = function(fold_indices, fold, ID, data, Ht, St, At, outcome, core_num = NULL) {
+ps_gradient_boosting = function(fold_indices, fold, ID, data, Ht, St, At, outcome, core_num = NULL, master_seed) {
   data_withpred = data.frame()
 
   expectation_cal = function(i) {
@@ -107,10 +110,20 @@ ps_gradient_boosting = function(fold_indices, fold, ID, data, Ht, St, At, outcom
     return(reserve)
   }
 
+  # Generate reproducible seeds for each fold
+  set.seed(master_seed)
+  fold_seeds = sample.int(1e8, fold)
+
   folds_list = 1:fold
   if (is.null(core_num)) { cl = parallel::makeCluster(detectCores()) } else { cl = parallel::makeCluster(core_num) }
   clusterExport(cl, varlist = ls(envir= environment()), envir = environment())
-  results = parLapply(cl, folds_list, expectation_cal)
+  results = parLapply(cl, folds_list,  function(i) {
+
+    # Set fold-specific seed
+    set.seed(fold_seeds[i])
+
+    expectation_cal(i)
+  })
   stopCluster(cl)
   data_withpred = dplyr::bind_rows(results)
 

@@ -13,6 +13,7 @@
 #' @param prob column names of \eqn{p_t(A_t = 1|H_t)}, the experiment design treatment probability
 #' @param outcome column names of outcome variable
 #' @param core_num number of cores will be used for calculation
+#' @param master_seed the master seed will generate seeds for each parallel calculations
 #'
 #' @return This function returns a dataset with pseudo outcome. It learns appropriate working models with Random Forest and
 #' generates pseudo outcome using the DR-WCLS.
@@ -40,7 +41,7 @@
 
 
 # Run random forest to train working model
-pseudo_outcome_generator_rf_v2 = function(fold, ID, data, Ht, St, At, prob, outcome, core_num = NULL) {
+pseudo_outcome_generator_rf_v2 = function(fold, ID, data, Ht, St, At, prob, outcome, core_num = NULL, master_seed) {
   # fold: # of folds hope to split
   # ID: the name of column where participants' ID are stored
   # data: simulated dataset
@@ -57,14 +58,16 @@ pseudo_outcome_generator_rf_v2 = function(fold, ID, data, Ht, St, At, prob, outc
   # pesudo outcome calculation. Then the last function will be called is pesudo_outcome_cal_rf_v2, and a
   # column with name "yDR" will be generated.
 
+  set.seed(master_seed)
+
   fold_ind = split_data(data[,ID], fold = fold)
   MRT_rf = ps_random_forest_v2(fold_indices = fold_ind, fold = fold, ID = ID,
-                               data = data, Ht = Ht, St = St, At = At, outcome = outcome, core_num)
+                               data = data, Ht = Ht, St = St, At = At, outcome = outcome, core_num, master_seed)
   pesudo = pesudo_outcome_cal_rf_v2(MRT_rf, At, prob, outcome)
   return(pesudo)
 }
 
-ps_random_forest_v2 = function(fold_indices, fold, ID, data, Ht, St, At, outcome, core_num = NULL) {
+ps_random_forest_v2 = function(fold_indices, fold, ID, data, Ht, St, At, outcome, core_num = NULL, master_seed) {
   # fold_indices: the result of function fold_indMRTSim
   # fold: # of folds hope to split
   # ID: the name of column where participants' ID are stored
@@ -152,6 +155,10 @@ ps_random_forest_v2 = function(fold_indices, fold, ID, data, Ht, St, At, outcome
   ################## do it parallel
   require(parallel)
 
+  # Generate reproducible seeds for each fold
+  set.seed(master_seed)
+  fold_seeds = sample.int(1e8, fold)
+
   folds_list = 1:fold
 
   if(!is.null(core_num)) {cl = makeCluster(core_num)} else {cl = makeCluster(detectCores())}
@@ -160,7 +167,13 @@ ps_random_forest_v2 = function(fold_indices, fold, ID, data, Ht, St, At, outcome
 
   clusterExport(cl, varlist = c(var_names, "expit"), envir = environment())
 
-  results = parLapply(cl, folds_list, expectation_cal)
+  results = parLapply(cl, folds_list, function(i) {
+
+    # Set fold-specific seed
+    set.seed(fold_seeds[i])
+
+    expectation_cal(i)
+  })
 
   stopCluster(cl)
 

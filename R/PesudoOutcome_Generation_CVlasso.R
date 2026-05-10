@@ -17,6 +17,7 @@
 #' @param prob column names of \eqn{p_t(A_t = 1|H_t)}, the experiment design treatment probability
 #' @param outcome column names of outcome variable
 #' @param core_num number of cores will be used for calculation
+#' @param master_seed the master seed will generate seeds for each parallel calculations
 #'
 #' @return This function returns a dataset with pseudo outcome. It learns appropriate working models with CV LASSO and
 #' generates pseudo outcome using the DR-WCLS.
@@ -43,7 +44,7 @@
 
 
 
-pseudo_outcome_generator_CVlasso = function(fold, ID, data, Ht, St, At, prob, outcome, core_num = NULL) {
+pseudo_outcome_generator_CVlasso = function(fold, ID, data, Ht, St, At, prob, outcome, core_num = NULL, master_seed) {
   # fold: # of folds hope to split
   # ID: the name of column where participants' ID are stored
   # data: dataset name
@@ -53,6 +54,7 @@ pseudo_outcome_generator_CVlasso = function(fold, ID, data, Ht, St, At, prob, ou
   # prob: column names of pt(At = 1|Ht), the design treatment probability
   # outcome: column names of outcome variable
   # core_num: number of cores will be used for calculation
+  # master_seed: the master seed will generate seeds for each parallel calculations
 
   # Output
   # This function returns a dataset with pseudo outcome. It will call function split_data to generate folds.
@@ -60,9 +62,11 @@ pseudo_outcome_generator_CVlasso = function(fold, ID, data, Ht, St, At, prob, ou
   # pseudo outcome calculation. Then the last function will be called is pseudo_outcomecal, and a
   # column with name "yDR" will be generated.
 
+  set.seed(master_seed)
+
   fold_ind = split_data(data[,ID], fold = fold)
   MRT_sim_lasso = simple_lasso(fold_indices = fold_ind, fold = fold, ID = ID, data = data,
-                               Ht = Ht, St = St, At = At, outcome = outcome, core_num)[[1]]
+                               Ht = Ht, St = St, At = At, outcome = outcome, core_num, master_seed)[[1]]
   pseudo = pseudo_outcomecal(MRT_sim_lasso, At, prob, outcome)
   return(pseudo)
 }
@@ -94,7 +98,7 @@ split_data = function(id, fold) {
 # split_data(rep(1:100, 100), fold = 10)
 
 # Run simple LASSO to train working model
-simple_lasso = function(fold_indices, fold, ID, data, Ht, St, At, outcome, core_num = NULL) {
+simple_lasso = function(fold_indices, fold, ID, data, Ht, St, At, outcome, core_num = NULL, master_seed) {
   # fold_indices: the result of function fold_indMRTSim
   # fold: # of folds hope to split
   # ID: the name of column where participants' ID are stored
@@ -104,6 +108,7 @@ simple_lasso = function(fold_indices, fold, ID, data, Ht, St, At, outcome, core_
   # At: column names of treatment (At)
   # outcome: column names of outcome variable
   # core_num: number of cores will be used for calculation
+  # master_seed: the master seed will generate seeds for each parallel calculations
 
   # Output
   # this function use CV LASSO to train model on folds and provide estimates that will be used for later
@@ -189,6 +194,10 @@ simple_lasso = function(fold_indices, fold, ID, data, Ht, St, At, outcome, core_
   # do it parallel
   require(parallel)
 
+  # Generate reproducible seeds for each fold
+  set.seed(master_seed)
+  fold_seeds = sample.int(1e8, fold)
+
   folds_list = 1:fold
 
   if(!is.null(core_num)) {cl = makeCluster(core_num)} else {cl = makeCluster(detectCores())}
@@ -197,7 +206,13 @@ simple_lasso = function(fold_indices, fold, ID, data, Ht, St, At, outcome, core_
 
   clusterExport(cl, varlist = c(var_names, "expit"), envir = environment())
 
-  results = parLapply(cl, folds_list, expectation_cal)
+  results = parLapply(cl, folds_list, function(i) {
+
+    # Set fold-specific seed
+    set.seed(fold_seeds[i])
+
+    expectation_cal(i)
+  })
 
   stopCluster(cl)
 
