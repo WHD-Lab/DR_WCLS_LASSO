@@ -27,6 +27,7 @@
 #' @param max_ite the maximum iteration for searching predictors
 #' @param tol when the improvement of residual sum of square less than this number, stop searching
 #' @param beta the true coefficient value (if simulation is conducted)
+#' @param seed the seed controls the randomization variable
 #'
 #' @return
 #' \describe{
@@ -67,7 +68,7 @@
 #'
 
 FISTA_backtracking = function(data,ID, moderator_formula, lam = NULL, noise_scale = NULL,
-                              splitrat = 0.8, max_ite = 10^(5), tol = 10^(-4), beta = NULL){
+                              splitrat = 0.8, max_ite = 10^(5), tol = 10^(-4), beta = NULL,seed){
 
   # data: the output of pesudo_outcomecal function
   # ID: the name of column where participants' ID are stored
@@ -80,6 +81,8 @@ FISTA_backtracking = function(data,ID, moderator_formula, lam = NULL, noise_scal
   # max_ite: the maximum iteration for searching predictors
   # tol: when the improvement of residual sum of square less than this number, stop searching
   # beta: the true coefficient value (if simulation is conducted)
+
+  set.seed(seed)
 
   ptSt = data[,"ptSt"]
   n = dplyr::n_distinct(data[,ID])

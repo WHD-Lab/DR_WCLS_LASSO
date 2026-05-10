@@ -17,6 +17,7 @@
 #' @param splitrat this value is corresponding to the data splitting rate. Details can read "Exact Selective Inference with Randomization" page 15 equation (10).
 #' This value will be used only when user doesn't provide the `noise_scale` or `lam`.
 #' @param beta True coefficients (for simulation use only).
+#' @param seed seed for randomization variable
 #'
 #' @return
 #' \describe{
@@ -59,7 +60,7 @@
 #' @export
 #'
 variable_selection_PY = function(data,ID, moderator_formula, lam = NULL, noise_scale = NULL,
-                                           splitrat = 0.8, venv, beta = NULL) {
+                                           splitrat = 0.8, venv, beta = NULL,seed) {
   # data: the output of pesudo_outcomecal function
   # ID: the name of column where participants' ID are stored
   # moderator_formula: determines the formula for the f(St)T*beta function
@@ -73,6 +74,7 @@ variable_selection_PY = function(data,ID, moderator_formula, lam = NULL, noise_s
   use_virtualenv(venv, required = TRUE)
 
   np = import("numpy", convert = FALSE)
+  np$random$seed(as.integer(seed))
   lassopy = import("selectinf.randomized.lasso", convert = FALSE)$lasso
   # selected_targets = import("selectinf.base", convert = FALSE)$selected_targets
   const = lassopy$gaussian
